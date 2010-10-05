@@ -19,42 +19,41 @@ class age:
 
    def setedad(self,edad): 
       self.edad=edad
-      return True
 
-   def getedad(self,edad):
+   def getedad(self):
       return self.edad 
 
-   def verifyedad10(self,edad):
-      if edad>=0 and edad<10:
+   def verifyedad10(self):
+      if self.edad>=0 and self.edad<10:
          result=True
       else:
 	 result=False
       return result
 
-   def verifyedad20(self,edad):
-      if edad>10 and edad<20:
+   def verifyedad20(self):
+      if self.edad>10 and self.edad<20:
          result=True
       else:
          result=False
       return result
 
-   def verifyedad40(self,edad):
-      if edad>20 and edad<40:
+   def verifyedad40(self):
+      if self.edad>20 and self.edad<40:
          result=True
       else:
          result=False
       return result
 
 
-   def verifyedad60(self,edad):
-      if edad>40 and edad<60:
+   def verifyedad60(self):
+      if self.edad>40 and self.edad<60:
          result=True
       else:
          result=False
       return result
 
-   def verifyedadmore60(self,edad):
-      if edad>=60:
+   def verifyedadmore60(self):
+      if self.edad>=60:
          result=True
       else:
          result=False
