@@ -1,0 +1,458 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/tweepy/controllers/default.py'
+p4
+sS'code'
+p5
+S'# -*- coding: utf-8 -*- \nimport tweepy\n#########################################################################\n## This is a samples controller\n## - index is the default action of any application\n## - user is required for authentication and authorization\n## - download is for downloading files uploaded in the db (does streaming)\n## - call exposes all registered services (none by default)\n#########################################################################  \n\ndef index():\n    """\n    example action using the internationalization operator T and flash\n    rendered by views/default/index.html or views/generic.html\n    """\n    user = tweepy.api.get_user(\'j3nnn1\')\n    \n    nameuser     = user.name\n    imageuser    = user.profile_image_url)\n    statususer   = user.status.text)\n    #timelinepublic = ()\n    return dict(nameuser=T(name), imageuser=T(image), statususer=T(status))\n\n\ndef user():\n    """\n    exposes:\n    http://..../[app]/default/user/login \n    http://..../[app]/default/user/logout\n    http://..../[app]/default/user/register\n    http://..../[app]/default/user/profile\n    http://..../[app]/default/user/retrieve_password\n    http://..../[app]/default/user/change_password\n    use @auth.requires_login()\n        @auth.requires_membership(\'group name\')\n        @auth.requires_permission(\'read\',\'table name\',record_id)\n    to decorate functions that need access control\n    """\n    return dict(form=auth())\n\n\ndef download():\n    """\n    allows downloading of uploaded files\n    http://..../[app]/default/download/[filename]\n    """\n    return response.download(request,db)\n\n\ndef call():\n    """\n    exposes services. for example:\n    http://..../[app]/default/call/jsonrpc\n    decorate with @services.jsonrpc the functions to expose\n    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv\n    """\n    session.forget()\n    return service()\n\nresponse._vars=response._caller(index)\n'
+p6
+sS'snapshot'
+p7
+(dp8
+S'exception'
+p9
+(dp10
+S'__getslice__'
+p11
+S"<method-wrapper '__getslice__' of exceptions.SyntaxError object>"
+p12
+sS'text'
+p13
+S"'    imageuser    = user.profile_image_url)\\n'"
+p14
+sS'__str__'
+p15
+S"<method-wrapper '__str__' of exceptions.SyntaxError object>"
+p16
+sS'__reduce__'
+p17
+S'<built-in method __reduce__ of exceptions.SyntaxError object>'
+p18
+sS'__dict__'
+p19
+S'{}'
+p20
+sS'__sizeof__'
+p21
+S'<built-in method __sizeof__ of exceptions.SyntaxError object>'
+p22
+sS'__init__'
+p23
+S"<method-wrapper '__init__' of exceptions.SyntaxError object>"
+p24
+sS'__setattr__'
+p25
+S"<method-wrapper '__setattr__' of exceptions.SyntaxError object>"
+p26
+sS'__reduce_ex__'
+p27
+S'<built-in method __reduce_ex__ of exceptions.SyntaxError object>'
+p28
+sS'__new__'
+p29
+S'<built-in method __new__ of type object>'
+p30
+sS'__format__'
+p31
+S'<built-in method __format__ of exceptions.SyntaxError object>'
+p32
+sS'__class__'
+p33
+S"<type 'exceptions.SyntaxError'>"
+p34
+sS'filename'
+p35
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/tweepy/controllers/default.py'"
+p36
+sS'lineno'
+p37
+S'19'
+p38
+sS'msg'
+p39
+S"'invalid syntax'"
+p40
+sS'__doc__'
+p41
+S"'Invalid syntax.'"
+p42
+sS'__getitem__'
+p43
+S"<method-wrapper '__getitem__' of exceptions.SyntaxError object>"
+p44
+sS'__setstate__'
+p45
+S'<built-in method __setstate__ of exceptions.SyntaxError object>'
+p46
+sS'__getattribute__'
+p47
+S"<method-wrapper '__getattribute__' of exceptions.SyntaxError object>"
+p48
+sS'print_file_and_line'
+p49
+S'None'
+p50
+sS'args'
+p51
+S"('invalid syntax', ('/home/j3nnn1/git/pyj3nnn1/web2py/applications/tweepy/controllers/default.py', 19, 42, '    imageuser    = user.profile_image_url)\\n'))"
+p52
+sS'__subclasshook__'
+p53
+S'<built-in method __subclasshook__ of type object>'
+p54
+sS'offset'
+p55
+S'42'
+p56
+sS'__unicode__'
+p57
+S'<built-in method __unicode__ of exceptions.SyntaxError object>'
+p58
+sS'__delattr__'
+p59
+S"<method-wrapper '__delattr__' of exceptions.SyntaxError object>"
+p60
+sS'__repr__'
+p61
+S"<method-wrapper '__repr__' of exceptions.SyntaxError object>"
+p62
+sS'__hash__'
+p63
+S"<method-wrapper '__hash__' of exceptions.SyntaxError object>"
+p64
+ssS'evalue'
+p65
+S'invalid syntax (default.py, line 19)'
+p66
+sS'request'
+p67
+(dp68
+S'function'
+p69
+S"'index'"
+p70
+sS'body'
+p71
+S'<cStringIO.StringO object>'
+p72
+sS'wsgi'
+p73
+S"<Storage {'start_response': <function <lambda> a...>, 'HTTP_ACCEPT_ENCODING': 'gzip,deflate,sdch'}}>"
+p74
+sS'extension'
+p75
+S"'html'"
+p76
+sS'vars'
+p77
+S'<Storage {}>'
+p78
+sS'cid'
+p79
+S'None'
+p80
+sS'url'
+p81
+S'<gluon.html.XML object>'
+p82
+sg51
+S'[]'
+p83
+sS'controller'
+p84
+S"'default'"
+p85
+sS'cookies'
+p86
+S"<SimpleCookie: session_id_admin='127-0-0-1-b501e...'127-0-0-1-1ec39e37-b351-48fa-af74-3086837ce8e1'>"
+p87
+sS'application'
+p88
+S"'tweepy'"
+p89
+sS'ajax'
+p90
+S'False'
+p91
+sS'client'
+p92
+S"'127.0.0.1'"
+p93
+sS'env'
+p94
+S"<Storage {'http_user_agent': 'Mozilla/5.0 (X11; ...e': False, 'path_info': '/tweepy/default/index'}>"
+p95
+sS'raw_args'
+p96
+S'None'
+p97
+sS'get_vars'
+p98
+S'<Storage {}>'
+p99
+sS'folder'
+p100
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/tweepy/'"
+p101
+sS'now'
+p102
+S'datetime.datetime(2010, 10, 12, 18, 1, 13, 56520)'
+p103
+sS'post_vars'
+p104
+S'<Storage {}>'
+p105
+ssS'frames'
+p106
+(lp107
+(dp108
+S'file'
+p109
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py'
+p110
+sS'dump'
+p111
+(dp112
+S'code'
+p113
+S"'# -*- coding: utf-8 -*- \\nimport tweepy\\n#########...ervice()\\n\\nresponse._vars=response._caller(index)\\n'"
+p114
+sS'layer'
+p115
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/tweepy/controllers/default.py'"
+p116
+sS'global compile2'
+p117
+S'<function compile2>'
+p118
+sS'ccode'
+p119
+S'undefined'
+p120
+ssS'lnum'
+p121
+I186
+sS'lines'
+p122
+(dp123
+I181
+S''
+sI182
+S'    try:'
+p124
+sI183
+S'        if type(code) == types.CodeType:'
+p125
+sI184
+S'            ccode = code'
+p126
+sI185
+S'        else:'
+p127
+sI186
+S'            ccode = compile2(code,layer)'
+p128
+sI187
+S''
+sI188
+S'        exec ccode in environment'
+p129
+sI189
+S'    except HTTP:'
+p130
+sI190
+S'        raise'
+p131
+ssS'call'
+p132
+S"(code='# -*- coding: utf-8 -*- \\nimport tweepy\\n#########...ervice()\\n\\nresponse._vars=response._caller(index)\\n', environment={'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}, layer='/home/j3nnn1/git/pyj3nnn1/web2py/applications/tweepy/controllers/default.py')"
+p133
+sS'func'
+p134
+S'restricted'
+p135
+sa(dp136
+g109
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py'
+p137
+sg111
+(dp138
+S'builtincompile'
+p139
+S'<built-in function compile>'
+p140
+sS'code'
+p141
+S"'# -*- coding: utf-8 -*- \\nimport tweepy\\n#########...ervice()\\n\\nresponse._vars=response._caller(index)\\n'"
+p142
+sS'code.rstrip'
+p143
+S'<built-in method rstrip of str object>'
+p144
+sS').replace'
+p145
+g120
+sS'layer'
+p146
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/tweepy/controllers/default.py'"
+p147
+ssg121
+I173
+sg122
+(dp148
+I168
+S''
+sI169
+S'def compile2(code,layer):'
+p149
+sI170
+S'    """'
+p150
+sI171
+S"    The +'\\n' is necessary else compile fails when code ends in a comment."
+p151
+sI172
+S'    """'
+p152
+sI173
+S"    return compile(code.rstrip().replace('\\r\\n','\\n')+'\\n', layer, 'exec')"
+p153
+sI174
+S''
+sI175
+S"def restricted(code, environment={}, layer='Unknown'):"
+p154
+sI176
+S'    """'
+p155
+sI177
+S'    runs code in environment and returns the output. if an exception occurs'
+p156
+ssg132
+S"(code='# -*- coding: utf-8 -*- \\nimport tweepy\\n#########...ervice()\\n\\nresponse._vars=response._caller(index)\\n', layer='/home/j3nnn1/git/pyj3nnn1/web2py/applications/tweepy/controllers/default.py')"
+p157
+sg134
+S'compile2'
+p158
+sasS'pyver'
+p159
+S'Python 2.6.6: /usr/bin/python'
+p160
+sS'session'
+p161
+(dp162
+S'auth'
+p163
+S'None'
+p164
+ssS'etype'
+p165
+S"<type 'exceptions.SyntaxError'>"
+p166
+sS'date'
+p167
+S'Tue Oct 12 18:01:13 2010'
+p168
+sS'response'
+p169
+(dp170
+S'status'
+p171
+S'200'
+p172
+sg71
+S'<cStringIO.StringO object>'
+p173
+sg86
+S"<SimpleCookie: session_id_tweepy='127-0-0-1-316504f2-0da6-4968-8ef6-728ad932eccd'>"
+p174
+sS'_vars'
+p175
+S'None'
+p176
+sS'title'
+p177
+S"'tweepy'"
+p178
+sS'session_file'
+p179
+S"<open file '/home/j3nnn1/git/pyj3nnn1/web2py/app...16504f2-0da6-4968-8ef6-728ad932eccd', mode 'rb+'>"
+p180
+sS'flash'
+p181
+S"''"
+p182
+sS'_custom_rollback'
+p183
+S'None'
+p184
+sS'session_id'
+p185
+S"'127-0-0-1-316504f2-0da6-4968-8ef6-728ad932eccd'"
+p186
+sS'headers'
+p187
+S"<Storage {'Expires': 'Tue, 12 Oct 2010 22:31:13 ...he, must-revalidate, post-check=0, pre-check=0'}>"
+p188
+sS'meta'
+p189
+S"<Storage {'keywords': 'bla bla bla', 'description': 'describe your app', 'author': 'you'}>"
+p190
+sS'session_filename'
+p191
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/tw...ns/127-0-0-1-316504f2-0da6-4968-8ef6-728ad932eccd'"
+p192
+sS'postprocessing'
+p193
+S'[]'
+p194
+sS'menu'
+p195
+S"[(<lazyT 'Index'>, False, <gluon.html.XML object>, []), (<lazyT 'Edit'>, False, <gluon.html.XML object>, [(<lazyT 'Controller'>, False, <gluon.html.XML object>), (<lazyT 'View'>, False, <gluon.html.XML object>), (<lazyT 'Layout'>, False, <gluon.html.XML object>), (<lazyT 'Stylesheet'>, False, <gluon.html.XML object>), (<lazyT 'DB Model'>, False, <gluon.html.XML object>), (<lazyT 'Menu Model'>, False, <gluon.html.XML object>), (<lazyT 'Database'>, False, <gluon.html.XML object>)])]"
+p196
+sS'_view_environment'
+p197
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p198
+sS'subtitle'
+p199
+S"<lazyT 'customize me!'>"
+p200
+sS'session_id_name'
+p201
+S"'session_id_tweepy'"
+p202
+sS'_custom_commit'
+p203
+S'None'
+p204
+sS'_caller'
+p205
+S'<function <lambda>>'
+p206
+sS'files'
+p207
+S'[]'
+p208
+sS'view'
+p209
+S"'default/index.html'"
+p210
+ssS'locals'
+p211
+(dp212
+g3
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/tweepy/controllers/default.py'"
+p213
+sg5
+S"'# -*- coding: utf-8 -*- \\nimport tweepy\\n#########...ervice()\\n\\nresponse._vars=response._caller(index)\\n'"
+p214
+sssS'traceback'
+p215
+S'Traceback (most recent call last):\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py", line 186, in restricted\n    ccode = compile2(code,layer)\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py", line 173, in compile2\n    return compile(code.rstrip().replace(\'\\r\\n\',\'\\n\')+\'\\n\', layer, \'exec\')\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/tweepy/controllers/default.py", line 19\n    imageuser    = user.profile_image_url)\n                                         ^\nSyntaxError: invalid syntax\n'
+p216
+s.

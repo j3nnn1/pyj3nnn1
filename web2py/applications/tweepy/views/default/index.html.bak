@@ -1,0 +1,34 @@
+{{extend 'layout.html'}}
+<hr/>
+<h1>This is the homework</h1>
+<table>
+    <tr>
+        <td colspan='2'>
+            <div id='person'> {{=T('Tweepy, user: j3nnn1!!')}}</div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="{{=imageuser}}" width='50px' heigth='50px'/>
+        </td>
+        <td>
+           <b>{{=nameuser}}: </b>{{=statususer}} 
+        </td>
+    </tr>
+    <tr>
+        <td colspan='2'>
+            <div id='timelinepublic'> {{=T('Tweepy, Public Time Line!!')}}</div>
+        </td>
+    </tr>
+{{for x in public:}}
+    <tr>
+        <td>
+            <img src="{{=public[x]['url_pic']}}" width='50px' heigth='50px'/>
+        </td>
+        <td>
+           <b>{{=public[x]['username']}}
+           ({{=public[x]['name']}}): </b>{{=public[x]['status']}}
+        </td>
+    </tr>
+{{pass}}     
+</table>

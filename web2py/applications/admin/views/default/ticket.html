@@ -1,0 +1,70 @@
+{{extend 'layout.html'}}
+<h1>Error ticket for "{{=app}}"</h1>
+<h2>Ticket {{=ticket}}</h2>
+<h3>{{=output}}</h3>
+<br/><br/>
+<h3>Error traceback</h3>
+{{=traceback}}
+
+{{if snapshot:}}
+{{try:}}
+    <h3>Error snapshot</h3>
+    <i>Detailed traceback description</i>
+    <ul>
+      <li><a onclick="collapse('exception_inner');">Exception:</a> {{=snapshot['etype']}}({{=snapshot['evalue']}})
+      <div id="exception_inner" style="display: none;">
+        <i>{{=T("Exception instance attributes")}}</i>
+        <ul>
+        {{for k,v in snapshot['exception'].items():}}
+            <li>{{="%s: %s" % (k,v) }}</li>
+        {{pass}}
+        </ul>
+      </div></li>
+      <li>{{=snapshot['pyver']}}</li>
+    </ul>
+
+    {{for i, frame in enumerate(snapshot['frames']):}}
+    {{style = (i != len(snapshot['frames'])-1 and 'display: none;' or '')}}
+    <h4>File {{="%s in %s at line %s" % (frame['file'], frame['func'], frame['lnum'])}}</h4>
+    [ <a onclick="collapse('{{="%s_code_inner" % i}}');">{{=T("code")}}</a> 
+    | <a onclick="collapse('{{="%s_args_inner" % i}}');">{{=T("arguments")}}</a> 
+    | <a onclick="collapse('{{="%s_vars_inner" % i}}');">{{=T("variables")}}</a> 
+    ]
+    <div id="{{="%s_args_inner" % i}}" style="{{=style}}">
+    <i>Function argument list: {{=frame['call']}}</i>
+    </div>
+    <div id="{{="%s_code_inner" % i}}" style="{{=style}}">
+    {{if frame['lines']:}}
+    {{=CODE('\n'.join([x[1] for x in sorted(frame['lines'].items(),key=lambda x: x[0])]), 
+            language='python', link=None, counter=min(frame['lines'].keys()), highlight_line=frame['lnum'])}}
+    {{pass}}
+    </div>
+    <div id="{{="%s_vars_inner" % i}}" style="{{=style}}">
+    <ul>
+        {{for k,v in frame['dump'].items():}}
+            <li>{{="%s: %s" % (k,v) }}</li>
+        {{pass}}
+    </ul>
+    </div>
+    {{pass}}
+
+    <button onclick="jQuery('#locals').slideToggle()">locals</button>
+    <div class="hidden" id="locals"><h4>locals</h4>{{=BEAUTIFY(snapshot['locals'])}}</div>
+    <button onclick="jQuery('#request').slideToggle()">request</button>
+    <div class="hidden" id="request"><h4>request</h4>{{=BEAUTIFY(snapshot['request'])}}</div>
+    <button onclick="jQuery('#session').slideToggle()">session</button>
+    <div class="hidden" id="session"><h4>session</h4>{{=BEAUTIFY(snapshot['session'])}}</div>
+    <button onclick="jQuery('#response').slideToggle()">response</button>
+    <div class="hidden" id="response"><h4>response</h4>{{=BEAUTIFY(snapshot['response'])}}</div>
+    <script>jQuery('.hidden').hide();</script>
+{{except Exception, e:}}
+    <!-- this should not happen, just in case... (cannot output normal hmtl as we don't know current open tags) -->
+    {{import traceback;tb=traceback.format_exc().replace("\n","\\n") }}
+    <script language='javascript'>alert("Exception during snapshot rendering: {{=tb}} ");</script>
+{{pass}}    
+{{pass}}
+
+<br/><br/>
+<h3>In file: {{=layer}}</h3>
+{{=CODE(code,language='python',link='/examples/global/vars/')}}
+

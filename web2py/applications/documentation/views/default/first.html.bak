@@ -1,0 +1,5 @@
+{{extend 'layout.html'}}
+<h1>¿What is your name?</h1>
+{{=form}}
+
+{{=BEAUTIFY(response._vars)}}
