@@ -23,7 +23,7 @@ th, td {
   padding:3px;
   border-right: 1px solid #999999;
   padding: 0;
-  border-spacing: 0;
+  spacing: 0;
 }
 
 .person {
