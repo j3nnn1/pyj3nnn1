@@ -1,0 +1,44 @@
+body{
+  font-family: arial, helvetica, sans-serif;
+  font-size:   13px;
+  line-height: 18px;
+  color: #666666;
+}
+
+h1 { font-size: 200%; letter-spacing: -2px; margin-bottom: 20px; }
+
+h2 { font-size: 180%; letter-spacing: -1px; margin-bottom: 20px; }
+
+h3 { font-size: 150%; letter-spacing: -1px; margin-bottom: 20px; }
+
+h4 { font-size: 120%; letter-spacing: -1px; margin-bottom: 20px; font-weight:bold;}
+
+table {
+  border: 1px solid #999999;
+}
+
+tr.odd { background-color: #eeeeee; }
+
+th, td {
+  padding:3px;
+  border-right: 1px solid #999999;
+  padding: 0;
+  spacing: 0;
+}
+
+.person {
+background: url(/tweepy/static/images/inputBg.gif) top left repeat;
+font-family: georgia, sans-serif;
+font-size:   10px;
+line-height: 18px;
+font-weight:bold;
+color: #5FB404;
+}
+.timelinepublic{
+background: url(/tweepy/static/images/inputBg.gif) top left repeat;
+font-family: georgia, sans-serif;
+font-size:   10px;
+line-height: 18px;
+font-weight:bold;
+color: #AEB404;
+}

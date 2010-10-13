@@ -15,18 +15,16 @@ def index():
     """
     user = tweepy.api.get_user('j3nnn1')
     
-    nameuser           = user.name
-    imageuser          = user.profile_image_url
-    statususer         = user.status.text
     dictionarytweet    ={}
+    usertweet          ={'nameuser': user.name, 'imageuser': user.profile_image_url, 'statususer':user.status.text}
     
     tweetpublic  = tweepy.api.public_timeline()
     
     for i, tweet in enumerate(tweetpublic):
-        userpublic = tweet.user
+        userpublic = tweet.user 
         dictionarytweet[i]={'name': userpublic.screen_name, 'status':tweet.text, 'url_pic':userpublic.profile_image_url, 'username': userpublic.name}
     
-    return dict(nameuser=nameuser, imageuser=imageuser, statususer=statususer, public=dictionarytweet)
+    return dict(userinfo=usertweet, public=dictionarytweet)
 
 
 def user():
