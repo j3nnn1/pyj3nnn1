@@ -16,18 +16,18 @@ for i, tweet in enumerate(search_tweets):
 
 #print 'Public timeline:.'
 
-#public_tweets = tweepy.api.public_timeline()
-#print 'tamaño del arreglo devuelto:' + str(len(public_tweets))
+public_tweets = tweepy.api.public_timeline()
+print 'tamaño del arreglo devuelto:' + str(len(public_tweets))
 
 
-#for i, tweet in enumerate(public_tweets):
-#    print 'numero: '+str(i)
+for i, tweet in enumerate(public_tweets):
+    print 'numero: '+str(i)
 #
-#    userpublic = tweet.user
-#    print userpublic.id
-#    print str(userpublic.screen_name)
-#    print tweet.text
-#    print str(userpublic.profile_image_url)
+    userpublic = tweet.user
+    print userpublic.id
+    print str(userpublic.screen_name)
+    print tweet.text
+    print str(userpublic.profile_image_url)
    
 
 
@@ -62,6 +62,12 @@ usertl = tweepy.api.user_timeline('j3nnn1')
 for i,tweet in enumerate(usertl):
     print 'tweet numero : '+str(i)
     print tweet.text
+    print 'foto:'
+    print tweet.user.profile_image_url 
+    print 'nickname:'
+    print tweet.user.screen_name
+    print 'nombre:'
+    print tweet.user.name
 
 
 
