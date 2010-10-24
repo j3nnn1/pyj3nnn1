@@ -36,10 +36,6 @@ for i, tweet in enumerate(public_tweets):
 #
 
 #autenticando en twitter
-#consumer_token = 'thClbkKdFy4QhXrOtlJaHg'
-#consumer_secret = '0zLHboJRauF6LnsQWpeGY4XD4KpWU4uCDdv8evE8nE'
-#key = '64244883-Orq6ABYBjwjuEei06PmDeJqGUPiB2iWFB87DPmdlv'
-#secret = 'ACBw2GaQ7LdcfbFJQGUJOvXJoNxi1wYCWHmHMzRWl3I'
 #
 #auth  =  tweepy.OAuthHandler(consumer_token, consumer_secret)
 #auth.set_access_token(key, secret)
