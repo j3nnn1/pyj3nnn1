@@ -3,17 +3,7 @@
 {{if 'message' in globals():}}{{=H2(message)}}{{else:}}{{=BEAUTIFY(response._vars)}}{{pass}}
 
 <hr />
-<h1>README</h1>
-<ul>
-  <li>{{=T('You are successfully running web2py')}}</li>
-  <li>{{=T('This is a copy of the scaffolding application')}}</li>
-  <li>{{=T('You can modify this application and adapt it to your needs')}}</li>
-  <li>{{=A(B(T("click here for the administrative interface")), _href=URL('admin','default','index'))}}</li>
-  <li>{{=A(T("click here for online examples"), _href=URL('examples','default','index'))}}</li>
-  <li><a href="http://web2py.com">web2py.com</a></li>
-  <li><a href="http://web2py.com/book">{{=T('documentation')}}</a></li>
-</ul>
-
+<h1>{{=T("it's me J3nnn1")}}</h1>
 <ol>
   <li>{{=T('You visited the url')}} {{=A(request.env.path_info,_href=request.env.path_info)}}</li>
   <li>{{=T('Which called the function')}} {{=A(request.function+'()',_href='#')}} {{=T('located in the file')}}
@@ -23,3 +13,10 @@
 </ol>
 
 
+{{for post in post:}}
+	{{=post.titulo}}
+	<br/>
+	{{=post.articulo}}
+	<br/>
+	{{=post.fecha}}
+{{pass}}
