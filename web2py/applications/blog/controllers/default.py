@@ -14,12 +14,23 @@ def index():
     """
     # filter to join.
     filtro = (db.articulos.id_usuario==db.usuarios.id)
-    post = db(filtro).select(db.articulos.titulo, db.articulos.fecha, db.articulos.articulo, db.usuarios.usuario, orderby=db.articulos.fecha)
+    post = db(filtro).select(db.articulos.titulo, db.articulos.fecha, db.articulos.articulo, db.usuarios.usuario,limitby=(0,3),orderby=~db.articulos.fecha)
 
     return dict(post=post)
 
 def about():
     """ Información sobre mi persona"""
+    return dict()
+
+def viewpost():
+    post    = db(db.articulos.id==request.args(0)).select().first()
+    form    = SQLFORM(db.comentarios)
+    form.vars.id_articulo = post.id
+    comments =db(db.comment.image_id==image.id).select()
+                    
+    if form.accepts(request.vars, session):
+       response.flash ='Tu comentario ha sido publicado'
+
     return dict()
 
 def user():
