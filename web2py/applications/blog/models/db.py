@@ -89,7 +89,8 @@ db.define_table('articulos',
         Field('titulo',    'string',  requires=[IS_NOT_EMPTY(),IS_NOT_IN_DB(db,'articulos.titulo')], required=True),
         Field('articulo',  'text',    requires=IS_NOT_EMPTY(),required=True),
         Field('fecha',     'datetime',default=now),
-        Field('id_usuario',db.usuarios, readable=False, writable=False))
+        Field('id_usuario',db.usuarios, readable=False, writable=False),
+        Field('image', 'upload'))
         
 
 db.define_table('comentarios',

@@ -1,15 +1,13 @@
 {{extend 'layout.html'}}
 <h1>{{=T("it's me J3nnn1")}}</h1>
-<hr />
-{{=post}}
+{{#=post}}
 {{for post in post:}}
-	<div>
 		<div class='titulo'>
-			<h3> {{#=post.titulo}} </h3>
+			<h3> {{=A(post.articulos.titulo)}} </h3>
 		</div>
+		<div class='contenido'> {{=post.articulos.articulo}}</div>
 		<div class='subtitulo'>
-			{{#=T("Escrito por: ")}} {{#=post.usuario}} {{#=T("el: ")}} {{#=post.fecha}}
+			{{=T("Escrito por: ")}} {{=post.usuarios.usuario}} {{=T("el: ")}} {{=post.articulos.fecha}}
 		</div>
-	</div>
-	<div> {{#=post.articulo}}</div>
+<hr />
 {{pass}}

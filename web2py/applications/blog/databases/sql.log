@@ -299,3 +299,6 @@ CREATE TABLE etiquetas_articulos(
     PRIMARY KEY(id)
 ) ENGINE=InnoDB CHARACTER SET utf8;
 success!
+timestamp: 2010-10-24T16:53:50.886252
+ALTER TABLE articulos ADD image VARCHAR(512);
+success!

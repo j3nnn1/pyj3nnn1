@@ -12,10 +12,9 @@ def index():
     """
     Esta vista va a obtener 3 post
     """
-    #
     # filter to join.
     filtro = (db.articulos.id_usuario==db.usuarios.id)
-    post = db(filtro).select(db.articulos.titulo, db.articulos.fecha, db.articulos.articulo, db.usuarios.usuario, orderby=db.articulos.fecha, limitby(0,3))
+    post = db(filtro).select(db.articulos.titulo, db.articulos.fecha, db.articulos.articulo, db.usuarios.usuario, orderby=db.articulos.fecha)
 
     return dict(post=post)
 

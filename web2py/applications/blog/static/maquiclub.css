@@ -42,3 +42,19 @@ line-height: 18px;
 font-weight:bold;
 color: #AEB404;
 }
+
+.subtitulo {
+#this is a class
+font-size:   6px;
+font-family: georgia, sans-serif;
+color: #AEB404;
+}
+.titulo {
+#this is a class
+}
+.contenido {
+font-family: arial, helvetica, sans-serif;
+color: #666666;
+font-size:   13px;
+line-height: 18px;
+}

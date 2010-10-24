@@ -9,7 +9,8 @@
     {{#------  require CSS and JS files for this page (read info in base.css) ------}}
     {{response.files.append(URL(request.application,'static','base.css'))}}
     {{response.files.append(URL(request.application,'static','superfish.js'))}}
-    {{response.files.append(URL(request.application,'static','/css/maquiclub.css'))}}
+    {{response.files.append(URL(request.application,'static','maquiclub.css'))}}
+    {{#response.files.append(URL(request.application,'static','Envision.css'))}}
     {{#------ include web2py specific js code (jquery, calendar, form stuff) ------}}
     {{include 'web2py_ajax.html'}}
   </head>
