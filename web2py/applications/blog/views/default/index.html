@@ -1,9 +1,8 @@
 {{extend 'layout.html'}}
-<h1>{{=T("it's me J3nnn1")}}</h1>
 {{#=post}}
 {{for post in post:}}
 		<div class='titulo'>
-			<h3> {{=A(post.articulos.titulo)}} </h3>
+			<h3> {{=A(post.articulos.titulo, _href=URL("viewpost", args=post.articulos.id))}} </h3>
 		</div>
 		<div class='contenido'> {{=post.articulos.articulo}}</div>
 		<div class='subtitulo'>
