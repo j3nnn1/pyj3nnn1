@@ -1,22 +1,15 @@
 {{extend 'layout.html'}}
-
-{{if 'message' in globals():}}{{=H2(message)}}{{else:}}{{=BEAUTIFY(response._vars)}}{{pass}}
-
-<hr />
 <h1>{{=T("it's me J3nnn1")}}</h1>
-<ol>
-  <li>{{=T('You visited the url')}} {{=A(request.env.path_info,_href=request.env.path_info)}}</li>
-  <li>{{=T('Which called the function')}} {{=A(request.function+'()',_href='#')}} {{=T('located in the file')}}
-    {{=A('web2py/applications/%(application)s/controllers/%(controller)s.py'%request,_href=URL('admin','default','peek',args=(request.application,'controllers',request.controller+'.py')))}}</li>
-  <li>{{=T('The output of the file is a dictionary that was rendered by the view')}}
-    {{=A('web2py/applications/%(application)s/views/%(controller)s/index.html'%request,_href=URL('admin','default','peek',args=(request.application,'views',request.controller,'index.html')))}}</li>
-</ol>
-
-
+<hr />
+{{=post}}
 {{for post in post:}}
-	{{=post.titulo}}
-	<br/>
-	{{=post.articulo}}
-	<br/>
-	{{=post.fecha}}
+	<div>
+		<div class='titulo'>
+			<h3> {{#=post.titulo}} </h3>
+		</div>
+		<div class='subtitulo'>
+			{{#=T("Escrito por: ")}} {{#=post.usuario}} {{#=T("el: ")}} {{#=post.fecha}}
+		</div>
+	</div>
+	<div> {{#=post.articulo}}</div>
 {{pass}}

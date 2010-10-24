@@ -12,9 +12,12 @@ def index():
     """
     Esta vista va a obtener 3 post
     """
-    post = db().select(db.articulos.ALL, orderby=db.articulos.fecha)
-    response.flash = T('Hola j3nnn1')
-    return dict(message=T('Hello World'), post=post)
+    #
+    # filter to join.
+    filtro = (db.articulos.id_usuario==db.usuarios.id)
+    post = db(filtro).select(db.articulos.titulo, db.articulos.fecha, db.articulos.articulo, db.usuarios.usuario, orderby=db.articulos.fecha, limitby(0,3))
+
+    return dict(post=post)
 
 def about():
     """ Información sobre mi persona"""

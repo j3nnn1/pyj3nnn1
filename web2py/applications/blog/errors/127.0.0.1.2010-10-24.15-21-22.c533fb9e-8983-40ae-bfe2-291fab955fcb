@@ -1,0 +1,485 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p4
+sS'code'
+p5
+S'# -*- coding: utf-8 -*- \n\n#########################################################################\n## This is a samples controller\n## - index is the default action of any application\n## - user is required for authentication and authorization\n## - download is for downloading files uploaded in the db (does streaming)\n## - call exposes all registered services (none by default)\n#########################################################################  \n\ndef index():\n    """\n    Esta vista va a obtener 3 post\n    """\n    # filter to join.\n    filtro = (db.articulos.id_usuario==db.usuarios.id)\n        post = db(filtro).select()\n\n    return dict(post=post)\n\ndef about():\n    """ Informaci\xc3\xb3n sobre mi persona"""\n    return dict()\n\ndef user():\n    """\n    exposes:\n    http://..../[app]/default/user/login \n    http://..../[app]/default/user/logout\n    http://..../[app]/default/user/register\n    http://..../[app]/default/user/profile\n    http://..../[app]/default/user/retrieve_password\n    http://..../[app]/default/user/change_password\n    use @auth.requires_login()\n        @auth.requires_membership(\'group name\')\n        @auth.requires_permission(\'read\',\'table name\',record_id)\n    to decorate functions that need access control\n    """\n    return dict(form=auth())\n\n\ndef download():\n    """\n    allows downloading of uploaded files\n    http://..../[app]/default/download/[filename]\n    """\n    return response.download(request,db)\n\n\ndef call():\n    """\n    exposes services. for example:\n    http://..../[app]/default/call/jsonrpc\n    decorate with @services.jsonrpc the functions to expose\n    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv\n    """\n    session.forget()\n    return service()\n\nresponse._vars=response._caller(index)\n'
+p6
+sS'snapshot'
+p7
+(dp8
+S'exception'
+p9
+(dp10
+S'__getslice__'
+p11
+S"<method-wrapper '__getslice__' of exceptions.IndentationError object>"
+p12
+sS'text'
+p13
+S"'        post = db(filtro).select()\\n'"
+p14
+sS'__str__'
+p15
+S"<method-wrapper '__str__' of exceptions.IndentationError object>"
+p16
+sS'__reduce__'
+p17
+S'<built-in method __reduce__ of exceptions.IndentationError object>'
+p18
+sS'__dict__'
+p19
+S'{}'
+p20
+sS'__sizeof__'
+p21
+S'<built-in method __sizeof__ of exceptions.IndentationError object>'
+p22
+sS'__init__'
+p23
+S"<method-wrapper '__init__' of exceptions.IndentationError object>"
+p24
+sS'__setattr__'
+p25
+S"<method-wrapper '__setattr__' of exceptions.IndentationError object>"
+p26
+sS'__reduce_ex__'
+p27
+S'<built-in method __reduce_ex__ of exceptions.IndentationError object>'
+p28
+sS'__new__'
+p29
+S'<built-in method __new__ of type object>'
+p30
+sS'__format__'
+p31
+S'<built-in method __format__ of exceptions.IndentationError object>'
+p32
+sS'__class__'
+p33
+S"<type 'exceptions.IndentationError'>"
+p34
+sS'filename'
+p35
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'"
+p36
+sS'lineno'
+p37
+S'17'
+p38
+sS'msg'
+p39
+S"'unexpected indent'"
+p40
+sS'__doc__'
+p41
+S"'Improper indentation.'"
+p42
+sS'__getitem__'
+p43
+S"<method-wrapper '__getitem__' of exceptions.IndentationError object>"
+p44
+sS'__setstate__'
+p45
+S'<built-in method __setstate__ of exceptions.IndentationError object>'
+p46
+sS'__getattribute__'
+p47
+S"<method-wrapper '__getattribute__' of exceptions.IndentationError object>"
+p48
+sS'print_file_and_line'
+p49
+S'None'
+p50
+sS'args'
+p51
+S"('unexpected indent', ('/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py', 17, 8, '        post = db(filtro).select()\\n'))"
+p52
+sS'__subclasshook__'
+p53
+S'<built-in method __subclasshook__ of type object>'
+p54
+sS'offset'
+p55
+S'8'
+sS'__unicode__'
+p56
+S'<built-in method __unicode__ of exceptions.IndentationError object>'
+p57
+sS'__delattr__'
+p58
+S"<method-wrapper '__delattr__' of exceptions.IndentationError object>"
+p59
+sS'__repr__'
+p60
+S"<method-wrapper '__repr__' of exceptions.IndentationError object>"
+p61
+sS'__hash__'
+p62
+S"<method-wrapper '__hash__' of exceptions.IndentationError object>"
+p63
+ssS'evalue'
+p64
+S'unexpected indent (default.py, line 17)'
+p65
+sS'request'
+p66
+(dp67
+S'function'
+p68
+S"'index'"
+p69
+sS'body'
+p70
+S'<cStringIO.StringO object>'
+p71
+sS'wsgi'
+p72
+S"<Storage {'start_response': <function <lambda> a...>, 'HTTP_ACCEPT_ENCODING': 'gzip,deflate,sdch'}}>"
+p73
+sS'extension'
+p74
+S"'html'"
+p75
+sS'vars'
+p76
+S'<Storage {}>'
+p77
+sS'cid'
+p78
+S'None'
+p79
+sS'url'
+p80
+S'<gluon.html.XML object>'
+p81
+sg51
+S'[]'
+p82
+sS'controller'
+p83
+S"'default'"
+p84
+sS'cookies'
+p85
+S"<SimpleCookie: session_id_admin='127-0-0-1-30657...'127-0-0-1-f66a923b-35d4-4221-bb69-65adf56edca3'>"
+p86
+sS'application'
+p87
+S"'blog'"
+p88
+sS'ajax'
+p89
+S'False'
+p90
+sS'client'
+p91
+S"'127.0.0.1'"
+p92
+sS'env'
+p93
+S"<Storage {'http_user_agent': 'Mozilla/5.0 (X11; ...ch', 'query_string': '', 'wsgi_run_once': False}>"
+p94
+sS'raw_args'
+p95
+S'None'
+p96
+sS'get_vars'
+p97
+S'<Storage {}>'
+p98
+sS'folder'
+p99
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/'"
+p100
+sS'now'
+p101
+S'datetime.datetime(2010, 10, 24, 15, 21, 18, 157877)'
+p102
+sS'post_vars'
+p103
+S'<Storage {}>'
+p104
+ssS'frames'
+p105
+(lp106
+(dp107
+S'file'
+p108
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py'
+p109
+sS'dump'
+p110
+(dp111
+S'code'
+p112
+S"'# -*- coding: utf-8 -*- \\n\\n######################...ervice()\\n\\nresponse._vars=response._caller(index)\\n'"
+p113
+sS'layer'
+p114
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'"
+p115
+sS'global compile2'
+p116
+S'<function compile2>'
+p117
+sS'ccode'
+p118
+S'undefined'
+p119
+ssS'lnum'
+p120
+I186
+sS'lines'
+p121
+(dp122
+I181
+S''
+sI182
+S'    try:'
+p123
+sI183
+S'        if type(code) == types.CodeType:'
+p124
+sI184
+S'            ccode = code'
+p125
+sI185
+S'        else:'
+p126
+sI186
+S'            ccode = compile2(code,layer)'
+p127
+sI187
+S''
+sI188
+S'        exec ccode in environment'
+p128
+sI189
+S'    except HTTP:'
+p129
+sI190
+S'        raise'
+p130
+ssS'call'
+p131
+S"(code='# -*- coding: utf-8 -*- \\n\\n######################...ervice()\\n\\nresponse._vars=response._caller(index)\\n', environment={'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}, layer='/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py')"
+p132
+sS'func'
+p133
+S'restricted'
+p134
+sa(dp135
+g108
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py'
+p136
+sg110
+(dp137
+S'builtincompile'
+p138
+S'<built-in function compile>'
+p139
+sS'code'
+p140
+S"'# -*- coding: utf-8 -*- \\n\\n######################...ervice()\\n\\nresponse._vars=response._caller(index)\\n'"
+p141
+sS'code.rstrip'
+p142
+S'<built-in method rstrip of str object>'
+p143
+sS').replace'
+p144
+g119
+sS'layer'
+p145
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'"
+p146
+ssg120
+I173
+sg121
+(dp147
+I168
+S''
+sI169
+S'def compile2(code,layer):'
+p148
+sI170
+S'    """'
+p149
+sI171
+S"    The +'\\n' is necessary else compile fails when code ends in a comment."
+p150
+sI172
+S'    """'
+p151
+sI173
+S"    return compile(code.rstrip().replace('\\r\\n','\\n')+'\\n', layer, 'exec')"
+p152
+sI174
+S''
+sI175
+S"def restricted(code, environment={}, layer='Unknown'):"
+p153
+sI176
+S'    """'
+p154
+sI177
+S'    runs code in environment and returns the output. if an exception occurs'
+p155
+ssg131
+S"(code='# -*- coding: utf-8 -*- \\n\\n######################...ervice()\\n\\nresponse._vars=response._caller(index)\\n', layer='/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py')"
+p156
+sg133
+S'compile2'
+p157
+sasS'pyver'
+p158
+S'Python 2.6.6: /usr/bin/python'
+p159
+sS'session'
+p160
+(dp161
+S'_formkey[articulos_create]'
+p162
+S"'0d82bc72-f674-45c1-8ba5-25f7fc51e6d9'"
+p163
+sS'auth'
+p164
+S'None'
+p165
+sS'last_orderby'
+p166
+S'None'
+p167
+sS'last_query'
+p168
+S"'db.articulos.id>0'"
+p169
+sS'_formkey[comentarios_create]'
+p170
+S"'76d6c20a-dac7-40ed-a905-102d82b363d6'"
+p171
+sS'_formkey[usuarios_create]'
+p172
+S"'1d1883ea-e00c-4bf8-8a71-efed38a78c06'"
+p173
+sS'_formkey[default]'
+p174
+S"'a1de23bf-1680-4a4f-b9de-957af6cc5cdf'"
+p175
+sS'_formkey[auth_user_create]'
+p176
+S"'8b18cc00-afac-4196-b603-cbe190e85c44'"
+p177
+ssS'etype'
+p178
+S"<type 'exceptions.IndentationError'>"
+p179
+sS'date'
+p180
+S'Sun Oct 24 15:21:22 2010'
+p181
+sS'response'
+p182
+(dp183
+S'status'
+p184
+S'200'
+p185
+sg70
+S'<cStringIO.StringO object>'
+p186
+sg85
+S"<SimpleCookie: session_id_blog='127-0-0-1-c9e49980-0272-480c-b712-192f1f1b4547'>"
+p187
+sS'_vars'
+p188
+S'None'
+p189
+sS'title'
+p190
+S"'blog'"
+p191
+sS'session_file'
+p192
+S"<open file '/home/j3nnn1/git/pyj3nnn1/web2py/app...9e49980-0272-480c-b712-192f1f1b4547', mode 'rb+'>"
+p193
+sS'flash'
+p194
+S"''"
+p195
+sS'_custom_rollback'
+p196
+S'None'
+p197
+sS'session_id'
+p198
+S"'127-0-0-1-c9e49980-0272-480c-b712-192f1f1b4547'"
+p199
+sS'headers'
+p200
+S"<Storage {'Expires': 'dom, 24 oct 2010 19:51:18 ...he, must-revalidate, post-check=0, pre-check=0'}>"
+p201
+sS'meta'
+p202
+S"<Storage {'keywords': 'bla bla bla', 'description': 'describe your app', 'author': 'you'}>"
+p203
+sS'session_filename'
+p204
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/bl...ns/127-0-0-1-c9e49980-0272-480c-b712-192f1f1b4547'"
+p205
+sS'postprocessing'
+p206
+S'[]'
+p207
+sS'menu'
+p208
+S"[(<lazyT 'Index'>, False, <gluon.html.XML object>, []), (<lazyT 'Edit'>, False, <gluon.html.XML object>, [(<lazyT 'Controller'>, False, <gluon.html.XML object>), (<lazyT 'View'>, False, <gluon.html.XML object>), (<lazyT 'Layout'>, False, <gluon.html.XML object>), (<lazyT 'Stylesheet'>, False, <gluon.html.XML object>), (<lazyT 'DB Model'>, False, <gluon.html.XML object>), (<lazyT 'Menu Model'>, False, <gluon.html.XML object>), (<lazyT 'Database'>, False, <gluon.html.XML object>)])]"
+p209
+sS'_view_environment'
+p210
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p211
+sS'subtitle'
+p212
+S"<lazyT 'customize me!'>"
+p213
+sS'session_id_name'
+p214
+S"'session_id_blog'"
+p215
+sS'_custom_commit'
+p216
+S'None'
+p217
+sS'_caller'
+p218
+S'<function <lambda>>'
+p219
+sS'files'
+p220
+S'[]'
+p221
+sS'view'
+p222
+S"'default/index.html'"
+p223
+ssS'locals'
+p224
+(dp225
+g3
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'"
+p226
+sg5
+S"'# -*- coding: utf-8 -*- \\n\\n######################...ervice()\\n\\nresponse._vars=response._caller(index)\\n'"
+p227
+sssS'traceback'
+p228
+S'Traceback (most recent call last):\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py", line 186, in restricted\n    ccode = compile2(code,layer)\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py", line 173, in compile2\n    return compile(code.rstrip().replace(\'\\r\\n\',\'\\n\')+\'\\n\', layer, \'exec\')\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py", line 17\n    post = db(filtro).select()\n   ^\nIndentationError: unexpected indent\n'
+p229
+s.
