@@ -1,0 +1,1007 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/appadmin.py'
+p4
+sS'code'
+p5
+S'# -*- coding: utf-8 -*-\n\n# ##########################################################\n# ## make sure administrator is on localhost\n# ###########################################################\n\nimport os\nimport socket\nimport datetime\nimport copy\nimport gluon.contenttype\nimport gluon.fileutils\n\n# ## critical --- make a copy of the environment\n\nglobal_env = copy.copy(globals())\nglobal_env[\'datetime\'] = datetime\n\nhttp_host = request.env.http_host.split(\':\')[0]\nremote_addr = request.env.remote_addr\ntry:\n    hosts = (http_host, socket.gethostname(),\n             socket.gethostbyname(http_host),\n             \'::1\',\'127.0.0.1\',\'::ffff:127.0.0.1\')   \nexcept:\n    hosts = (http_host, )\n\nif request.env.http_x_forwarded_for or request.env.wsgi_url_scheme\\\n     in [\'https\', \'HTTPS\']:\n    session.secure()\nelif (remote_addr not in hosts) and (remote_addr != "127.0.0.1"):\n    raise HTTP(200, T(\'appadmin is disabled because insecure channel\'))\nif not gluon.fileutils.check_credentials(request):\n    redirect(URL(a=\'admin\', c=\'default\', f=\'index\'))\n\nignore_rw = True\nresponse.view = \'appadmin.html\'\nresponse.menu = [[T(\'design\'), False, URL(\'admin\', \'default\', \'design\',\n                 args=[request.application])], [T(\'db\'), False,\n                 URL(\'index\')], [T(\'state\'), False,\n                 URL(\'state\')], [T(\'cache\'), False,\n                 URL(\'ccache\')]]\n\n# ##########################################################\n# ## auxiliary functions\n# ###########################################################\n\n\ndef get_databases(request):\n    dbs = {}\n    for (key, value) in global_env.items():\n        cond = False\n        try:\n            cond = isinstance(value, GQLDB)\n        except:\n            cond = isinstance(value, SQLDB)\n        if cond:\n            dbs[key] = value\n    return dbs\n\n\ndatabases = get_databases(None)\n\n\ndef eval_in_global_env(text):\n    exec (\'_ret=%s\' % text, {}, global_env)\n    return global_env[\'_ret\']\n\n\ndef get_database(request):\n    if request.args and request.args[0] in databases:\n        return eval_in_global_env(request.args[0])\n    else:\n        session.flash = T(\'invalid request\')\n        redirect(URL(\'index\'))\n\n\ndef get_table(request):\n    db = get_database(request)\n    if len(request.args) > 1 and request.args[1] in db.tables:\n        return (db, request.args[1])\n    else:\n        session.flash = T(\'invalid request\')\n        redirect(URL(\'index\'))\n\n\ndef get_query(request):\n    try:\n        return eval_in_global_env(request.vars.query)\n    except Exception:\n        return None\n\n\ndef query_by_table_type(tablename,db,request=request):\n    keyed = hasattr(db[tablename],\'_primarykey\')\n    if keyed:\n        firstkey = db[tablename][db[tablename]._primarykey[0]]\n        cond = \'>0\'\n        if firstkey.type in [\'string\', \'text\']:\n            cond = \'!=""\'\n        qry = \'%s.%s.%s%s\' % (request.args[0], request.args[1], firstkey.name, cond)\n    else:\n        qry = \'%s.%s.id>0\' % tuple(request.args[:2])\n    return qry\n\n\n\n# ##########################################################\n# ## list all databases and tables\n# ###########################################################\n\n\ndef index():\n    return dict(databases=databases)\n\n\n# ##########################################################\n# ## insert a new record\n# ###########################################################\n\n\ndef insert():\n    (db, table) = get_table(request)\n    form = SQLFORM(db[table], ignore_rw=ignore_rw)\n    if form.accepts(request.vars, session):\n        response.flash = T(\'new record inserted\')\n    return dict(form=form,table=db[table])\n\n\n# ##########################################################\n# ## list all records in table and insert new record\n# ###########################################################\n\n\ndef download():\n    import os\n    db = get_database(request)\n    return response.download(request,db)\n\ndef csv():\n    import gluon.contenttype\n    response.headers[\'Content-Type\'] = \\\n        gluon.contenttype.contenttype(\'.csv\')\n    db = get_database(request)\n    query = get_query(request)\n    if not query:\n        return None\n    response.headers[\'Content-disposition\'] = \'attachment; filename=%s_%s.csv\'\\\n         % tuple(request.vars.query.split(\'.\')[:2])\n    return str(db(query).select())\n\n\ndef import_csv(table, file):\n    table.import_from_csv_file(file)\n\ndef select():\n    import re\n    db = get_database(request)\n    dbname = request.args[0]\n    regex = re.compile(\'(?P<table>\\w+)\\.(?P<field>\\w+)=(?P<value>\\d+)\')\n    if len(request.args)>1 and hasattr(db[request.args[1]],\'_primarykey\'):\n        regex = re.compile(\'(?P<table>\\w+)\\.(?P<field>\\w+)=(?P<value>.+)\')\n    if request.vars.query:\n        match = regex.match(request.vars.query)\n        if match:\n            request.vars.query = \'%s.%s.%s==%s\' % (request.args[0],\n                    match.group(\'table\'), match.group(\'field\'),\n                    match.group(\'value\'))\n    else:\n        request.vars.query = session.last_query\n    query = get_query(request)\n    if request.vars.start:\n        start = int(request.vars.start)\n    else:\n        start = 0\n    nrows = 0\n    stop = start + 100\n    table = None\n    rows = []\n    orderby = request.vars.orderby\n    if orderby:\n        orderby = dbname + \'.\' + orderby\n        if orderby == session.last_orderby:\n            if orderby[0] == \'~\':\n                orderby = orderby[1:]\n            else:\n                orderby = \'~\' + orderby\n    session.last_orderby = orderby\n    session.last_query = request.vars.query\n    form = FORM(TABLE(TR(T(\'Query:\'), \'\', INPUT(_style=\'width:400px\',\n                _name=\'query\', _value=request.vars.query or \'\',\n                requires=IS_NOT_EMPTY(error_message=T("Cannot be empty")))), TR(T(\'Update:\'),\n                INPUT(_name=\'update_check\', _type=\'checkbox\',\n                value=False), INPUT(_style=\'width:400px\',\n                _name=\'update_fields\', _value=request.vars.update_fields\n                 or \'\')), TR(T(\'Delete:\'), INPUT(_name=\'delete_check\',\n                _class=\'delete\', _type=\'checkbox\', value=False), \'\'),\n                TR(\'\', \'\', INPUT(_type=\'submit\', _value=\'submit\'))),\n                _action=URL(r=request,args=request.args))\n    if request.vars.csvfile != None:\n        try:\n            import_csv(db[request.vars.table],\n                       request.vars.csvfile.file)\n            response.flash = T(\'data uploaded\')\n        except Exception, e:\n            response.flash = DIV(T(\'unable to parse csv file\'),PRE(str(e)))\n    if form.accepts(request.vars, formname=None):\n#         regex = re.compile(request.args[0] + \'\\.(?P<table>\\w+)\\.id\\>0\')\n        regex = re.compile(request.args[0] + \'\\.(?P<table>\\w+)\\..+\')\n        \n        match = regex.match(form.vars.query.strip())\n        if match:\n            table = match.group(\'table\')\n        try:\n            nrows = db(query).count()\n            if form.vars.update_check and form.vars.update_fields:\n                db(query).update(**eval_in_global_env(\'dict(%s)\'\n                                  % form.vars.update_fields))\n                response.flash = T(\'%s rows updated\', nrows)\n            elif form.vars.delete_check:\n                db(query).delete()\n                response.flash = T(\'%s rows deleted\', nrows)\n            nrows = db(query).count()\n            if orderby:\n                rows = db(query).select(limitby=(start, stop),\n                        orderby=eval_in_global_env(orderby))\n            else:\n                rows = db(query).select(limitby=(start, stop))\n        except Exception, e:\n            (rows, nrows) = ([], 0)\n            response.flash = DIV(T(\'Invalid Query\'),PRE(str(e)))\n    return dict(\n        form=form,\n        table=table,\n        start=start,\n        stop=stop,\n        nrows=nrows,\n        rows=rows,\n        query=request.vars.query,\n        )\n\n\n# ##########################################################\n# ## edit delete one record\n# ###########################################################\n\n\ndef update():\n    (db, table) = get_table(request)\n    keyed = hasattr(db[table],\'_primarykey\')\n    record = None\n    if keyed:\n        key = [f for f in request.vars if f in db[table]._primarykey]\n        if key:\n            record = db(db[table][key[0]] == request.vars[key[0]]).select().first()\n    else:\n        record = db(db[table].id == request.args(2)).select().first()\n\n    if not record:\n        qry = query_by_table_type(table, db)\n        session.flash = T(\'record does not exist\')\n        redirect(URL(\'select\', args=request.args[:1],\n                     vars=dict(query=qry)))\n    \n    if keyed:\n        for k in db[table]._primarykey: \n            db[table][k].writable=False\n    \n    form = SQLFORM(db[table], record, deletable=True, delete_label=T(\'Check to delete\'), \n                   ignore_rw=ignore_rw and not keyed,\n                   linkto=URL(\'select\',\n                   args=request.args[:1]), upload=URL(r=request,\n                   f=\'download\', args=request.args[:1]))\n\n    if form.accepts(request.vars, session):\n        session.flash = T(\'done!\')\n        qry = query_by_table_type(table, db)\n        redirect(URL(\'select\', args=request.args[:1],\n                 vars=dict(query=qry)))\n    return dict(form=form,table=db[table])\n\n\n# ##########################################################\n# ## get global variables\n# ###########################################################\n\n\ndef state():\n    return dict()\n\ndef ccache():\n    form = FORM(\n        P(TAG.BUTTON("Clear CACHE?", _type="submit", _name="yes", _value="yes")),\n        P(TAG.BUTTON("Clear RAM", _type="submit", _name="ram", _value="ram")),\n        P(TAG.BUTTON("Clear DISK", _type="submit", _name="disk", _value="disk")),\n    )\n    \n    if form.accepts(request.vars, session):\n        clear_ram = False\n        clear_disk = False\n        session.flash = ""\n        if request.vars.yes:\n            clear_ram = clear_disk = True\n        if request.vars.ram:\n            clear_ram = True\n        if request.vars.disk:\n            clear_disk = True\n            \n        if clear_ram:\n            cache.ram.clear()\n            session.flash += "Ram Cleared "\n        if clear_disk:\n            cache.disk.clear()\n            session.flash += "Disk Cleared"\n            \n        redirect(URL(r=request))\n    \n    try:\n        from guppy import hpy; hp=hpy()\n    except ImportError:\n        hp = False\n        \n    import shelve, os, copy, time, math\n    from gluon import portalocker\n    \n    ram = {\n        \'bytes\': 0,\n        \'objects\': 0,\n        \'hits\': 0,\n        \'misses\': 0,\n        \'ratio\': 0,\n        \'oldest\': time.time()\n    }\n    disk = copy.copy(ram)\n    total = copy.copy(ram)\n    \n    for key, value in cache.ram.storage.items():\n        if isinstance(value, dict):\n            ram[\'hits\'] = value[\'hit_total\'] - value[\'misses\']\n            ram[\'misses\'] = value[\'misses\']\n            try:\n                ram[\'ratio\'] = ram[\'hits\'] * 100 / value[\'hit_total\']\n            except (KeyError, ZeroDivisionError):\n                ram[\'ratio\'] = 0\n        else:\n            if hp:\n                ram[\'bytes\'] += hp.iso(value[1]).size\n                ram[\'objects\'] += hp.iso(value[1]).count\n                \n                if value[0] < ram[\'oldest\']:\n                    ram[\'oldest\'] = value[0]\n    \n    locker = open(os.path.join(request.folder,\n                                        \'cache/cache.lock\'), \'a\')\n    portalocker.lock(locker, portalocker.LOCK_EX)\n    disk_storage = shelve.open(\n        os.path.join(request.folder,\n                \'cache/cache.shelve\'))\n    \n    for key, value in disk_storage.items():\n        if isinstance(value, dict):\n            disk[\'hits\'] = value[\'hit_total\'] - value[\'misses\']\n            disk[\'misses\'] = value[\'misses\']\n            try:\n                disk[\'ratio\'] = disk[\'hits\'] * 100 / value[\'hit_total\']\n            except (KeyError, ZeroDivisionError):\n                disk[\'ratio\'] = 0\n        else:\n            if hp:\n                disk[\'bytes\'] += hp.iso(value[1]).size\n                disk[\'objects\'] += hp.iso(value[1]).count\n                if value[0] < disk[\'oldest\']:\n                    disk[\'oldest\'] = value[0]\n        \n    portalocker.unlock(locker)\n    locker.close()\n    disk_storage.close()        \n    \n    total[\'bytes\'] = ram[\'bytes\'] + disk[\'bytes\']\n    total[\'objects\'] = ram[\'objects\'] + disk[\'objects\']\n    total[\'hits\'] = ram[\'hits\'] + disk[\'hits\']\n    total[\'misses\'] = ram[\'misses\'] + disk[\'misses\']\n    try:\n        total[\'ratio\'] = total[\'hits\'] * 100 / (total[\'hits\'] + total[\'misses\'])\n    except (KeyError, ZeroDivisionError):\n        total[\'ratio\'] = 0\n    \n    if disk[\'oldest\'] < ram[\'oldest\']:\n        total[\'oldest\'] = disk[\'oldest\']\n    else:\n        total[\'oldest\'] = ram[\'oldest\']\n    \n    def GetInHMS(seconds):\n        hours = math.floor(seconds / 3600)\n        seconds -= hours * 3600\n        minutes = math.floor(seconds / 60)\n        seconds -= minutes * 60\n        seconds = math.floor(seconds)\n        \n        return (hours, minutes, seconds)\n\n    ram[\'oldest\'] = GetInHMS(time.time() - ram[\'oldest\'])\n    disk[\'oldest\'] = GetInHMS(time.time() - disk[\'oldest\'])\n    total[\'oldest\'] = GetInHMS(time.time() - total[\'oldest\'])\n    \n    return dict(form=form, total=total,\n                ram=ram, disk=disk)\n\n\nresponse._vars=response._caller(insert)\n'
+p6
+sS'snapshot'
+p7
+(dp8
+S'exception'
+p9
+(dp10
+S'__hash__'
+p11
+S"<method-wrapper '__hash__' of exceptions.TypeError object>"
+p12
+sS'__setattr__'
+p13
+S"<method-wrapper '__setattr__' of exceptions.TypeError object>"
+p14
+sS'__reduce_ex__'
+p15
+S'<built-in method __reduce_ex__ of exceptions.TypeError object>'
+p16
+sS'__getslice__'
+p17
+S"<method-wrapper '__getslice__' of exceptions.TypeError object>"
+p18
+sS'__getitem__'
+p19
+S"<method-wrapper '__getitem__' of exceptions.TypeError object>"
+p20
+sS'__setstate__'
+p21
+S'<built-in method __setstate__ of exceptions.TypeError object>'
+p22
+sS'__reduce__'
+p23
+S'<built-in method __reduce__ of exceptions.TypeError object>'
+p24
+sS'__str__'
+p25
+S"<method-wrapper '__str__' of exceptions.TypeError object>"
+p26
+sS'__format__'
+p27
+S'<built-in method __format__ of exceptions.TypeError object>'
+p28
+sS'__getattribute__'
+p29
+S"<method-wrapper '__getattribute__' of exceptions.TypeError object>"
+p30
+sS'__class__'
+p31
+S"<type 'exceptions.TypeError'>"
+p32
+sS'__unicode__'
+p33
+S'<built-in method __unicode__ of exceptions.TypeError object>'
+p34
+sS'__delattr__'
+p35
+S"<method-wrapper '__delattr__' of exceptions.TypeError object>"
+p36
+sS'__subclasshook__'
+p37
+S'<built-in method __subclasshook__ of type object>'
+p38
+sS'__repr__'
+p39
+S"<method-wrapper '__repr__' of exceptions.TypeError object>"
+p40
+sS'args'
+p41
+S'("\'str\' object is not callable",)'
+p42
+sS'__dict__'
+p43
+S'{}'
+p44
+sS'__sizeof__'
+p45
+S'<built-in method __sizeof__ of exceptions.TypeError object>'
+p46
+sS'__doc__'
+p47
+S"'Inappropriate argument type.'"
+p48
+sS'__init__'
+p49
+S"<method-wrapper '__init__' of exceptions.TypeError object>"
+p50
+sS'__new__'
+p51
+S'<built-in method __new__ of type object>'
+p52
+ssS'evalue'
+p53
+S"'str' object is not callable"
+p54
+sS'request'
+p55
+(dp56
+S'function'
+p57
+S"'insert'"
+p58
+sS'body'
+p59
+S"<open file '<fdopen>', mode 'w+b'>"
+p60
+sS'wsgi'
+p61
+S"<Storage {'start_response': <function <lambda> a...>, 'HTTP_ACCEPT_ENCODING': 'gzip,deflate,sdch'}}>"
+p62
+sS'extension'
+p63
+S"'html'"
+p64
+sS'vars'
+p65
+S"<Storage {'correo': '', '_formkey': 'a927a351-7d..., '_formname': 'usuarios_create', 'usuario': ''}>"
+p66
+sS'cid'
+p67
+S'None'
+p68
+sS'url'
+p69
+S'<gluon.html.XML object>'
+p70
+sg41
+S"['db', 'usuarios']"
+p71
+sS'controller'
+p72
+S"'appadmin'"
+p73
+sS'cookies'
+p74
+S"<SimpleCookie: session_id_admin='127-0-0-1-30657...'127-0-0-1-f66a923b-35d4-4221-bb69-65adf56edca3'>"
+p75
+sS'application'
+p76
+S"'blog'"
+p77
+sS'ajax'
+p78
+S'False'
+p79
+sS'client'
+p80
+S"'127.0.0.1'"
+p81
+sS'env'
+p82
+S"<Storage {'content_length': '565', 'http_user_ag...ch', 'query_string': '', 'wsgi_run_once': False}>"
+p83
+sS'raw_args'
+p84
+S"'db/usuarios'"
+p85
+sS'get_vars'
+p86
+S'<Storage {}>'
+p87
+sS'folder'
+p88
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/'"
+p89
+sS'now'
+p90
+S'datetime.datetime(2010, 10, 24, 12, 13, 52, 218410)'
+p91
+sS'post_vars'
+p92
+S"<Storage {'correo': '', '_formkey': 'a927a351-7d..., '_formname': 'usuarios_create', 'usuario': ''}>"
+p93
+ssS'frames'
+p94
+(lp95
+(dp96
+S'file'
+p97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py'
+p98
+sS'dump'
+p99
+(dp100
+S'environment'
+p101
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p102
+sS'ccode'
+p103
+S'<code object <module> at 0x94d1338, file "/home/...plications/blog/controllers/appadmin.py", line 7>'
+p104
+ssS'lnum'
+p105
+I188
+sS'lines'
+p106
+(dp107
+I192
+S'        # XXX Show exception in Wing IDE if running in debugger'
+p108
+sI183
+S'        if type(code) == types.CodeType:'
+p109
+sI184
+S'            ccode = code'
+p110
+sI185
+S'        else:'
+p111
+sI186
+S'            ccode = compile2(code,layer)'
+p112
+sI187
+S''
+sI188
+S'        exec ccode in environment'
+p113
+sI189
+S'    except HTTP:'
+p114
+sI190
+S'        raise'
+p115
+sI191
+S'    except Exception:'
+p116
+ssS'call'
+p117
+S"(code='# -*- coding: utf-8 -*-\\n\\n# #####################...=disk)\\n\\n\\nresponse._vars=response._caller(insert)\\n', environment={'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}, layer='/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/appadmin.py')"
+p118
+sS'func'
+p119
+S'restricted'
+p120
+sa(dp121
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/appadmin.py'
+p122
+sg99
+(dp123
+sg105
+I410
+sg106
+(dp124
+I399
+S''
+sI400
+S'        return (hours, minutes, seconds)'
+p125
+sI401
+S''
+sI402
+S"    ram['oldest'] = GetInHMS(time.time() - ram['oldest'])"
+p126
+sI403
+S"    disk['oldest'] = GetInHMS(time.time() - disk['oldest'])"
+p127
+sI404
+S"    total['oldest'] = GetInHMS(time.time() - total['oldest'])"
+p128
+sI405
+S''
+sI406
+S'    return dict(form=form, total=total,'
+p129
+sI407
+S'                ram=ram, disk=disk)'
+p130
+sI408
+S''
+ssg117
+S'()'
+p131
+sg119
+S'<module>'
+p132
+sa(dp133
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/globals.py'
+p134
+sg99
+(dp135
+S'self'
+p136
+S'undefined'
+p137
+sS'f'
+S'<function insert>'
+p138
+ssg105
+I96
+sg106
+(dp139
+I96
+S'        self._caller = lambda f: f()'
+p140
+sI97
+S'        self._view_environment = None'
+p141
+sI98
+S'        self._custom_commit = None'
+p142
+sI99
+S'        self._custom_rollback = None'
+p143
+sI100
+S''
+sI91
+S"        self.flash = ''           # used by the default view layout"
+p144
+sI92
+S'        self.meta = Storage()     # used by web2py_ajax.html'
+p145
+sI93
+S'        self.menu = []            # used by the default view layout'
+p146
+sI94
+S'        self.files = []           # used by web2py_ajax.html'
+p147
+sI95
+S'        self._vars = None'
+p148
+ssg117
+S'(f=<function insert>)'
+p149
+sg119
+S'<lambda>'
+p150
+sa(dp151
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/appadmin.py'
+p152
+sg99
+(dp153
+S'global request'
+p154
+S"<Storage {'function': 'insert', 'body': <open fi...'_formname': 'usuarios_create', 'usuario': ''}>}>"
+p155
+sS'request.vars'
+p156
+S"<Storage {'correo': '', '_formkey': 'a927a351-7d..., '_formname': 'usuarios_create', 'usuario': ''}>"
+p157
+sS'global session'
+p158
+S"<Storage {'last_orderby': None, 'last_query': 'd...reate]': 'a927a351-7db4-444d-bba1-5024c9d6e08f'}>"
+p159
+sS'form'
+p160
+S'<gluon.sqlhtml.SQLFORM object>'
+p161
+sS'form.accepts'
+p162
+S'<bound method SQLFORM.accepts of <gluon.sqlhtml.SQLFORM object>>'
+p163
+ssg105
+I125
+sg106
+(dp164
+I128
+S''
+sI129
+S''
+sI120
+S''
+sI121
+S''
+sI122
+S'def insert():'
+p165
+sI123
+S'    (db, table) = get_table(request)'
+p166
+sI124
+S'    form = SQLFORM(db[table], ignore_rw=ignore_rw)'
+p167
+sI125
+S'    if form.accepts(request.vars, session):'
+p168
+sI126
+S"        response.flash = T('new record inserted')"
+p169
+sI127
+S'    return dict(form=form,table=db[table])'
+p170
+ssg117
+S'()'
+p171
+sg119
+S'insert'
+p172
+sa(dp173
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/sqlhtml.py'
+p174
+sg99
+(dp175
+S'hideerror'
+p176
+g79
+ssg105
+I952
+sg106
+(dp177
+I947
+S'            request_vars,'
+p178
+sI948
+S'            session,'
+p179
+sI949
+S'            formname,'
+p180
+sI950
+S'            keepvalues,'
+p181
+sI951
+S'            onvalidation,'
+p182
+sI952
+S'            hideerror=hideerror,'
+p183
+sI953
+S'            )'
+p184
+sI954
+S''
+sI955
+S'        if not ret and self.record and self.errors:'
+p185
+sI956
+S'            ### if there are errors in update mode'
+p186
+ssg117
+S"(self=<gluon.sqlhtml.SQLFORM object>, request_vars=<Storage {'correo': '', '_formkey': 'a927a351-7d..., '_formname': 'usuarios_create', 'usuario': ''}>, session=<Storage {'last_orderby': None, 'last_query': 'd...reate]': 'a927a351-7db4-444d-bba1-5024c9d6e08f'}>, formname='usuarios_create', keepvalues=False, onvalidation=None, dbio=True, hideerror=False)"
+p187
+sg119
+S'accepts'
+p188
+sa(dp189
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py'
+p190
+sg99
+(dp191
+S'status'
+p192
+S'True'
+p193
+sS'self'
+p194
+S'<gluon.sqlhtml.SQLFORM object>'
+p195
+sS'self._traverse'
+p196
+S'<bound method SQLFORM._traverse of <gluon.sqlhtml.SQLFORM object>>'
+p197
+sS'hideerror'
+p198
+g79
+ssg105
+I1548
+sg106
+(dp199
+I1543
+S"        if self.session and self.session.get('_formkey[%s]'"
+p200
+sI1544
+S'                 % self.formname, None) != self.request_vars._formkey:'
+p201
+sI1545
+S'            status = False'
+p202
+sI1546
+S'        if self.formname != self.request_vars._formname:'
+p203
+sI1547
+S'            status = False'
+p204
+sI1548
+S'        status = self._traverse(status,hideerror)'
+p205
+sI1549
+S'        if status and onvalidation:'
+p206
+sI1550
+S'            if isinstance(onvalidation, (list, tuple)):'
+p207
+sI1551
+S'                [f(self) for f in onvalidation]'
+p208
+sI1552
+S'            else:'
+p209
+ssg117
+S"(self=<gluon.sqlhtml.SQLFORM object>, vars=<Storage {'correo': '', '_formkey': 'a927a351-7d..., '_formname': 'usuarios_create', 'usuario': ''}>, session=<Storage {'last_orderby': None, 'last_query': 'd...reate]': 'a927a351-7db4-444d-bba1-5024c9d6e08f'}>, formname='usuarios_create', keepvalues=False, onvalidation=None, hideerror=False)"
+p210
+sg119
+g188
+sa(dp211
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py'
+p212
+sg99
+(dp213
+S'status'
+p214
+g193
+sS'newstatus'
+p215
+g193
+sS'c'
+S'<gluon.html.TABLE object>'
+p216
+sS'hideerror'
+p217
+g79
+sS'c._traverse'
+p218
+S'<bound method TABLE._traverse of <gluon.html.TABLE object>>'
+p219
+ssg105
+I558
+sg106
+(dp220
+I553
+S'                c.errors = self.errors'
+p221
+sI554
+S'                c.latest = self.latest'
+p222
+sI555
+S'                c.session = self.session'
+p223
+sI556
+S'                c.formname = self.formname'
+p224
+sI557
+S"                c['hideerror']=hideerror"
+p225
+sI558
+S'                newstatus = c._traverse(status,hideerror) and newstatus'
+p226
+sI559
+S''
+sI560
+S'        # for input, textarea, select, option'
+p227
+sI561
+S"        # deal with 'value' and 'validation'"
+p228
+sI562
+S''
+ssg117
+S'(self=<gluon.sqlhtml.SQLFORM object>, status=True, hideerror=False)'
+p229
+sg119
+S'_traverse'
+p230
+sa(dp231
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py'
+p232
+sg99
+(dp233
+S'status'
+p234
+g193
+sS'newstatus'
+p235
+g79
+sS'c'
+S'<gluon.html.TR object>'
+p236
+sS'hideerror'
+p237
+g79
+sS'c._traverse'
+p238
+S'<bound method TR._traverse of <gluon.html.TR object>>'
+p239
+ssg105
+I558
+sg106
+(dp240
+I553
+S'                c.errors = self.errors'
+p241
+sI554
+S'                c.latest = self.latest'
+p242
+sI555
+S'                c.session = self.session'
+p243
+sI556
+S'                c.formname = self.formname'
+p244
+sI557
+S"                c['hideerror']=hideerror"
+p245
+sI558
+S'                newstatus = c._traverse(status,hideerror) and newstatus'
+p246
+sI559
+S''
+sI560
+S'        # for input, textarea, select, option'
+p247
+sI561
+S"        # deal with 'value' and 'validation'"
+p248
+sI562
+S''
+ssg117
+S'(self=<gluon.html.TABLE object>, status=True, hideerror=False)'
+p249
+sg119
+g230
+sa(dp250
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py'
+p251
+sg99
+(dp252
+S'status'
+p253
+g193
+sS'newstatus'
+p254
+g193
+sS'c'
+S'<gluon.html.TD object>'
+p255
+sS'hideerror'
+p256
+g79
+sS'c._traverse'
+p257
+S'<bound method TD._traverse of <gluon.html.TD object>>'
+p258
+ssg105
+I558
+sg106
+(dp259
+I553
+S'                c.errors = self.errors'
+p260
+sI554
+S'                c.latest = self.latest'
+p261
+sI555
+S'                c.session = self.session'
+p262
+sI556
+S'                c.formname = self.formname'
+p263
+sI557
+S"                c['hideerror']=hideerror"
+p264
+sI558
+S'                newstatus = c._traverse(status,hideerror) and newstatus'
+p265
+sI559
+S''
+sI560
+S'        # for input, textarea, select, option'
+p266
+sI561
+S"        # deal with 'value' and 'validation'"
+p267
+sI562
+S''
+ssg117
+S'(self=<gluon.html.TR object>, status=True, hideerror=False)'
+p268
+sg119
+g230
+sa(dp269
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py'
+p270
+sg99
+(dp271
+S'status'
+p272
+g193
+sS'newstatus'
+p273
+g193
+sS'c'
+S'<gluon.html.INPUT object>'
+p274
+sS'hideerror'
+p275
+g79
+sS'c._traverse'
+p276
+S'<bound method INPUT._traverse of <gluon.html.INPUT object>>'
+p277
+ssg105
+I558
+sg106
+(dp278
+I553
+S'                c.errors = self.errors'
+p279
+sI554
+S'                c.latest = self.latest'
+p280
+sI555
+S'                c.session = self.session'
+p281
+sI556
+S'                c.formname = self.formname'
+p282
+sI557
+S"                c['hideerror']=hideerror"
+p283
+sI558
+S'                newstatus = c._traverse(status,hideerror) and newstatus'
+p284
+sI559
+S''
+sI560
+S'        # for input, textarea, select, option'
+p285
+sI561
+S"        # deal with 'value' and 'validation'"
+p286
+sI562
+S''
+ssg117
+S'(self=<gluon.html.TD object>, status=True, hideerror=False)'
+p287
+sg119
+g230
+sa(dp288
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py'
+p289
+sg99
+(dp290
+S'newstatus'
+p291
+g193
+sS'self'
+p292
+S'<gluon.html.INPUT object>'
+p293
+sS'self._validate'
+p294
+S'<bound method INPUT._validate of <gluon.html.INPUT object>>'
+p295
+ssg105
+I565
+sg106
+(dp296
+I560
+S'        # for input, textarea, select, option'
+p297
+sI561
+S"        # deal with 'value' and 'validation'"
+p298
+sI562
+S''
+sI563
+S"        name = self['_name']"
+p299
+sI564
+S'        if newstatus:'
+p300
+sI565
+S'            newstatus = self._validate()'
+p301
+sI566
+S'            self._postprocessing()'
+p302
+sI567
+S"        elif 'old_value' in self.attributes:"
+p303
+sI568
+S"            self['value'] = self['old_value']"
+p304
+sI569
+S'            self._postprocessing()'
+p305
+ssg117
+S'(self=<gluon.html.INPUT object>, status=True, hideerror=False)'
+p306
+sg119
+g230
+sa(dp307
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py'
+p308
+sg99
+(dp309
+S'errors'
+p310
+g137
+sS'value'
+p311
+S"''"
+p312
+sS'validator'
+p313
+S"'CRYPT(); IS_NOT_EMPTY()'"
+p314
+ssg105
+I1336
+sg106
+(dp315
+I1331
+S"        requires = self['requires']"
+p316
+sI1332
+S'        if requires:'
+p317
+sI1333
+S'            if not isinstance(requires, (list, tuple)):'
+p318
+sI1334
+S'                requires = [requires]'
+p319
+sI1335
+S'            for validator in requires:'
+p320
+sI1336
+S'                (value, errors) = validator(value)'
+p321
+sI1337
+S'                if errors != None:'
+p322
+sI1338
+S'                    self.vars[name] = value'
+p323
+sI1339
+S'                    self.errors[name] = errors'
+p324
+sI1340
+S'                    break'
+p325
+ssg117
+S'(self=<gluon.html.INPUT object>)'
+p326
+sg119
+S'_validate'
+p327
+sasS'pyver'
+p328
+S'Python 2.6.6: /usr/bin/python'
+p329
+sS'session'
+p330
+(dp331
+S'last_orderby'
+p332
+S'None'
+p333
+sS'last_query'
+p334
+S"'db.usuarios.id>0'"
+p335
+sS'_formkey[default]'
+p336
+S"'a1de23bf-1680-4a4f-b9de-957af6cc5cdf'"
+p337
+sS'auth'
+p338
+S'None'
+p339
+sS'_formkey[usuarios_create]'
+p340
+S"'a927a351-7db4-444d-bba1-5024c9d6e08f'"
+p341
+ssS'etype'
+p342
+S"<type 'exceptions.TypeError'>"
+p343
+sS'date'
+p344
+S'Sun Oct 24 12:13:52 2010'
+p345
+sS'response'
+p346
+(dp347
+S'status'
+p348
+S'200'
+p349
+sg59
+S'<cStringIO.StringO object>'
+p350
+sg74
+S"<SimpleCookie: session_id_blog='127-0-0-1-c9e49980-0272-480c-b712-192f1f1b4547'>"
+p351
+sS'_vars'
+p352
+S'None'
+p353
+sS'title'
+p354
+S"'blog'"
+p355
+sS'session_file'
+p356
+S"<open file '/home/j3nnn1/git/pyj3nnn1/web2py/app...9e49980-0272-480c-b712-192f1f1b4547', mode 'rb+'>"
+p357
+sS'flash'
+p358
+S"''"
+p359
+sS'_custom_rollback'
+p360
+S'None'
+p361
+sS'session_id'
+p362
+S"'127-0-0-1-c9e49980-0272-480c-b712-192f1f1b4547'"
+p363
+sS'headers'
+p364
+S"<Storage {'Expires': 'Sun, 24 Oct 2010 16:43:52 ...he, must-revalidate, post-check=0, pre-check=0'}>"
+p365
+sS'meta'
+p366
+S"<Storage {'keywords': 'bla bla bla', 'description': 'describe your app', 'author': 'you'}>"
+p367
+sS'session_filename'
+p368
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/bl...ns/127-0-0-1-c9e49980-0272-480c-b712-192f1f1b4547'"
+p369
+sS'postprocessing'
+p370
+S'[]'
+p371
+sS'menu'
+p372
+S"[[<lazyT 'design'>, False, <gluon.html.XML object>], [<lazyT 'db'>, False, <gluon.html.XML object>], [<lazyT 'state'>, False, <gluon.html.XML object>], [<lazyT 'cache'>, False, <gluon.html.XML object>]]"
+p373
+sS'_view_environment'
+p374
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p375
+sS'subtitle'
+p376
+S"<lazyT 'customize me!'>"
+p377
+sS'session_id_name'
+p378
+S"'session_id_blog'"
+p379
+sS'_custom_commit'
+p380
+S'None'
+p381
+sS'_caller'
+p382
+S'<function <lambda>>'
+p383
+sS'files'
+p384
+S'[]'
+p385
+sS'view'
+p386
+S"'appadmin.html'"
+p387
+ssS'locals'
+p388
+(dp389
+S'self'
+p390
+S'<gluon.html.INPUT object>'
+p391
+sS'validator'
+p392
+S"'CRYPT(); IS_NOT_EMPTY()'"
+p393
+sS'requires'
+p394
+S"['CRYPT(); IS_NOT_EMPTY()']"
+p395
+sS'name'
+p396
+S"'clave'"
+p397
+sS'value'
+p398
+S"''"
+p399
+sssS'traceback'
+p400
+S'Traceback (most recent call last):\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py", line 188, in restricted\n    exec ccode in environment\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/appadmin.py", line 410, in <module>\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/globals.py", line 96, in <lambda>\n    self._caller = lambda f: f()\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/appadmin.py", line 125, in insert\n    if form.accepts(request.vars, session):\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/sqlhtml.py", line 952, in accepts\n    hideerror=hideerror,\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py", line 1548, in accepts\n    status = self._traverse(status,hideerror)\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py", line 558, in _traverse\n    newstatus = c._traverse(status,hideerror) and newstatus\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py", line 558, in _traverse\n    newstatus = c._traverse(status,hideerror) and newstatus\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py", line 558, in _traverse\n    newstatus = c._traverse(status,hideerror) and newstatus\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py", line 558, in _traverse\n    newstatus = c._traverse(status,hideerror) and newstatus\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py", line 565, in _traverse\n    newstatus = self._validate()\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/html.py", line 1336, in _validate\n    (value, errors) = validator(value)\nTypeError: \'str\' object is not callable\n'
+p401
+s.

@@ -1,0 +1,22 @@
+(dp1
+S'id_usuario'
+p2
+S'INTEGER REFERENCES usuarios(id) ON DELETE CASCADE'
+p3
+sS'titulo'
+p4
+S'CHAR(255)'
+p5
+sS'fecha'
+p6
+S'TIMESTAMP'
+p7
+sS'articulo'
+p8
+S'TEXT'
+p9
+sS'id'
+p10
+S'INTEGER PRIMARY KEY AUTOINCREMENT'
+p11
+s.

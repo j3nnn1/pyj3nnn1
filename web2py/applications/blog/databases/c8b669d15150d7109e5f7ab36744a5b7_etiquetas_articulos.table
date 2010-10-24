@@ -1,0 +1,14 @@
+(dp1
+S'id_articulo'
+p2
+S'INTEGER REFERENCES articulos(id) ON DELETE CASCADE'
+p3
+sS'id'
+p4
+S'INTEGER PRIMARY KEY AUTOINCREMENT'
+p5
+sS'id_etiqueta'
+p6
+S'INTEGER REFERENCES etiquetas(id) ON DELETE CASCADE'
+p7
+s.

@@ -12,7 +12,8 @@ if request.env.web2py_runtime_gae:            # if running on Google App Engine
     # from google.appengine.api.memcache import Client
     # session.connect(request, response, db = MEMDB(Client()))
 else:                                         # else use a normal relational database
-    db = DAL('sqlite://storage.sqlite')       # if not, use SQLite or other DB
+    #db = DAL('sqlite://storage.sqlite')       # if not, use SQLite or other DB
+    db = DAL('mysql://j3nnn1:j3nnn1@angvp.com/j3nnn1_blog') 
 ## if no need for session
 # session.forget()
 
@@ -74,3 +75,38 @@ crud.settings.auth = None                      # =auth to enforce authorization 
 ## >>> rows=db(db.mytable.myfield=='value').select(db.mytable.ALL)
 ## >>> for row in rows: print row.id, row.myfield
 #########################################################################
+
+
+db.define_table('usuarios',
+        Field('usuario', 'string', requires= [IS_NOT_EMPTY(),IS_NOT_IN_DB(db,'usuarios.usuario')], required=True), 
+        Field('clave', 'password', requires= [CRYPT(),IS_NOT_EMPTY()], required=True),
+        Field('correo', 'string',  readable=False, writable=True, requires= [IS_NOT_EMPTY(), IS_NOT_IN_DB(db,'usuarios.correo')], required=True))
+
+import datetime
+now = datetime.datetime.today()
+
+db.define_table('articulos',
+        Field('titulo',    'string',  requires=[IS_NOT_EMPTY(),IS_NOT_IN_DB(db,'articulos.titulo')], required=True),
+        Field('articulo',  'text',    requires=IS_NOT_EMPTY(),required=True),
+        Field('fecha',     'datetime',default=now),
+        Field('id_usuario',db.usuarios, readable=False, writable=False))
+        
+
+db.define_table('comentarios',
+        Field('id_articulo', db.articulos, readable=False, writable=False),
+        Field('titulo',      'string',requires = IS_NOT_EMPTY(), required=True),
+        Field('comentario',  'text',  requires = IS_NOT_EMPTY(), required=True),
+        Field('nombre',      'string',requires = IS_NOT_EMPTY(), required=True),
+        Field('correo',      'string',requires = [IS_EMAIL(), IS_NOT_EMPTY()],     required=True),
+        Field('url',         'string',required=False),
+        Field('fecha',       'datetime', default=now),
+        Field('visible',     'boolean'))
+
+
+db.define_table('etiquetas',
+        Field('nombre', 'string', requires=IS_NOT_EMPTY(), required=True))
+        
+
+db.define_table('etiquetas_articulos', 
+        Field('id_etiqueta',db.etiquetas, readable=False, writable=False),      
+        Field('id_articulo',db.articulos, readable=False, writable=False))

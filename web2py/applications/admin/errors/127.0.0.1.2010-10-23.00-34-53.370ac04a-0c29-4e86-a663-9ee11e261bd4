@@ -1,0 +1,971 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/admin/controllers/default.py'
+p4
+sS'code'
+p5
+S'# coding: utf8 \n\nfrom gluon.admin import *\nfrom glob import glob\nimport shutil\n\ndef index():\n    """ Index handler """\n\n    send = request.vars.send\n    if not send:\n        send = URL(\'site\')\n\n    if session.authorized:\n        redirect(send)\n    elif request.vars.password:\n        if verify_password(request.vars.password):\n            session.authorized = True\n\n            if CHECK_VERSION:\n                session.check_version = True\n            else:\n                session.check_version = False\n\n            session.last_time = t0\n            if isinstance(send, list):  # ## why does this happen?\n                send = str(send[0])\n\n            redirect(send)\n        else:\n            response.flash = T(\'invalid password\')\n\n    # f == file\n    apps = [f for f in os.listdir(apath(r=request)) if f.find(\'.\') < 0]\n\n    return dict(apps=apps, send=send)\n\n\ndef check_version():\n    """ Checks if web2py is up to date """\n\n    session.forget()\n    session._unlock(response)\n\n    new_version, version_number = check_new_version(request.env.web2py_version,\n                                    WEB2PY_VERSION_URL)\n    \n    if new_version == -1:\n        return A(T(\'Unable to check for upgrades\'), _href=WEB2PY_URL)\n    elif new_version == True:\n        return A(T(\'A new version of web2py is available: %s\'\n                                            % version_number), _href=WEB2PY_URL)\n    else:\n        return A(T(\'web2py is up to date\'), _href=WEB2PY_URL)\n\n\ndef logout():\n    """ Logout handler """\n\n    session.authorized = None\n    redirect(URL(\'index\'))\n\n\ndef change_password():\n    if session.pam_user:\n        session.flash = T(\'PAM authenticated user, cannot change password here\')\n        redirect(URL(\'site\'))\n    form=SQLFORM.factory(Field(\'current_admin_password\',\'password\'),\n                         Field(\'new_admin_password\',\'password\',requires=IS_STRONG()),\n                         Field(\'new_admin_password_again\',\'password\'))\n    if form.accepts(request.vars):\n        if not verify_password(request.vars.current_admin_password):\n            form.errors.current_admin_password = T(\'invalid password\')\n        elif form.vars.new_admin_password != form.vars.new_admin_password_again:\n            form.errors.new_admin_password_again = T(\'no match\')\n        else:\n            path = os.path.join(request.env.web2py_path,\'parameters_%s.py\' % request.env.server_port)\n            open(path,\'w\').write(\'password="%s"\' % CRYPT()(request.vars.new_admin_password)[0])\n            session.flash = T(\'password changed\')\n            redirect(URL(\'site\'))\n    return dict(form=form)\n\ndef site():\n    """ Site handler """\n\n    myversion = request.env.web2py_version\n\n    # Shortcut to make the elif statements more legible\n    file_or_appurl = \'file\' in request.vars or \'appurl\' in request.vars\n\n    if request.vars.filename and not \'file\' in request.vars:\n        # create a new application        \n        appname = cleanpath(request.vars.filename).replace(\'.\', \'_\')\n        if app_create(appname, request):            \n            session.flash = T(\'new application "%s" created\', appname)\n            redirect(URL(\'design\',args=appname))\n        else:\n            session.flash = \\\n                T(\'unable to create application "%s"\', request.vars.filename)\n        redirect(URL(r=request))\n        \n    elif file_or_appurl and not request.vars.filename:\n        # can\'t do anything without an app name\n        msg = \'you must specify a name for the uploaded application\'\n        response.flash = T(msg)\n\n    elif file_or_appurl and request.vars.filename:\n        # fetch an application via URL or file upload\n        if request.vars.appurl is not \'\':\n            try:\n                f = urllib.urlopen(request.vars.appurl)\n            except Exception, e:\n                session.flash = DIV(T(\'Unable to download app because:\'),PRE(str(e)))\n                redirect(URL(r=request))\n            fname = request.vars.appurl\n        elif request.vars.file is not \'\':\n            f = request.vars.file.file\n            fname = request.vars.file.filename\n\n        appname = cleanpath(request.vars.filename).replace(\'.\', \'_\')\n        installed = app_install(appname, f, request, fname,\n                                overwrite=request.vars.overwrite_check)\n        if installed:\n            msg = \'application %(appname)s installed with md5sum: %(digest)s\'\n            session.flash = T(msg, dict(appname=appname,\n                                        digest=md5_hash(installed)))\n        elif request.vars.overwrite_check:\n            msg = \'unable to install application "%(appname)s"\'\n            session.flash = T(msg, dict(appname=request.vars.filename))\n\n        else:\n            msg = \'unable to install application "%(appname)s"\'\n            session.flash = T(msg, dict(appname=request.vars.filename))\n\n        redirect(URL(r=request))\n\n    regex = re.compile(\'^\\w+$\')\n    apps = sorted([(f.upper(), f) for f in os.listdir(apath(r=request)) \\\n                       if regex.match(f)])\n    apps = [item[1] for item in apps]\n\n    return dict(app=None, apps=apps, myversion=myversion)\n\n\ndef pack():\n    if len(request.args) == 1:\n        fname = \'web2py.app.%s.w2p\' % request.args[0]\n        filename = app_pack(request.args[0], request)\n    else:\n        fname = \'web2py.app.%s.compiled.w2p\' % request.args[0]\n        filename = app_pack_compiled(request.args[0], request)\n\n    if filename:\n        response.headers[\'Content-Type\'] = \'application/w2p\'\n        disposition = \'attachment; filename=%s\' % fname\n        response.headers[\'Content-Disposition\'] = disposition\n        return open(filename, \'rb\').read()\n    else:\n        session.flash = T(\'internal error\')\n        redirect(URL(\'site\'))\n\ndef pack_plugin():\n    if len(request.args) == 2:\n        fname = \'web2py.plugin.%s.w2p\' % request.args[1]\n        filename = plugin_pack(request.args[0], request.args[1], request)\n    if filename:\n        response.headers[\'Content-Type\'] = \'application/w2p\'\n        disposition = \'attachment; filename=%s\' % fname\n        response.headers[\'Content-Disposition\'] = disposition\n        return open(filename, \'rb\').read()\n    else:\n        session.flash = T(\'internal error\')\n        redirect(URL(\'plugin\',args=request.args))\n\ndef upgrade_web2py():\n    if \'upgrade\' in request.vars:\n        (success, error) = upgrade(request)\n        if success:\n            session.flash = T(\'web2py upgraded; please restart it\')\n        else:\n            session.flash = T(\'unable to upgrade because "%s"\', error)\n        redirect(URL(\'site\'))\n    elif \'noupgrade\' in request.vars:\n        redirect(URL(\'site\'))\n    return dict()\n\ndef uninstall():\n    app = request.args[0]\n\n    if \'delete\' in request.vars:\n        deleted = app_uninstall(app, request)\n        if deleted:\n            session.flash = T(\'application "%s" uninstalled\', app)\n        else:\n            session.flash = T(\'unable to uninstall "%s"\', app)\n        redirect(URL(\'site\'))\n    elif \'nodelete\' in request.vars:\n        redirect(URL(\'site\'))\n    return dict(app=app)\n\n\ndef cleanup():\n    clean = app_cleanup(request.args[0], request)\n    if not clean:\n        session.flash = T("some files could not be removed")\n    else:\n        session.flash = T(\'cache, errors and sessions cleaned\')\n\n    redirect(URL(\'site\'))\n\n\ndef compile_app():\n    c = app_compile(request.args[0], request)\n    if not c:\n        session.flash = T(\'application compiled\')\n    else:\n        session.flash = DIV(T(\'Cannot compile: there are errors in your app:\',\n                              CODE(c)))    \n    redirect(URL(\'site\'))\n\n\ndef remove_compiled_app():\n    """ Remove the compiled application """\n    remove_compiled_application(apath(request.args[0], r=request))\n    session.flash = T(\'compiled application removed\')\n    redirect(URL(\'site\'))\n\n    \ndef delete():\n    """ Object delete handler """\n\n    filename = \'/\'.join(request.args)\n    sender = request.vars.sender\n\n    if isinstance(sender, list):  # ## fix a problem with Vista\n        sender = sender[0]\n\n    if \'nodelete\' in request.vars:\n        redirect(URL(sender))\n    elif \'delete\' in request.vars:\n        try:\n            os.unlink(apath(filename, r=request))\n            session.flash = T(\'file "%(filename)s" deleted\',\n                              dict(filename=filename))\n        except Exception:\n            session.flash = T(\'unable to delete file "%(filename)s"\',\n                              dict(filename=filename))\n        redirect(URL(sender))\n    return dict(filename=filename, sender=sender)\n        \ndef peek():\n    """ Visualize object code """\n\n    filename = \'/\'.join(request.args)\n\n    try:\n        data = open(apath(filename, r=request), \'r\').read().replace(\'\\r\',\'\')\n    except IOError:\n        session.flash = T(\'file does not exist\')\n        redirect(URL(\'site\'))\n\n    extension = filename[filename.rfind(\'.\') + 1:].lower()\n\n    return dict(app=request.args[0],\n                filename=filename,\n                data=data,\n                extension=extension)\n\n\ndef test():\n    """ Execute controller tests """\n\n    app = request.args[0]\n\n    if len(request.args) > 1:\n        file = request.args[1]\n    else:\n        file = \'.*\\.py\'\n\n    controllers = listdir(apath(\'%s/controllers/\' % app, r=request), file + \'$\')\n\n    return dict(app=app, controllers=controllers)\n\ndef keepalive():\n    return \'\'\n\ndef edit():\n    """ File edit handler """\n    # Load json only if it is ajax edited...\n\n    filename = \'/\'.join(request.args)\n\n    # Try to discover the file type\n    if filename[-3:] == \'.py\':\n        filetype = \'python\'\n    elif filename[-5:] == \'.html\':\n        filetype = \'html\'\n    elif filename[-4:] == \'.css\':\n        filetype = \'css\'\n    elif filename[-3:] == \'.js\':\n        filetype = \'js\'\n    else:\n        filetype = \'text\'\n\n    # ## check if file is not there\n\n    path = apath(filename, r=request)\n\n    if request.vars.revert and os.path.exists(path + \'.bak\'):\n        try:\n            data = open(path + \'.bak\', \'r\').read()\n            data1 = open(path, \'r\').read()\n        except IOError:\n            session.flash = T(\'Invalid action\')\n            if \'from_ajax\' in request.vars:\n                 return response.json({\'error\': str(T(\'Invalid action\'))})\n            else:\n                redirect(URL(\'site\'))\n\n        open(path, \'w\').write(data)\n        file_hash = md5_hash(data)\n        saved_on = time.ctime(os.stat(path)[stat.ST_MTIME])\n        open(path + \'.bak\', \'w\').write(data1)\n        response.flash = T(\'file "%s" of %s restored\', (filename, saved_on))\n    else:\n        try:\n            data = open(path, \'r\').read()\n        except IOError:\n            session.flash = T(\'Invalid action\')\n            if \'from_ajax\' in request.vars:\n                return response.json({\'error\': str(T(\'Invalid action\'))})\n            else:\n                redirect(URL(\'site\'))\n\n        file_hash = md5_hash(data)\n        saved_on = time.ctime(os.stat(path)[stat.ST_MTIME])\n\n        if request.vars.file_hash and request.vars.file_hash != file_hash:\n            session.flash = T(\'file changed on disk\')\n            data = request.vars.data.replace(\'\\r\\n\', \'\\n\').strip() + \'\\n\'\n            open(path + \'.1\', \'w\').write(data)\n            if \'from_ajax\' in request.vars:\n                return response.json({\'error\': str(T(\'file changed on disk\')), \n                                      \'redirect\': URL(\'resolve\',\n                                                      args=request.args)})\n            else:\n                redirect(URL(\'resolve\', args=request.args))\n        elif request.vars.data:\n            open(path + \'.bak\', \'w\').write(data)\n            data = request.vars.data.replace(\'\\r\\n\', \'\\n\').strip() + \'\\n\'\n            open(path, \'w\').write(data)\n            file_hash = md5_hash(data)\n            saved_on = time.ctime(os.stat(path)[stat.ST_MTIME])\n            response.flash = T(\'file saved on %s\', saved_on)\n\n    data_or_revert = (request.vars.data or request.vars.revert)\n\n    if data_or_revert and request.args[1] == \'modules\':\n        # Lets try to reload the modules\n        try:\n            mopath = \'.\'.join(request.args[2:])[:-3]\n            exec \'import applications.%s.modules.%s\' % (request.args[0], mopath)\n            reload(sys.modules[\'applications.%s.modules.%s\'\n                    % (request.args[0], mopath)])\n        except Exception, e:\n            response.flash = DIV(T(\'failed to reload module because:\'),PRE(str(e)))\n\n    edit_controller = None\n    editviewlinks = None\n    view_link = None\n    if filetype == \'html\' and request.args >= 3:\n        cfilename = os.path.join(request.args[0], \'controllers\',\n                                 request.args[2] + \'.py\')\n        if os.path.exists(apath(cfilename, r=request)):\n            edit_controller = URL(\'edit\', args=[cfilename])\n            view = request.args[3].replace(\'.html\',\'\')\n            view_link = A(T(\'view\'),_href=URL(request.args[0],request.args[2],view))\n    elif filetype == \'python\' and request.args[1] == \'controllers\':\n        ## it\'s a controller file.\n        ## Create links to all of the associated view files.\n        app = request.args[0]\n        viewname = os.path.splitext(request.args[2])[0]\n        viewpath = os.path.join(app,\'views\',viewname)\n        aviewpath = apath(viewpath, r=request)\n        viewlist = []\n        if os.path.exists(aviewpath):\n            if os.path.isdir(aviewpath):\n                viewlist = glob(os.path.join(aviewpath,\'*.html\'))\n        elif os.path.exists(aviewpath+\'.html\'):\n            viewlist.append(aviewpath+\'.html\')\n        if len(viewlist):\n            editviewlinks = []\n            for v in viewlist:\n                vf = os.path.split(v)[-1]\n                vargs = "/".join([viewpath.replace(os.sep,"/"),vf])\n                editviewlinks.append(A(T(vf.split(".")[0]),\\\n                    _href=URL(\'edit\',args=[vargs])))\n\n    if len(request.args) > 2 and request.args[1] == \'controllers\':\n        controller = (request.args[2])[:-3]\n        functions = regex_expose.findall(data)\n    else:\n        (controller, functions) = (None, None)\n\n    if \'from_ajax\' in request.vars:\n        return response.json({\'file_hash\': file_hash, \'saved_on\': saved_on, \'functions\':functions, \'controller\': controller, \'application\': request.args[0] })\n    else:\n\n        editarea_preferences = {}\n        editarea_preferences[\'FONT_SIZE\'] = \'10\'\n        editarea_preferences[\'FULL_SCREEN\'] = \'false\'\n        editarea_preferences[\'ALLOW_TOGGLE\'] = \'true\'\n        editarea_preferences[\'REPLACE_TAB_BY_SPACES\'] = \'4\'\n        editarea_preferences[\'DISPLAY\'] = \'onload\'\n        for key in editarea_preferences:\n            if globals().has_key(key):\n                editarea_preferences[key]=globals()[key]\n        return dict(app=request.args[0],\n                    filename=filename,\n                    filetype=filetype,\n                    data=data,\n                    edit_controller=edit_controller,\n                    file_hash=file_hash,\n                    saved_on=saved_on,\n                    controller=controller,\n                    functions=functions,\n                    view_link=view_link,\n                    editarea_preferences=editarea_preferences,\n                    editviewlinks=editviewlinks)\n\ndef resolve():\n    """  """\n\n    filename = \'/\'.join(request.args)\n\n    if filename[-3:] == \'.py\':\n        filetype = \'python\'\n\n    elif filename[-5:] == \'.html\':\n        filetype = \'html\'\n\n    elif filename[-4:] == \'.css\':\n        filetype = \'css\'\n\n    elif filename[-3:] == \'.js\':\n        filetype = \'js\'\n    else:\n        filetype = \'text\'\n\n    # ## check if file is not there\n\n    path = apath(filename, r=request)\n    a = open(path, \'r\').readlines()\n\n    try:\n        b = open(path + \'.1\', \'r\').readlines()\n    except IOError:\n        session.flash = \'Other file, no longer there\'\n        redirect(URL(\'edit\', args=request.args))\n\n    d = difflib.ndiff(a, b)\n\n    def leading(line):\n        """  """\n\n        # TODO: we really need to comment this\n        z = \'\'\n        for (k, c) in enumerate(line):\n            if c == \' \':\n                z += \'&nbsp;\'\n            elif c == \' \\t\':\n                z += \'&nbsp;\'\n            elif k == 0 and c == \'?\':\n                pass\n            else:\n                break\n\n        return XML(z)\n\n    def getclass(item):\n        """ Determine item class """\n\n        if item[0] == \' \':\n            return \'normal\'\n        if item[0] == \'+\':\n            return \'plus\'\n        if item[0] == \'-\':\n            return \'minus\'\n\n    if request.vars:\n        c = \'\'.join([item[2:] for (i, item) in enumerate(d) if item[0] \\\n                     == \' \' or \'line%i\' % i in request.vars])\n        open(path, \'w\').write(c)\n        session.flash = \'files merged\'\n        redirect(URL(\'edit\', args=request.args))\n    else:\n        # Making the short circuit compatible with <= python2.4\n        gen_data = lambda index,item: not item[:1] in [\'+\',\'-\'] and "" \\\n                   or INPUT(_type=\'checkbox\',\n                            _name=\'line%i\' % index,\n                            value=item[0] == \'+\')\n\n        diff = TABLE(*[TR(TD(gen_data(i,item)),\n                          TD(item[0]),\n                          TD(leading(item[2:]),\n                          TT(item[2:].rstrip())), _class=getclass(item))\n                       for (i, item) in enumerate(d) if item[0] != \'?\'])\n\n    return dict(diff=diff, filename=filename)\n\n\ndef edit_language():\n    """ Edit language file """\n\n    filename = \'/\'.join(request.args)\n\n    from gluon.languages import read_dict, write_dict\n    strings = read_dict(apath(filename, r=request))\n    keys = sorted(strings.keys(),lambda x,y: cmp(x.lower(), y.lower()))\n    rows = []\n    rows.append(H2(T(\'Original/Translation\')))\n\n    for key in keys:\n        name = md5_hash(key)\n        if key==strings[key]:\n            _class=\'untranslated\'\n        else:\n            _class=\'translated\'\n        if len(key) <= 40:\n            elem = INPUT(_type=\'text\', _name=name,value=strings[key],\n                         _size=70,_class=_class)\n        else:\n            elem = TEXTAREA(_name=name, value=strings[key], _cols=70, \n                            _rows=5, _class=_class)\n\n        # Making the short circuit compatible with <= python2.4\n        k = (strings[key] != key) and key or B(key)\n\n        rows.append(P(k, BR(), elem, TAG.BUTTON(T(\'delete\'),\n                            _onclick=\'return delkey("%s")\' % name), _id=name))\n\n    rows.append(INPUT(_type=\'submit\', _value=T(\'update\')))\n    form = FORM(*rows)\n    if form.accepts(request.vars, keepvalues=True):\n        strs = dict()\n        for key in keys:\n            name = md5_hash(key)\n            if form.vars[name]==chr(127): continue\n            strs[key] = form.vars[name]\n        write_dict(apath(filename, r=request), strs)\n        session.flash = T(\'file saved on %(time)s\', dict(time=time.ctime()))\n        redirect(URL(r=request,args=request.args))\n    return dict(app=request.args[0], filename=filename, form=form)\n\n\ndef about():\n    """ Read about info """\n\n    app = request.args[0]\n\n    # ## check if file is not there\n    about = open(apath(\'%s/ABOUT\' % app, r=request), \'r\').read()\n    license = open(apath(\'%s/LICENSE\' % app, r=request), \'r\').read()\n\n    return dict(app=app, about=WIKI(about), license=WIKI(license))\n\n\ndef design():\n    """ Application design handler """\n\n    app = request.args[0]\n\n    if not response.flash and app == request.application:\n        msg = T(\'ATTENTION: you cannot edit the running application!\')\n        response.flash = msg\n\n    if request.vars.pluginfile!=None:\n        filename=os.path.basename(request.vars.pluginfile.filename)\n        if plugin_install(app, request.vars.pluginfile.file,\n                          request, filename):\n            session.flash = T(\'new plugin installed\')\n            redirect(URL(\'design\',args=app))\n        else:\n            session.flash = \\\n                T(\'unable to create application "%s"\', request.vars.filename)\n        redirect(URL(r=request))\n\n\n    # If we have only pyc files it means that \n    # we cannot design\n    if os.path.exists(apath(\'%s/compiled\' % app, r=request)):\n        session.flash = \\\n            T(\'application is compiled and cannot be designed\')\n        redirect(URL(\'site\'))\n\n    # Get all models\n    models = listdir(apath(\'%s/models/\' % app, r=request), \'.*\\.py$\')\n    models=[x.replace(\'\\\\\',\'/\') for x in models]\n    defines = {}\n    for m in models:\n        data = open(apath(\'%s/models/%s\' % (app, m), r=request), \'r\').read()\n        defines[m] = regex_tables.findall(data)\n        defines[m].sort()\n\n    # Get all controllers\n    controllers = sorted(listdir(apath(\'%s/controllers/\' % app, r=request), \'.*\\.py$\'))\n    controllers = [x.replace(\'\\\\\',\'/\') for x in controllers]\n    functions = {}\n    for c in controllers:\n        data = open(apath(\'%s/controllers/%s\' % (app, c), r=request), \'r\').read()\n        items = regex_expose.findall(data)\n        functions[c] = items\n    \n    # Get all views\n    views = sorted(listdir(apath(\'%s/views/\' % app, r=request), \'[\\w/\\-]+\\.\\w+$\'))\n    views = [x.replace(\'\\\\\',\'/\') for x in views]\n    extend = {}\n    include = {}\n    for c in views:\n        data = open(apath(\'%s/views/%s\' % (app, c), r=request), \'r\').read()\n        items = regex_extend.findall(data)\n\n        if items:\n            extend[c] = items[0][1]\n\n        items = regex_include.findall(data)\n        include[c] = [i[1] for i in items]\n    \n    # Get all modules\n    modules = listdir(apath(\'%s/modules/\' % app, r=request), \'.*\\.py$\')\n    modules = modules=[x.replace(\'\\\\\',\'/\') for x in modules]\n    modules.sort()\n    \n    # Get all static files\n    statics = listdir(apath(\'%s/static/\' % app, r=request), \'[^\\.#].*\')\n    statics = [x.replace(\'\\\\\',\'/\') for x in statics]\n    statics.sort()\n    \n    # Get all languages\n    languages = listdir(apath(\'%s/languages/\' % app, r=request), \'[\\w-]*\\.py\')\n\n    #Get crontab\n    cronfolder = apath(\'%s/cron\' % app, r=request)\n    if not os.path.exists(cronfolder): os.mkdir(cronfolder)\n    crontab = apath(\'%s/cron/crontab\' % app, r=request)\n    if not os.path.exists(crontab): open(crontab,\'w\').write(\'#crontab\')\n\n    plugins=[]\n    def filter_plugins(items,plugins):\n        plugins+=[item[7:].split(\'/\')[0].split(\'.\')[0] for item in items if item.startswith(\'plugin_\')]\n        plugins[:]=list(set(plugins))\n        plugins.sort()\n        return [item for item in items if not item.startswith(\'plugin_\')]\n    \n    return dict(app=app,\n                models=filter_plugins(models,plugins),\n                defines=defines,\n                controllers=filter_plugins(controllers,plugins),\n                functions=functions,\n                views=filter_plugins(views,plugins),\n                modules=filter_plugins(modules,plugins),\n                extend=extend,\n                include=include,\n                statics=filter_plugins(statics,plugins),\n                languages=languages,\n                crontab=crontab,\n                plugins=plugins)\n\ndef delete_plugin():\n    """ Object delete handler """\n\n    app=request.args(0)\n    plugin = request.args(1)\n    plugin_name=\'plugin_\'+plugin\n    if \'nodelete\' in request.vars:\n        redirect(URL(\'design\',args=app))\n    elif \'delete\' in request.vars:\n        try:\n            for folder in [\'models\',\'views\',\'controllers\',\'static\',\'modules\']:\n                path=os.path.join(apath(app,r=request),folder)\n                for item in os.listdir(path):\n                    if item.startswith(plugin_name): \n                        filename=os.path.join(path,item)\n                        if os.path.isdir(filename):\n                            shutil.rmtree(filename)\n                        else:                            \n                            os.unlink(filename)\n            session.flash = T(\'plugin "%(plugin)s" deleted\',\n                              dict(plugin=plugin))\n        except Exception:\n            session.flash = T(\'unable to delete file plugin "%(plugin)s"\',\n                              dict(plugin=plugin))\n        redirect(URL(\'design\',args=request.args(0)))\n    return dict(plugin=plugin)\n\ndef plugin():\n    """ Application design handler """\n\n    app = request.args(0)\n    plugin = request.args(1)\n\n    if not response.flash and app == request.application:\n        msg = T(\'ATTENTION: you cannot edit the running application!\')\n        response.flash = msg\n\n    # If we have only pyc files it means that \n    # we cannot design\n    if os.path.exists(apath(\'%s/compiled\' % app, r=request)):\n        session.flash = \\\n            T(\'application is compiled and cannot be designed\')\n        redirect(URL(\'site\'))\n\n    # Get all models\n    models = listdir(apath(\'%s/models/\' % app, r=request), \'.*\\.py$\')\n    models=[x.replace(\'\\\\\',\'/\') for x in models]\n    defines = {}\n    for m in models:\n        data = open(apath(\'%s/models/%s\' % (app, m), r=request), \'r\').read()\n        defines[m] = regex_tables.findall(data)\n        defines[m].sort()\n\n    # Get all controllers\n    controllers = sorted(listdir(apath(\'%s/controllers/\' % app, r=request), \'.*\\.py$\'))\n    controllers = [x.replace(\'\\\\\',\'/\') for x in controllers]\n    functions = {}\n    for c in controllers:\n        data = open(apath(\'%s/controllers/%s\' % (app, c), r=request), \'r\').read()\n        items = regex_expose.findall(data)\n        functions[c] = items\n    \n    # Get all views\n    views = sorted(listdir(apath(\'%s/views/\' % app, r=request), \'[\\w/\\-]+\\.\\w+$\'))\n    views = [x.replace(\'\\\\\',\'/\') for x in views]\n    extend = {}\n    include = {}\n    for c in views:\n        data = open(apath(\'%s/views/%s\' % (app, c), r=request), \'r\').read()\n        items = regex_extend.findall(data)\n\n        if items:\n            extend[c] = items[0][1]\n\n        items = regex_include.findall(data)\n        include[c] = [i[1] for i in items]\n    \n    # Get all modules\n    modules = listdir(apath(\'%s/modules/\' % app, r=request), \'.*\\.py$\')\n    modules = modules=[x.replace(\'\\\\\',\'/\') for x in modules]\n    modules.sort()\n    \n    # Get all static files\n    statics = listdir(apath(\'%s/static/\' % app, r=request), \'[^\\.#].*\')\n    statics = [x.replace(\'\\\\\',\'/\') for x in statics]\n    statics.sort()\n    \n    # Get all languages\n    languages = listdir(apath(\'%s/languages/\' % app, r=request), \'[\\w-]*\\.py\')\n\n    #Get crontab\n    crontab = apath(\'%s/cron/crontab\' % app, r=request)\n    if not os.path.exists(crontab): open(crontab,\'w\').write(\'#crontab\')\n    \n\n    def filter_plugins(items):\n        regex=re.compile(\'^plugin_\'+plugin+\'(/.*|\\..*)?$\')\n        return [item for item in items if regex.match(item)]\n    \n    return dict(app=app,\n                models=filter_plugins(models),\n                defines=defines,\n                controllers=filter_plugins(controllers),\n                functions=functions,\n                views=filter_plugins(views),\n                modules=filter_plugins(modules),\n                extend=extend,\n                include=include,\n                statics=filter_plugins(statics),\n                languages=languages,\n                crontab=crontab)\n\n\ndef create_file():\n    """ Create files handler """\n\n    try:\n        path = apath(request.vars.location, r=request)\n        filename = re.sub(\'[^\\w./-]+\', \'_\', request.vars.filename)\n\n        if path[-11:] == \'/languages/\':\n            # Handle language files\n            if len(filename) == 0:\n                raise SyntaxError\n            if not filename[-3:] == \'.py\':\n                filename += \'.py\'\n            app = path.split(\'/\')[-3]\n            path=os.path.join(apath(app, r=request),\'languages\',filename)\n            if not os.path.exists(path):\n                open(path,\'w\').write(\'\')\n            findT(apath(app, r=request), filename[:-3])\n            session.flash = T(\'language file "%(filename)s" created/updated\',\n                              dict(filename=filename))\n            redirect(request.vars.sender)\n\n        elif path[-8:] == \'/models/\':\n            # Handle python models\n            if not filename[-3:] == \'.py\':\n                filename += \'.py\'\n\n            if len(filename) == 3:\n                raise SyntaxError\n\n            fn = re.sub(\'\\W\', \'\', filename[:-3].lower())\n            text = \'# coding: utf8\\n\'\n\n        elif path[-13:] == \'/controllers/\':\n            # Handle python controllers\n            if not filename[-3:] == \'.py\':\n                filename += \'.py\'\n\n            if len(filename) == 3:\n                raise SyntaxError\n\n            text = \'# coding: utf8\\n# %s\\ndef index(): return dict(message="hello from %s")\'\n            text = text % (T(\'try something like\'), filename)\n\n        elif path[-7:] == \'/views/\':\n            if request.vars.plugin and not filename.startswith(\'plugin_%s/\' % request.vars.plugin):\n                filename = \'plugin_%s/%s\' % (request.vars.plugin, filename)\n            # Handle template (html) views\n            if filename.find(\'.\')<0:\n                filename += \'.html\'\n            \n            if len(filename) == 5:\n                raise SyntaxError\n\n            msg = T(\'This is the %(filename)s template\',\n                    dict(filename=filename))\n            text = dedent("""\n                   {{extend \'layout.html\'}}\n                   <h1>%s</h1>\n                   {{=BEAUTIFY(response._vars)}}""" % msg)\n\n        elif path[-9:] == \'/modules/\':\n            if request.vars.plugin and not filename.startswith(\'plugin_%s/\' % request.vars.plugin):\n                filename = \'plugin_%s/%s\' % (request.vars.plugin, filename)\n            # Handle python module files\n            if not filename[-3:] == \'.py\':\n                filename += \'.py\'\n\n            if len(filename) == 3:\n                raise SyntaxError\n\n            text = dedent("""\n                   #!/usr/bin/env python \n                   # coding: utf8 \n                   from gluon.html import *\n                   from gluon.http import *\n                   from gluon.validators import *\n                   from gluon.sqlhtml import *\n                   # request, response, session, cache, T, db(s) \n                   # must be passed and cannot be imported!""")\n\n        elif path[-8:] == \'/static/\':\n            if request.vars.plugin and not filename.startswith(\'plugin_%s/\' % request.vars.plugin):\n                filename = \'plugin_%s/%s\' % (request.vars.plugin, filename)\n            text = \'\'\n        else:\n            redirect(request.vars.sender)\n\n        full_filename = os.path.join(path, filename)\n        dirpath = os.path.dirname(full_filename)\n\n        if not os.path.exists(dirpath):\n            os.makedirs(dirpath)\n\n        if os.path.exists(full_filename):\n            raise SyntaxError\n\n        open(full_filename, \'w\').write(text)\n        session.flash = T(\'file "%(filename)s" created\',\n                          dict(filename=full_filename[len(path):]))\n        redirect(URL(\'edit\',\n                 args=[os.path.join(request.vars.location, filename)]))\n    except Exception, e:\n        if not isinstance(e,HTTP):\n            session.flash = T(\'cannot create file\')\n\n    redirect(request.vars.sender)\n\n\ndef upload_file():\n    """ File uploading handler """\n\n    try:\n        path = apath(request.vars.location, r=request)\n\n        if request.vars.filename:\n            filename = re.sub(\'[^\\w\\./]+\', \'_\', request.vars.filename)\n        else:\n            filename = os.path.split(request.vars.file.filename)[-1]\n\n        if path[-8:] == \'/models/\' and not filename[-3:] == \'.py\':\n            filename += \'.py\'\n\n        if path[-9:] == \'/modules/\' and not filename[-3:] == \'.py\':\n            filename += \'.py\'\n\n        if path[-13:] == \'/controllers/\' and not filename[-3:] == \'.py\':\n            filename += \'.py\'\n\n        if path[-7:] == \'/views/\' and not filename[-5:] == \'.html\':\n            filename += \'.html\'\n\n        if path[-11:] == \'/languages/\' and not filename[-3:] == \'.py\':\n            filename += \'.py\'\n\n        filename = os.path.join(path, filename)\n        dirpath = os.path.dirname(filename)\n\n        if not os.path.exists(dirpath):\n            os.makedirs(dirpath)\n\n        open(filename, \'wb\').write(request.vars.file.file.read())\n        session.flash = T(\'file "%(filename)s" uploaded\',\n                          dict(filename=filename[len(path):]))\n    except Exception:\n        session.flash = T(\'cannot upload file "%(filename)s"\',\n                          dict(filename[len(path):]))\n\n    redirect(request.vars.sender)\n\n\ndef errors():\n    """ Error handler """\n\n    app = request.args[0]\n\n    for item in request.vars:\n        if item[:7] == \'delete_\':\n            os.unlink(apath(\'%s/errors/%s\' % (app, item[7:]), r=request))\n\n    func = lambda p: os.stat(apath(\'%s/errors/%s\' % (app, p), r=request)).st_mtime\n    tickets = sorted(listdir(apath(\'%s/errors/\' % app, r=request), \'^\\w.*\'),\n                     key=func,\n                     reverse=True)\n\n    return dict(app=app, tickets=tickets)\n\n\ndef make_link(path):\n    """ Create a link from a path """\n    tryFile = path.replace(\'\\\\\', \'/\')\n\n    if os.path.isabs(tryFile) and os.path.isfile(tryFile):\n        (folder, filename) = os.path.split(tryFile)\n        (base, ext) = os.path.splitext(filename)\n        app = request.args[0]\n        \n        editable = {\'controllers\': \'.py\', \'models\': \'.py\', \'views\': \'.html\'}\n        for key in editable.keys():\n            check_extension = folder.endswith("%s/%s" % (app,key))\n            if ext.lower() == editable[key] and check_extension:\n                return A(\'"\' + tryFile + \'"\',\n                         _href=URL(r=request,\n                         f=\'edit/%s/%s/%s\' % (app, key, filename))).xml()\n    return \'\'\n\n\ndef make_links(traceback):\n    """ Make links using the given traceback """\n\n    lwords = traceback.split(\'"\')\n\n    # Making the short circuit compatible with <= python2.4\n    result = (len(lwords) != 0) and lwords[0] or \'\'\n\n    i = 1\n\n    while i < len(lwords):\n        link = make_link(lwords[i])\n\n        if link == \'\':\n            result += \'"\' + lwords[i]\n        else:\n            result += link\n\n            if i + 1 < len(lwords):\n                result += lwords[i + 1]\n                i = i + 1\n\n        i = i + 1\n\n    return result\n\n\nclass TRACEBACK(object):\n    """ Generate the traceback """\n\n    def __init__(self, text):\n        """ TRACEBACK constructor """\n\n        self.s = make_links(CODE(text).xml())\n\n    def xml(self):\n        """ Returns the xml """\n\n        return self.s\n\n\ndef ticket():\n    """ Ticket handler """\n\n    if len(request.args) != 2:\n        session.flash = T(\'invalid ticket\')\n        redirect(URL(\'site\'))\n\n    app = request.args[0]\n    ticket = request.args[1]\n    e = RestrictedError()\n    e.load(request, app, ticket)\n\n    return dict(app=app,\n                ticket=ticket,\n                output=e.output,\n                traceback=(e.traceback and TRACEBACK(e.traceback)),\n                snapshot=e.snapshot,\n                code=e.code,\n                layer=e.layer)\n\n\ndef update_languages():\n    """ Update available languages """\n\n    app = request.args[0]\n    update_all_languages(apath(app, r=request))\n    session.flash = T(\'Language files (static strings) updated\')\n    redirect(URL(\'design\',args=app))\n\ndef twitter():\n    session.forget()\n    session._unlock(response)\n    import gluon.tools\n    import gluon.contrib.simplejson as sj\n    try:\n        page = gluon.tools.fetch(\'http://twitter.com/web2py?format=json\')\n        return sj.loads(page)[\'#timeline\']\n    except Exception, e:\n        return DIV(T(\'Unable to download because\'),PRE(str(e)))\n\n\nresponse._vars=response._caller(edit)\n'
+p6
+sS'snapshot'
+p7
+(dp8
+S'exception'
+p9
+(dp10
+S'__hash__'
+p11
+S"<method-wrapper '__hash__' of exceptions.TypeError object>"
+p12
+sS'__setattr__'
+p13
+S"<method-wrapper '__setattr__' of exceptions.TypeError object>"
+p14
+sS'__reduce_ex__'
+p15
+S'<built-in method __reduce_ex__ of exceptions.TypeError object>'
+p16
+sS'__getslice__'
+p17
+S"<method-wrapper '__getslice__' of exceptions.TypeError object>"
+p18
+sS'__getitem__'
+p19
+S"<method-wrapper '__getitem__' of exceptions.TypeError object>"
+p20
+sS'__setstate__'
+p21
+S'<built-in method __setstate__ of exceptions.TypeError object>'
+p22
+sS'__reduce__'
+p23
+S'<built-in method __reduce__ of exceptions.TypeError object>'
+p24
+sS'__str__'
+p25
+S"<method-wrapper '__str__' of exceptions.TypeError object>"
+p26
+sS'__format__'
+p27
+S'<built-in method __format__ of exceptions.TypeError object>'
+p28
+sS'__getattribute__'
+p29
+S"<method-wrapper '__getattribute__' of exceptions.TypeError object>"
+p30
+sS'__class__'
+p31
+S"<type 'exceptions.TypeError'>"
+p32
+sS'__unicode__'
+p33
+S'<built-in method __unicode__ of exceptions.TypeError object>'
+p34
+sS'__delattr__'
+p35
+S"<method-wrapper '__delattr__' of exceptions.TypeError object>"
+p36
+sS'__subclasshook__'
+p37
+S'<built-in method __subclasshook__ of type object>'
+p38
+sS'__repr__'
+p39
+S"<method-wrapper '__repr__' of exceptions.TypeError object>"
+p40
+sS'args'
+p41
+S"('<gluon.html.XML object at 0x8d9bd4c> is not JSON serializable',)"
+p42
+sS'__dict__'
+p43
+S'{}'
+p44
+sS'__sizeof__'
+p45
+S'<built-in method __sizeof__ of exceptions.TypeError object>'
+p46
+sS'__doc__'
+p47
+S"'Inappropriate argument type.'"
+p48
+sS'__init__'
+p49
+S"<method-wrapper '__init__' of exceptions.TypeError object>"
+p50
+sS'__new__'
+p51
+S'<built-in method __new__ of type object>'
+p52
+ssS'evalue'
+p53
+S'<gluon.html.XML object at 0x8d9bd4c> is not JSON serializable'
+p54
+sS'request'
+p55
+(dp56
+S'function'
+p57
+S"'edit'"
+p58
+sS'body'
+p59
+S"<open file '<fdopen>', mode 'w+b'>"
+p60
+sS'wsgi'
+p61
+S"<Storage {'start_response': <function <lambda> a...>, 'HTTP_ACCEPT_ENCODING': 'gzip,deflate,sdch'}}>"
+p62
+sS'extension'
+p63
+S"'html'"
+p64
+sS'vars'
+p65
+S"<Storage {None: '', 'file_hash': '0630666425107e...v>\\n\\n', 'saved_on': 'Sat Oct 23 00:29:19 2010'}>"
+p66
+sS'cid'
+p67
+S'None'
+p68
+sS'url'
+p69
+S'<gluon.html.XML object>'
+p70
+sg41
+S"['blog', 'views', 'default', 'about.html']"
+p71
+sS'controller'
+p72
+S"'default'"
+p73
+sS'cookies'
+p74
+S"<SimpleCookie: session_id_admin='127-0-0-1-1d055...'127-0-0-1-e89fe62a-f699-413d-96c0-aaca05aca65b'>"
+p75
+sS'application'
+p76
+S"'admin'"
+p77
+sS'ajax'
+p78
+S'True'
+p79
+sS'client'
+p80
+S"'127.0.0.1'"
+p81
+sS'env'
+p82
+S"<Storage {'content_length': '1619', 'http_user_a...ch', 'query_string': '', 'wsgi_run_once': False}>"
+p83
+sS'raw_args'
+p84
+S"'blog/views/default/about.html'"
+p85
+sS'get_vars'
+p86
+S'<Storage {}>'
+p87
+sS'folder'
+p88
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/admin/'"
+p89
+sS'now'
+p90
+S'datetime.datetime(2010, 10, 23, 0, 34, 53, 859965)'
+p91
+sS'post_vars'
+p92
+S"<Storage {None: '', 'file_hash': '0630666425107e...v>\\n\\n', 'saved_on': 'Sat Oct 23 00:29:19 2010'}>"
+p93
+ssS'frames'
+p94
+(lp95
+(dp96
+S'file'
+p97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py'
+p98
+sS'dump'
+p99
+(dp100
+S'environment'
+p101
+S"{'A': <class 'gluon.html.A'>, 'ALLOW_TOGGLE': 'true', 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CHECK_VERSION': True, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, ...}"
+p102
+sS'ccode'
+p103
+S'<code object <module> at 0x8c943c8, file "/home/...plications/admin/controllers/default.py", line 3>'
+p104
+ssS'lnum'
+p105
+I188
+sS'lines'
+p106
+(dp107
+I192
+S'        # XXX Show exception in Wing IDE if running in debugger'
+p108
+sI183
+S'        if type(code) == types.CodeType:'
+p109
+sI184
+S'            ccode = code'
+p110
+sI185
+S'        else:'
+p111
+sI186
+S'            ccode = compile2(code,layer)'
+p112
+sI187
+S''
+sI188
+S'        exec ccode in environment'
+p113
+sI189
+S'    except HTTP:'
+p114
+sI190
+S'        raise'
+p115
+sI191
+S'    except Exception:'
+p116
+ssS'call'
+p117
+S"(code='# coding: utf8 \\n\\nfrom gluon.admin import *\\nfrom ...str(e)))\\n\\n\\nresponse._vars=response._caller(edit)\\n', environment={'A': <class 'gluon.html.A'>, 'ALLOW_TOGGLE': 'true', 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CHECK_VERSION': True, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, ...}, layer='/home/j3nnn1/git/pyj3nnn1/web2py/applications/admin/controllers/default.py')"
+p118
+sS'func'
+p119
+S'restricted'
+p120
+sa(dp121
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/admin/controllers/default.py'
+p122
+sg99
+(dp123
+sg105
+I1051
+sg106
+(dp124
+I1040
+S'    session.forget()'
+p125
+sI1041
+S'    session._unlock(response)'
+p126
+sI1042
+S'    import gluon.tools'
+p127
+sI1043
+S'    import gluon.contrib.simplejson as sj'
+p128
+sI1044
+S'    try:'
+p129
+sI1045
+S"        page = gluon.tools.fetch('http://twitter.com/web2py?format=json')"
+p130
+sI1046
+S"        return sj.loads(page)['#timeline']"
+p131
+sI1047
+S'    except Exception, e:'
+p132
+sI1048
+S"        return DIV(T('Unable to download because'),PRE(str(e)))"
+p133
+sI1049
+S''
+ssg117
+S'()'
+p134
+sg119
+S'<module>'
+p135
+sa(dp136
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/globals.py'
+p137
+sg99
+(dp138
+S'self'
+p139
+S'undefined'
+p140
+sS'f'
+S'<function edit>'
+p141
+ssg105
+I96
+sg106
+(dp142
+I96
+S'        self._caller = lambda f: f()'
+p143
+sI97
+S'        self._view_environment = None'
+p144
+sI98
+S'        self._custom_commit = None'
+p145
+sI99
+S'        self._custom_rollback = None'
+p146
+sI100
+S''
+sI91
+S"        self.flash = ''           # used by the default view layout"
+p147
+sI92
+S'        self.meta = Storage()     # used by web2py_ajax.html'
+p148
+sI93
+S'        self.menu = []            # used by the default view layout'
+p149
+sI94
+S'        self.files = []           # used by web2py_ajax.html'
+p150
+sI95
+S'        self._vars = None'
+p151
+ssg117
+S'(f=<function edit>)'
+p152
+sg119
+S'<lambda>'
+p153
+sa(dp154
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/admin/controllers/default.py'
+p155
+sg99
+(dp156
+S'global request'
+p157
+S"<Storage {'function': 'edit', 'body': <open file...\\n\\n', 'saved_on': 'Sat Oct 23 00:29:19 2010'}>}>"
+p158
+sS'request.args'
+p159
+S"['blog', 'views', 'default', 'about.html']"
+p160
+sS'args'
+p161
+g140
+ssg105
+I345
+sg106
+(dp162
+I340
+S"            data = request.vars.data.replace('\\r\\n', '\\n').strip() + '\\n'"
+p163
+sI341
+S"            open(path + '.1', 'w').write(data)"
+p164
+sI342
+S"            if 'from_ajax' in request.vars:"
+p165
+sI343
+S"                return response.json({'error': str(T('file changed on disk')),"
+p166
+sI344
+S"                                      'redirect': URL('resolve',"
+p167
+sI345
+S'                                                      args=request.args)})'
+p168
+sI346
+S'            else:'
+p169
+sI347
+S"                redirect(URL('resolve', args=request.args))"
+p170
+sI348
+S'        elif request.vars.data:'
+p171
+sI349
+S"            open(path + '.bak', 'w').write(data)"
+p172
+ssg117
+S'()'
+p173
+sg119
+S'edit'
+p174
+sa(dp175
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/globals.py'
+p176
+sg99
+(dp177
+S'global json'
+p178
+S'<function json>'
+p179
+sS'data'
+p180
+S"{'error': 'file changed on disk', 'redirect': <gluon.html.XML object>}"
+p181
+ssg105
+I206
+sg106
+(dp182
+I201
+S"            self.headers['Content-Disposition'] = \\"
+p183
+sI202
+S'                "attachment; filename=%s" % filename'
+p184
+sI203
+S'        return self.stream(stream, chunk_size = chunk_size, request=request)'
+p185
+sI204
+S''
+sI205
+S'    def json(self, data):'
+p186
+sI206
+S'        return json(data)'
+p187
+sI207
+S''
+sI208
+S'    def xmlrpc(self, request, methods):'
+p188
+sI209
+S'        """'
+p189
+sI210
+S'        assuming::'
+p190
+ssg117
+S"(self=<Storage {'status': 200, 'body': <cStringIO.Stri...t': None, 'files': [], '_custom_rollback': None}>, data={'error': 'file changed on disk', 'redirect': <gluon.html.XML object>})"
+p191
+sg119
+S'json'
+p192
+sa(dp193
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/serializers.py'
+p194
+sg99
+(dp195
+S'value'
+p196
+S"{'error': 'file changed on disk', 'redirect': <gluon.html.XML object>}"
+p197
+sS'global simplejson'
+p198
+S"<module 'gluon.contrib.simplejson' from '/home/j...n1/web2py/gluon/contrib/simplejson/__init__.pyc'>"
+p199
+sS'simplejson.dumps'
+p200
+S'<function dumps>'
+p201
+ssg105
+I31
+sg106
+(dp202
+I32
+S''
+sI33
+S''
+sI34
+S'def csv(value):'
+p203
+sI35
+S"    return ''"
+p204
+sI26
+S"def xml(value, encoding='UTF-8', key='document'):"
+p205
+sI27
+S'    return (\'<?xml version="1.0" encoding="%s"?>\' % encoding) + str(xml_rec(value,key))'
+p206
+sI28
+S''
+sI29
+S''
+sI30
+S'def json(value):'
+p207
+sI31
+S'    return simplejson.dumps(value)'
+p208
+ssg117
+S"(value={'error': 'file changed on disk', 'redirect': <gluon.html.XML object>})"
+p209
+sg119
+g192
+sa(dp210
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/contrib/simplejson/__init__.py'
+p211
+sg99
+(dp212
+S'_default_encoder.encode'
+p213
+S'<bound method JSONEncoder.encode of <gluon.contrib.simplejson.encoder.JSONEncoder object>>'
+p214
+sS'global _default_encoder'
+p215
+S'<gluon.contrib.simplejson.encoder.JSONEncoder object>'
+p216
+sS'obj'
+p217
+S"{'error': 'file changed on disk', 'redirect': <gluon.html.XML object>}"
+p218
+ssg105
+I228
+sg106
+(dp219
+I224
+S'    if (skipkeys is False and ensure_ascii is True and'
+p220
+sI225
+S'        check_circular is True and allow_nan is True and'
+p221
+sI226
+S'        cls is None and indent is None and separators is None and'
+p222
+sI227
+S"        encoding == 'utf-8' and default is None and not kw):"
+p223
+sI228
+S'        return _default_encoder.encode(obj)'
+p224
+sI229
+S'    if cls is None:'
+p225
+sI230
+S'        cls = JSONEncoder'
+p226
+sI231
+S'    return cls('
+p227
+sI232
+S'        skipkeys=skipkeys, ensure_ascii=ensure_ascii,'
+p228
+sI223
+S'    # cached encoder'
+p229
+ssg117
+S"(obj={'error': 'file changed on disk', 'redirect': <gluon.html.XML object>}, skipkeys=False, ensure_ascii=True, check_circular=True, allow_nan=True, cls=None, indent=None, separators=None, encoding='utf-8', default=None, **kw={})"
+p230
+sg119
+S'dumps'
+p231
+sa(dp232
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/contrib/simplejson/encoder.py'
+p233
+sg99
+(dp234
+S'chunks'
+p235
+S'<generator object _iterencode>'
+p236
+sS'builtinlist'
+p237
+S"<type 'list'>"
+p238
+ssg105
+I232
+sg106
+(dp239
+I227
+S"        # This doesn't pass the iterator directly to ''.join() because the"
+p240
+sI228
+S"        # exceptions aren't as detailed.  The list call should be roughly"
+p241
+sI229
+S"        # equivalent to the PySequence_Fast that ''.join() would do."
+p242
+sI230
+S'        chunks = self.iterencode(o, _one_shot=True)'
+p243
+sI231
+S'        if not isinstance(chunks, (list, tuple)):'
+p244
+sI232
+S'            chunks = list(chunks)'
+p245
+sI233
+S'        if self.ensure_ascii:'
+p246
+sI234
+S"            return ''.join(chunks)"
+p247
+sI235
+S'        else:'
+p248
+sI236
+S"            return u''.join(chunks)"
+p249
+ssg117
+S"(self=<gluon.contrib.simplejson.encoder.JSONEncoder object>, o={'error': 'file changed on disk', 'redirect': <gluon.html.XML object>})"
+p250
+sg119
+S'encode'
+p251
+sa(dp252
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/contrib/simplejson/encoder.py'
+p253
+sg99
+(dp254
+S'_current_indent_level'
+p255
+S'0'
+sS'chunk'
+p256
+S"': '"
+p257
+sS'o'
+S"{'error': 'file changed on disk', 'redirect': <gluon.html.XML object>}"
+p258
+sS'_iterencode_dict'
+p259
+S'<function _iterencode_dict>'
+p260
+ssg105
+I501
+sg106
+(dp261
+I496
+S'            yield _floatstr(o)'
+p262
+sI497
+S'        elif isinstance(o, (list, tuple)):'
+p263
+sI498
+S'            for chunk in _iterencode_list(o, _current_indent_level):'
+p264
+sI499
+S'                yield chunk'
+p265
+sI500
+S'        elif isinstance(o, dict):'
+p266
+sI501
+S'            for chunk in _iterencode_dict(o, _current_indent_level):'
+p267
+sI502
+S'                yield chunk'
+p268
+sI503
+S'        elif _use_decimal and isinstance(o, Decimal):'
+p269
+sI504
+S'            yield str(o)'
+p270
+sI505
+S'        else:'
+p271
+ssg117
+S"(o={'error': 'file changed on disk', 'redirect': <gluon.html.XML object>}, _current_indent_level=0)"
+p272
+sg119
+S'_iterencode'
+p273
+sa(dp274
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/contrib/simplejson/encoder.py'
+p275
+sg99
+(dp276
+S'chunks'
+p277
+S'<generator object _iterencode>'
+p278
+sS'chunk'
+p279
+g140
+ssg105
+I475
+sg106
+(dp280
+I470
+S'                    chunks = _iterencode_list(value, _current_indent_level)'
+p281
+sI471
+S'                elif isinstance(value, dict):'
+p282
+sI472
+S'                    chunks = _iterencode_dict(value, _current_indent_level)'
+p283
+sI473
+S'                else:'
+p284
+sI474
+S'                    chunks = _iterencode(value, _current_indent_level)'
+p285
+sI475
+S'                for chunk in chunks:'
+p286
+sI476
+S'                    yield chunk'
+p287
+sI477
+S'        if newline_indent is not None:'
+p288
+sI478
+S'            _current_indent_level -= 1'
+p289
+sI479
+S"            yield '\\n' + (_indent * _current_indent_level)"
+p290
+ssg117
+S"(dct={'error': 'file changed on disk', 'redirect': <gluon.html.XML object>}, _current_indent_level=0)"
+p291
+sg119
+S'_iterencode_dict'
+p292
+sa(dp293
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/contrib/simplejson/encoder.py'
+p294
+sg99
+(dp295
+S'_default'
+p296
+S'<bound method JSONEncoder.default of <gluon.contrib.simplejson.encoder.JSONEncoder object>>'
+p297
+sS'o'
+S'<gluon.html.XML object>'
+p298
+ssg105
+I511
+sg106
+(dp299
+I512
+S'            for chunk in _iterencode(o, _current_indent_level):'
+p300
+sI513
+S'                yield chunk'
+p301
+sI514
+S'            if markers is not None:'
+p302
+sI515
+S'                del markers[markerid]'
+p303
+sI506
+S'            if markers is not None:'
+p304
+sI507
+S'                markerid = id(o)'
+p305
+sI508
+S'                if markerid in markers:'
+p306
+sI509
+S'                    raise ValueError("Circular reference detected")'
+p307
+sI510
+S'                markers[markerid] = o'
+p308
+sI511
+S'            o = _default(o)'
+p309
+ssg117
+S'(o=<gluon.html.XML object>, _current_indent_level=0)'
+p310
+sg119
+g273
+sa(dp311
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/contrib/simplejson/encoder.py'
+p312
+sg99
+(dp313
+S'builtinrepr'
+p314
+S'<built-in function repr>'
+p315
+sS'builtinTypeError'
+p316
+S"<type 'exceptions.TypeError'>"
+p317
+sS'o'
+S'<gluon.html.XML object>'
+p318
+ssg105
+I206
+sg106
+(dp319
+I201
+S"            return o.isoformat()[:19].replace('T',' ')"
+p320
+sI202
+S'        if isinstance(o, (int, long)):'
+p321
+sI203
+S'            return int(o)'
+p322
+sI204
+S"        if hasattr(o,'as_dict') and callable(o.as_dict):"
+p323
+sI205
+S'            return o.as_dict()'
+p324
+sI206
+S'        raise TypeError(repr(o) + " is not JSON serializable")'
+p325
+sI207
+S''
+sI208
+S'    def encode(self, o):'
+p326
+sI209
+S'        """Return a JSON string representation of a Python data structure.'
+p327
+sI210
+S''
+ssg117
+S'(self=<gluon.contrib.simplejson.encoder.JSONEncoder object>, o=<gluon.html.XML object>)'
+p328
+sg119
+S'default'
+p329
+sasS'pyver'
+p330
+S'Python 2.6.6: /usr/bin/python'
+p331
+sS'session'
+p332
+(dp333
+S'check_version'
+p334
+S'False'
+p335
+sS'flash'
+p336
+S"<lazyT 'file changed on disk'>"
+p337
+sS'pam_user'
+p338
+S'None'
+p339
+sS'authorized'
+p340
+g79
+sS'last_time'
+p341
+S'1287810293.870944'
+p342
+ssS'etype'
+p343
+S"<type 'exceptions.TypeError'>"
+p344
+sS'date'
+p345
+S'Sat Oct 23 00:34:53 2010'
+p346
+sS'response'
+p347
+(dp348
+S'status'
+p349
+S'200'
+p350
+sg59
+S'<cStringIO.StringO object>'
+p351
+sg74
+S"<SimpleCookie: session_id_admin='127-0-0-1-1d05562c-380e-46a1-831e-22dff28954cd'>"
+p352
+sS'_vars'
+p353
+S'None'
+p354
+sS'title'
+p355
+S"'edit blog/views/default/about.html'"
+p356
+sS'session_file'
+p357
+S"<open file '/home/j3nnn1/git/pyj3nnn1/web2py/app...d05562c-380e-46a1-831e-22dff28954cd', mode 'rb+'>"
+p358
+sS'flash'
+p359
+S"''"
+p360
+sS'_custom_rollback'
+p361
+S'None'
+p362
+sS'session_id'
+p363
+S"'127-0-0-1-1d05562c-380e-46a1-831e-22dff28954cd'"
+p364
+sS'headers'
+p365
+S"<Storage {'Expires': 'Sat, 23 Oct 2010 05:04:53 ...he, must-revalidate, post-check=0, pre-check=0'}>"
+p366
+sS'meta'
+p367
+S'<Storage {}>'
+p368
+sS'session_filename'
+p369
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/ad...ns/127-0-0-1-1d05562c-380e-46a1-831e-22dff28954cd'"
+p370
+sS'postprocessing'
+p371
+S'[]'
+p372
+sS'menu'
+p373
+S"[(<lazyT 'site'>, False, <gluon.html.XML object>), (<lazyT 'edit'>, False, <gluon.html.XML object>), (<lazyT 'about'>, False, <gluon.html.XML object>), (<lazyT 'errors'>, False, <gluon.html.XML object>), (<lazyT 'logout'>, False, <gluon.html.XML object>), (<lazyT 'help'>, False, <gluon.html.XML object>)]"
+p374
+sS'_view_environment'
+p375
+S"{'A': <class 'gluon.html.A'>, 'ALLOW_TOGGLE': 'true', 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CHECK_VERSION': True, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, ...}"
+p376
+sS'subtitle'
+p377
+S"'admin'"
+p378
+sS'session_id_name'
+p379
+S"'session_id_admin'"
+p380
+sS'_custom_commit'
+p381
+S'None'
+p382
+sS'_caller'
+p383
+S'<function <lambda>>'
+p384
+sS'files'
+p385
+S'[]'
+p386
+sS'view'
+p387
+S"'default/edit.html'"
+p388
+ssS'locals'
+p389
+(dp390
+S'self'
+p391
+S'<gluon.contrib.simplejson.encoder.JSONEncoder object>'
+p392
+sS'o'
+S'<gluon.html.XML object>'
+p393
+sssS'traceback'
+p394
+S'Traceback (most recent call last):\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py", line 188, in restricted\n    exec ccode in environment\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/admin/controllers/default.py", line 1051, in <module>\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/globals.py", line 96, in <lambda>\n    self._caller = lambda f: f()\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/admin/controllers/default.py", line 345, in edit\n    args=request.args)})\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/globals.py", line 206, in json\n    return json(data)\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/serializers.py", line 31, in json\n    return simplejson.dumps(value)\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/contrib/simplejson/__init__.py", line 228, in dumps\n    return _default_encoder.encode(obj)\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/contrib/simplejson/encoder.py", line 232, in encode\n    chunks = list(chunks)\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/contrib/simplejson/encoder.py", line 501, in _iterencode\n    for chunk in _iterencode_dict(o, _current_indent_level):\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/contrib/simplejson/encoder.py", line 475, in _iterencode_dict\n    for chunk in chunks:\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/contrib/simplejson/encoder.py", line 511, in _iterencode\n    o = _default(o)\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/contrib/simplejson/encoder.py", line 206, in default\n    raise TypeError(repr(o) + " is not JSON serializable")\nTypeError: <gluon.html.XML object at 0x8d9bd4c> is not JSON serializable\n'
+p395
+s.

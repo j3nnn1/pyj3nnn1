@@ -1,0 +1,22 @@
+(dp1
+S'id_usuario'
+p2
+S'INT, INDEX id_usuario__idx (id_usuario), FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE'
+p3
+sS'titulo'
+p4
+S'VARCHAR(512)'
+p5
+sS'fecha'
+p6
+S'DATETIME'
+p7
+sS'articulo'
+p8
+S'LONGTEXT'
+p9
+sS'id'
+p10
+S'INT AUTO_INCREMENT NOT NULL'
+p11
+s.

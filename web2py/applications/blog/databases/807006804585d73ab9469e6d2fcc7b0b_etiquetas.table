@@ -1,0 +1,10 @@
+(dp1
+S'nombre'
+p2
+S'VARCHAR(512)'
+p3
+sS'id'
+p4
+S'INT AUTO_INCREMENT NOT NULL'
+p5
+s.
