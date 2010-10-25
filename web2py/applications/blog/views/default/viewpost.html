@@ -1,23 +1,27 @@
 {{extend 'layout.html'}}
 
-{{#=BEAUTIFY(request.vars)}}
-{{#=BEAUTIFY(post)}}
-{{=BEAUTIFY(comments)}}
-<br/>
-{{=H3(post.articulos.titulo)}}
-{{=post.articulos.articulo}}
-
-<br/>
-<br/>
-{{=T("Escrito por: ")}} {{=post.usuarios.usuario}} {{=T("el ")}} {{=post.articulos.fecha}}
-<br/>
-<br/>
-{{#=comments.comentarios.titulo}}
-<br/>
-{{#=comments.comentarios.nombre}} / {{#=comments.comentarios.correo}}
-{{#=(comments.comentarios.url or "No tiene Url")}}
-{{#=comments.comentarios.comentario}}
-Escrito el: {{#=comments.comentarios.fecha}}
-<br/>
+<div class='post'>
+{{=H2(post.articulos.titulo, _class='title')}}
+    <div class='entry'>
+	<p> {{=post.articulos.articulo}} </p>
+    </div>
+    <div class='meta'>
+	{{=T("Escrito por: ")}} {{=post.usuarios.usuario}} {{=T("el ")}} {{=post.articulos.fecha}}
+    </div>
+    <div class='entry'>
+    {{if comments:}}
+	{{ for comment in comments: }}
+            {{=B(T("Titulo: "))}} {{=comment.comentarios.titulo}}<br/>
+            {{=B(T("Nombre: "))}} {{=comment.comentarios.nombre}} <br />
+            {{=B(T("Web: "))}} {{=(comment.comentarios.url or "No tiene Url")}} <br />
+            {{=B(T("Comentario: "))}}<br />
+            {{=comment.comentarios.comentario}} <br />
+            {{=B(T("Escrito el:"))}} {{=comment.comentarios.fecha}} <br /><br />
+    {{pass}}
+    {{else:}}
+        {{=H3(T("Este post no tiene comentarios aun, sé el primero en dejar uno"))}}
+    {{pass}}
+    </div>
 <br/>
 {{=form}}
+</div>

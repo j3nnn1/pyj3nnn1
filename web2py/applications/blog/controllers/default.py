@@ -13,13 +13,10 @@ def index():
     Esta vista va a obtener 3 post
     """
     # filter to join.
-    #filtro = (db.articulos.id_usuario==db.usuarios.id)
-    #post = db(filtro).select(db.articulos.id, db.articulos.titulo, db.articulos.fecha, db.articulos.articulo, db.usuarios.usuario,limitby=(0,3),orderby=~db.articulos.fecha)
-    #return dict(post=post)
     filtro = (db.articulos.id_usuario==db.usuarios.id)
-    perpage = 3                  # Numero de articulos por pagina
+    perpage = 3                                  # Numero de articulos por pagina
     totalposts = db(db.articulos.id > 0).count() # contamos cuantos posts hay en la bd
-    totalpages = totalposts / perpage        # division para sacar el numero de paginas
+    totalpages = totalposts / perpage            # division para sacar el numero de paginas
                   
     page = int(request.vars.page) if request.vars.page else 1
     limit = int(page - 1) * perpage
@@ -36,15 +33,22 @@ def about():
     return dict()
 
 def viewpost():
-    filtro      = (db.articulos.id==request.args(0))&(db.articulos.id_usuario==db.usuarios.id)
-    post        = db(filtro).select(db.articulos.ALL, db.usuarios.usuario).first()
-    form        = SQLFORM(db.comentarios)
-    form.vars.id_articulo = post.articulos.id
+    if request.args(0):
+        filtro      = ((db.articulos.id==request.args(0)) & (db.articulos.id_usuario==db.usuarios.id))
+        post        = db(filtro).select(db.articulos.ALL, db.usuarios.usuario).first()
 
-    comments    = db(db.comentarios.id_articulo==post.articulos.id).select() or "Este Post no posee comentarios"
+        if post:
+            form        = SQLFORM(db.comentarios)
+            form.vars.id_articulo = post.articulos.id
+            filtro          = (db.comentarios.id_articulo==post.articulos.id)
+            comments        = (db(filtro).select(db.comentarios.ALL, orderby=~db.comentarios.fecha)).records 
+        else:
+            redirect(URL('index'))
 
-    if form.accepts(request.vars, session):
-       response.flash ='Tu comentario ha sido publicado'
+        if form.accepts(request.vars, session):
+            response.flash ='Tu comentario ha sido publicado'
+    else:
+        redirect(URL('index'))
 
     return dict(post=post, form=form, comments=comments)
 
