@@ -101,8 +101,9 @@ db.define_table('comentarios',
         Field('correo',      'string',requires = [IS_EMAIL(), IS_NOT_EMPTY()],     required=True),
         Field('url',         'string',required=False),
         Field('fecha',       'datetime', default=now),
-        Field('visible',     'boolean'))
+        Field('visible',     'boolean', readable=False, writable=False))
 
+db.comentarios.id.readable=db.comentarios.id.writable=False
 
 db.define_table('etiquetas',
         Field('nombre', 'string', requires=IS_NOT_EMPTY(), required=True))

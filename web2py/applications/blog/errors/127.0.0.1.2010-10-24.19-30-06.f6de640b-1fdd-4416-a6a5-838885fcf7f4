@@ -1,0 +1,729 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p4
+sS'code'
+p5
+S'# -*- coding: utf-8 -*- \n\n#########################################################################\n## This is a samples controller\n## - index is the default action of any application\n## - user is required for authentication and authorization\n## - download is for downloading files uploaded in the db (does streaming)\n## - call exposes all registered services (none by default)\n#########################################################################  \n\ndef index():\n    """\n    Esta vista va a obtener 3 post\n    """\n    # filter to join.\n    filtro = (db.articulos.id_usuario==db.usuarios.id)\n    post = db(filtro).select(db.articulos.id, db.articulos.titulo, db.articulos.fecha, db.articulos.articulo, db.usuarios.usuario,limitby=(0,3),orderby=~db.articulos.fecha)\n\n    return dict(post=post)\n\ndef about():\n    """ Informaci\xc3\xb3n sobre mi persona"""\n    return dict()\n\ndef viewpost():\n    filtro      = (db.articulos.id==request.args(0))&(db.articulos.id_usuario==db.usuarios.id)\n    campos      = "db.articulos.titulo, db.articulos.articulo, db.articulos.fecha, db.usuarios.usuario"  \n    post        = db(filtro).select(campos).first()\n    form        = SQLFORM(db.comentarios)\n    form.vars.id_articulo = post.id\n    comments    = db(db.comentarios.id_articulo==post.id).select()\n                    \n    if form.accepts(request.vars, session):\n       response.flash =\'Tu comentario ha sido publicado\'\n\n    return dict(post=post, form=form, comments=comments)\n\ndef user():\n    """\n    exposes:\n    http://..../[app]/default/user/login \n    http://..../[app]/default/user/logout\n    http://..../[app]/default/user/register\n    http://..../[app]/default/user/profile\n    http://..../[app]/default/user/retrieve_password\n    http://..../[app]/default/user/change_password\n    use @auth.requires_login()\n        @auth.requires_membership(\'group name\')\n        @auth.requires_permission(\'read\',\'table name\',record_id)\n    to decorate functions that need access control\n    """\n    return dict(form=auth())\n\n\ndef download():\n    """\n    allows downloading of uploaded files\n    http://..../[app]/default/download/[filename]\n    """\n    return response.download(request,db)\n\n\ndef call():\n    """\n    exposes services. for example:\n    http://..../[app]/default/call/jsonrpc\n    decorate with @services.jsonrpc the functions to expose\n    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv\n    """\n    session.forget()\n    return service()\n\nresponse._vars=response._caller(viewpost)\n'
+p6
+sS'snapshot'
+p7
+(dp8
+S'exception'
+p9
+(dp10
+S'__hash__'
+p11
+S"<method-wrapper '__hash__' of exceptions.KeyError object>"
+p12
+sS'__setattr__'
+p13
+S"<method-wrapper '__setattr__' of exceptions.KeyError object>"
+p14
+sS'__reduce_ex__'
+p15
+S'<built-in method __reduce_ex__ of exceptions.KeyError object>'
+p16
+sS'__getslice__'
+p17
+S"<method-wrapper '__getslice__' of exceptions.KeyError object>"
+p18
+sS'__getitem__'
+p19
+S"<method-wrapper '__getitem__' of exceptions.KeyError object>"
+p20
+sS'__setstate__'
+p21
+S'<built-in method __setstate__ of exceptions.KeyError object>'
+p22
+sS'__reduce__'
+p23
+S'<built-in method __reduce__ of exceptions.KeyError object>'
+p24
+sS'__str__'
+p25
+S"<method-wrapper '__str__' of exceptions.KeyError object>"
+p26
+sS'__format__'
+p27
+S'<built-in method __format__ of exceptions.KeyError object>'
+p28
+sS'__getattribute__'
+p29
+S"<method-wrapper '__getattribute__' of exceptions.KeyError object>"
+p30
+sS'__class__'
+p31
+S"<type 'exceptions.KeyError'>"
+p32
+sS'__unicode__'
+p33
+S'<built-in method __unicode__ of exceptions.KeyError object>'
+p34
+sS'__delattr__'
+p35
+S"<method-wrapper '__delattr__' of exceptions.KeyError object>"
+p36
+sS'__subclasshook__'
+p37
+S'<built-in method __subclasshook__ of type object>'
+p38
+sS'__repr__'
+p39
+S"<method-wrapper '__repr__' of exceptions.KeyError object>"
+p40
+sS'args'
+p41
+S"('db',)"
+p42
+sS'__dict__'
+p43
+S'{}'
+p44
+sS'__sizeof__'
+p45
+S'<built-in method __sizeof__ of exceptions.KeyError object>'
+p46
+sS'__doc__'
+p47
+S"'Mapping key not found.'"
+p48
+sS'__init__'
+p49
+S"<method-wrapper '__init__' of exceptions.KeyError object>"
+p50
+sS'__new__'
+p51
+S'<built-in method __new__ of type object>'
+p52
+ssS'evalue'
+p53
+S"'db'"
+p54
+sS'request'
+p55
+(dp56
+S'function'
+p57
+S"'viewpost'"
+p58
+sS'body'
+p59
+S'<cStringIO.StringO object>'
+p60
+sS'wsgi'
+p61
+S"<Storage {'start_response': <function <lambda> a...ING': 'gzip,deflate', 'HTTP_KEEP_ALIVE': '300'}}>"
+p62
+sS'extension'
+p63
+S"'html'"
+p64
+sS'vars'
+p65
+S'<Storage {}>'
+p66
+sS'cid'
+p67
+S'None'
+p68
+sS'url'
+p69
+S'<gluon.html.XML object>'
+p70
+sg41
+S"['5']"
+p71
+sS'controller'
+p72
+S"'default'"
+p73
+sS'cookies'
+p74
+S"<SimpleCookie: session_id_admin='127-0-0-1-f2e5b...'127-0-0-1-5dc66841-ff4e-4166-a5cb-65f23e1becc2'>"
+p75
+sS'application'
+p76
+S"'blog'"
+p77
+sS'ajax'
+p78
+S'False'
+p79
+sS'client'
+p80
+S"'127.0.0.1'"
+p81
+sS'env'
+p82
+S"<Storage {'http_user_agent': 'Mozilla/5.0 (X11; ...te', 'query_string': '', 'wsgi_run_once': False}>"
+p83
+sS'raw_args'
+p84
+S"'5'"
+p85
+sS'get_vars'
+p86
+S'<Storage {}>'
+p87
+sS'folder'
+p88
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/'"
+p89
+sS'now'
+p90
+S'datetime.datetime(2010, 10, 24, 19, 30, 5, 252444)'
+p91
+sS'post_vars'
+p92
+S'<Storage {}>'
+p93
+ssS'frames'
+p94
+(lp95
+(dp96
+S'file'
+p97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py'
+p98
+sS'dump'
+p99
+(dp100
+S'environment'
+p101
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p102
+sS'ccode'
+p103
+S'<code object <module> at 0x9b097b8, file "/home/...plications/blog/controllers/default.py", line 11>'
+p104
+ssS'lnum'
+p105
+I188
+sS'lines'
+p106
+(dp107
+I192
+S'        # XXX Show exception in Wing IDE if running in debugger'
+p108
+sI183
+S'        if type(code) == types.CodeType:'
+p109
+sI184
+S'            ccode = code'
+p110
+sI185
+S'        else:'
+p111
+sI186
+S'            ccode = compile2(code,layer)'
+p112
+sI187
+S''
+sI188
+S'        exec ccode in environment'
+p113
+sI189
+S'    except HTTP:'
+p114
+sI190
+S'        raise'
+p115
+sI191
+S'    except Exception:'
+p116
+ssS'call'
+p117
+S"(code='# -*- coding: utf-8 -*- \\n\\n######################...ice()\\n\\nresponse._vars=response._caller(viewpost)\\n', environment={'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}, layer='/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py')"
+p118
+sS'func'
+p119
+S'restricted'
+p120
+sa(dp121
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p122
+sg99
+(dp123
+sg105
+I73
+sg106
+(dp124
+I64
+S'    """'
+p125
+sI65
+S'    exposes services. for example:'
+p126
+sI66
+S'    http://..../[app]/default/call/jsonrpc'
+p127
+sI67
+S'    decorate with @services.jsonrpc the functions to expose'
+p128
+sI68
+S'    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv'
+p129
+sI69
+S'    """'
+p130
+sI70
+S'    session.forget()'
+p131
+sI71
+S'    return service()'
+p132
+sI62
+S''
+sI63
+S'def call():'
+p133
+ssg117
+S'()'
+p134
+sg119
+S'<module>'
+p135
+sa(dp136
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/globals.py'
+p137
+sg99
+(dp138
+S'self'
+p139
+S'undefined'
+p140
+sS'f'
+S'<function viewpost>'
+p141
+ssg105
+I96
+sg106
+(dp142
+I96
+S'        self._caller = lambda f: f()'
+p143
+sI97
+S'        self._view_environment = None'
+p144
+sI98
+S'        self._custom_commit = None'
+p145
+sI99
+S'        self._custom_rollback = None'
+p146
+sI100
+S''
+sI91
+S"        self.flash = ''           # used by the default view layout"
+p147
+sI92
+S'        self.meta = Storage()     # used by web2py_ajax.html'
+p148
+sI93
+S'        self.menu = []            # used by the default view layout'
+p149
+sI94
+S'        self.files = []           # used by web2py_ajax.html'
+p150
+sI95
+S'        self._vars = None'
+p151
+ssg117
+S'(f=<function viewpost>)'
+p152
+sg119
+S'<lambda>'
+p153
+sa(dp154
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p155
+sg99
+(dp156
+S').select'
+p157
+g140
+sS'filtro'
+p158
+S'<gluon.sql.Query object>'
+p159
+sS'campos'
+p160
+S"'db.articulos.titulo, db.articulos.articulo, db.articulos.fecha, db.usuarios.usuario'"
+p161
+sS'global db'
+p162
+S"<SQLDB {'auth_event': <Table {'origin': <gluon.s..., 'id': <gluon.sql.Field object at 0x99f210c>}>}>"
+p163
+sS'post'
+p164
+g140
+sS').first'
+p165
+g140
+ssg105
+I28
+sg106
+(dp166
+I32
+S''
+sI23
+S'    return dict()'
+p167
+sI24
+S''
+sI25
+S'def viewpost():'
+p168
+sI26
+S'    filtro      = (db.articulos.id==request.args(0))&(db.articulos.id_usuario==db.usuarios.id)'
+p169
+sI27
+S'    campos      = "db.articulos.titulo, db.articulos.articulo, db.articulos.fecha, db.usuarios.usuario"'
+p170
+sI28
+S'    post        = db(filtro).select(campos).first()'
+p171
+sI29
+S'    form        = SQLFORM(db.comentarios)'
+p172
+sI30
+S'    form.vars.id_articulo = post.id'
+p173
+sI31
+S'    comments    = db(db.comentarios.id_articulo==post.id).select()'
+p174
+ssg117
+S'()'
+p175
+sg119
+S'viewpost'
+p176
+sa(dp177
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/sql.py'
+p178
+sg99
+(dp179
+S'query'
+p180
+g140
+sS'self'
+p181
+S'<gluon.sql.Set object>'
+p182
+sS'attributes'
+p183
+g44
+sS'fields'
+p184
+S"('db.articulos.titulo, db.articulos.articulo, db.articulos.fecha, db.usuarios.usuario',)"
+p185
+sS'self._select'
+p186
+S'<bound method Set._select of <gluon.sql.Set object>>'
+p187
+ssg105
+I3259
+sg106
+(dp188
+I3254
+S"            db['_lastsql'] = query"
+p189
+sI3255
+S'            db._execute(query)'
+p190
+sI3256
+S'            return db._cursor.fetchall()'
+p191
+sI3257
+S''
+sI3258
+S"        if not attributes.get('cache', None):"
+p192
+sI3259
+S'            query = self._select(*fields, **attributes)'
+p193
+sI3260
+S'            rows = response(query)'
+p194
+sI3261
+S'        else:'
+p195
+sI3262
+S"            (cache_model, time_expire) = attributes['cache']"
+p196
+sI3263
+S"            del attributes['cache']"
+p197
+ssg117
+S"(self=<gluon.sql.Set object>, *fields=('db.articulos.titulo, db.articulos.articulo, db.articulos.fecha, db.usuarios.usuario',), **attributes={})"
+p198
+sg119
+S'select'
+p199
+sa(dp200
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/sql.py'
+p201
+sg99
+(dp202
+S'global Table'
+p203
+S"<class 'gluon.sql.Table'>"
+p204
+sS'self'
+p205
+S'<gluon.sql.Set object>'
+p206
+sS'builtinisinstance'
+p207
+S'<built-in function isinstance>'
+p208
+sS'w2p_tablenames'
+p209
+g140
+sS't'
+S"'db'"
+p210
+sS'tablenames'
+p211
+S"['articulos', 'db', 'usuarios']"
+p212
+sS'self._db'
+p213
+S"<SQLDB {'auth_event': <Table {'origin': <gluon.s..., 'id': <gluon.sql.Field object at 0x99f210c>}>}>"
+p214
+ssg105
+I3147
+sg106
+(dp215
+I3142
+S'            fields = [self._db[table].ALL for table in self._tables]'
+p216
+sI3143
+S"        sql_f = ', '.join([str(f) for f in fields])"
+p217
+sI3144
+S"        tablenames = parse_tablenames(self.sql_w + ' ' + sql_f)"
+p218
+sI3145
+S'        if len(tablenames) < 1:'
+p219
+sI3146
+S"            raise SyntaxError, 'Set: no tables selected'"
+p220
+sI3147
+S'        w2p_tablenames = [ t for t in tablenames if isinstance(self._db[t],Table) ]'
+p221
+sI3148
+S"        self.colnames = [c.strip() for c in sql_f.split(', ')]"
+p222
+sI3149
+S'        if self.sql_w:'
+p223
+sI3150
+S"            sql_w = ' WHERE ' + self.sql_w"
+p224
+sI3151
+S'        else:'
+p225
+ssg117
+S"(self=<gluon.sql.Set object>, *fields=('db.articulos.titulo, db.articulos.articulo, db.articulos.fecha, db.usuarios.usuario',), **attributes={})"
+p226
+sg119
+S'_select'
+p227
+sa(dp228
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/sql.py'
+p229
+sg99
+(dp230
+S'builtinstr'
+p231
+S"<type 'str'>"
+p232
+sS'self'
+p233
+S"<SQLDB {'auth_event': <Table {'origin': <gluon.s..., 'id': <gluon.sql.Field object at 0x99f210c>}>}>"
+p234
+sS'dict.__getitem__'
+p235
+S"<method '__getitem__' of 'dict' objects>"
+p236
+sS'key'
+p237
+S"'db'"
+p238
+sS'builtindict'
+p239
+S"<type 'dict'>"
+p240
+ssg105
+I1374
+sg106
+(dp241
+I1376
+S'    def __setitem__(self, key, value):'
+p242
+sI1377
+S'        dict.__setitem__(self, str(key), value)'
+p243
+sI1378
+S''
+sI1369
+S'    def __iter__(self):'
+p244
+sI1370
+S'        for tablename in self.tables:'
+p245
+sI1371
+S'            yield self[tablename]'
+p246
+sI1372
+S''
+sI1373
+S'    def __getitem__(self, key):'
+p247
+sI1374
+S'        return dict.__getitem__(self, str(key))'
+p248
+sI1375
+S''
+ssg117
+S"(self=<SQLDB {'auth_event': <Table {'origin': <gluon.s..., 'id': <gluon.sql.Field object at 0x99f210c>}>}>, key='db')"
+p249
+sg119
+g19
+sasS'pyver'
+p250
+S'Python 2.6.6: /usr/bin/python'
+p251
+sS'session'
+p252
+(dp253
+S'_formkey[comentarios_create]'
+p254
+S"'455a2a61-3353-4150-b14e-74819466d8f2'"
+p255
+sS'auth'
+p256
+S'None'
+p257
+ssS'etype'
+p258
+S"<type 'exceptions.KeyError'>"
+p259
+sS'date'
+p260
+S'Sun Oct 24 19:30:06 2010'
+p261
+sS'response'
+p262
+(dp263
+S'status'
+p264
+S'200'
+p265
+sg59
+S'<cStringIO.StringO object>'
+p266
+sg74
+S"<SimpleCookie: session_id_blog='127-0-0-1-5dc66841-ff4e-4166-a5cb-65f23e1becc2'>"
+p267
+sS'_vars'
+p268
+S'None'
+p269
+sS'title'
+p270
+S"'blog'"
+p271
+sS'session_file'
+p272
+S"<open file '/home/j3nnn1/git/pyj3nnn1/web2py/app...dc66841-ff4e-4166-a5cb-65f23e1becc2', mode 'rb+'>"
+p273
+sS'flash'
+p274
+S"''"
+p275
+sS'_custom_rollback'
+p276
+S'None'
+p277
+sS'session_id'
+p278
+S"'127-0-0-1-5dc66841-ff4e-4166-a5cb-65f23e1becc2'"
+p279
+sS'headers'
+p280
+S"<Storage {'Expires': 'lun, 25 oct 2010 00:00:05 ...he, must-revalidate, post-check=0, pre-check=0'}>"
+p281
+sS'meta'
+p282
+S"<Storage {'keywords': 'j3nnn1 web2py python', 'd...con web2py... ', 'author': 'Jennifer Maldonado'}>"
+p283
+sS'session_filename'
+p284
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/bl...ns/127-0-0-1-5dc66841-ff4e-4166-a5cb-65f23e1becc2'"
+p285
+sS'postprocessing'
+p286
+S'[]'
+p287
+sS'menu'
+p288
+S"[(<lazyT 'Index'>, False, <gluon.html.XML object>, []), (<lazyT 'About'>, False, <gluon.html.XML object>, []), (<lazyT 'Edit'>, False, <gluon.html.XML object>, [(<lazyT 'Controller'>, False, <gluon.html.XML object>), (<lazyT 'View'>, False, <gluon.html.XML object>), (<lazyT 'Layout'>, False, <gluon.html.XML object>), (<lazyT 'Stylesheet'>, False, <gluon.html.XML object>), (<lazyT 'DB Model'>, False, <gluon.html.XML object>), (<lazyT 'Menu Model'>, False, <gluon.html.XML object>), (<lazyT 'Database'>, False, <gluon.html.XML object>)])]"
+p289
+sS'_view_environment'
+p290
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p291
+sS'subtitle'
+p292
+S'<lazyT "it\'s me j3nnn1">'
+p293
+sS'session_id_name'
+p294
+S"'session_id_blog'"
+p295
+sS'_custom_commit'
+p296
+S'None'
+p297
+sS'_caller'
+p298
+S'<function <lambda>>'
+p299
+sS'files'
+p300
+S'[]'
+p301
+sS'view'
+p302
+S"'default/viewpost.html'"
+p303
+ssS'locals'
+p304
+(dp305
+S'self'
+p306
+S"<SQLDB {'auth_event': <Table {'origin': <gluon.s..., 'id': <gluon.sql.Field object at 0x99f210c>}>}>"
+p307
+sS'key'
+p308
+S"'db'"
+p309
+sssS'traceback'
+p310
+S'Traceback (most recent call last):\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py", line 188, in restricted\n    exec ccode in environment\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py", line 73, in <module>\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/globals.py", line 96, in <lambda>\n    self._caller = lambda f: f()\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py", line 28, in viewpost\n    post        = db(filtro).select(campos).first()\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/sql.py", line 3259, in select\n    query = self._select(*fields, **attributes)\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/sql.py", line 3147, in _select\n    w2p_tablenames = [ t for t in tablenames if isinstance(self._db[t],Table) ]\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/sql.py", line 1374, in __getitem__\n    return dict.__getitem__(self, str(key))\nKeyError: \'db\'\n'
+p311
+s.

@@ -1,9 +1,23 @@
 {{extend 'layout.html'}}
 
-{{=post}}
+{{#=BEAUTIFY(request.vars)}}
+{{#=BEAUTIFY(post)}}
+{{=BEAUTIFY(comments)}}
+<br/>
+{{=H3(post.articulos.titulo)}}
+{{=post.articulos.articulo}}
 
+<br/>
+<br/>
+{{=T("Escrito por: ")}} {{=post.usuarios.usuario}} {{=T("el ")}} {{=post.articulos.fecha}}
+<br/>
+<br/>
+{{#=comments.comentarios.titulo}}
+<br/>
+{{#=comments.comentarios.nombre}} / {{#=comments.comentarios.correo}}
+{{#=(comments.comentarios.url or "No tiene Url")}}
+{{#=comments.comentarios.comentario}}
+Escrito el: {{#=comments.comentarios.fecha}}
+<br/>
+<br/>
 {{=form}}
-
-{{#=comments}}
-
-

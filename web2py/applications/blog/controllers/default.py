@@ -13,21 +13,36 @@ def index():
     Esta vista va a obtener 3 post
     """
     # filter to join.
+    #filtro = (db.articulos.id_usuario==db.usuarios.id)
+    #post = db(filtro).select(db.articulos.id, db.articulos.titulo, db.articulos.fecha, db.articulos.articulo, db.usuarios.usuario,limitby=(0,3),orderby=~db.articulos.fecha)
+    #return dict(post=post)
     filtro = (db.articulos.id_usuario==db.usuarios.id)
-    post = db(filtro).select(db.articulos.id, db.articulos.titulo, db.articulos.fecha, db.articulos.articulo, db.usuarios.usuario,limitby=(0,3),orderby=~db.articulos.fecha)
+    perpage = 3                  # Numero de articulos por pagina
+    totalposts = db(db.articulos.id > 0).count() # contamos cuantos posts hay en la bd
+    totalpages = totalposts / perpage        # division para sacar el numero de paginas
+                  
+    page = int(request.vars.page) if request.vars.page else 1
+    limit = int(page - 1) * perpage
+                         
+    if totalposts > perpage and totalpages == 1 and totalpages * perpage != totalposts:
+        totalpages = 2
+                                                        
+    post = db(filtro).select(db.articulos.ALL, db.usuarios.usuario,limitby=(limit,page*perpage),orderby=~db.articulos.fecha)
 
-    return dict(post=post)
+    return dict(post=post,totalpages=totalpages,postpage=page)
 
 def about():
     """ Información sobre mi persona"""
     return dict()
 
 def viewpost():
-    post        = db(db.articulos.id==request.args(0)).select().first()
+    filtro      = (db.articulos.id==request.args(0))&(db.articulos.id_usuario==db.usuarios.id)
+    post        = db(filtro).select(db.articulos.ALL, db.usuarios.usuario).first()
     form        = SQLFORM(db.comentarios)
-    form.vars.id_articulo = post.id
-    comments    = db(db.comentarios.id_articulo==post.id).select()
-                    
+    form.vars.id_articulo = post.articulos.id
+
+    comments    = db(db.comentarios.id_articulo==post.articulos.id).select() or "Este Post no posee comentarios"
+
     if form.accepts(request.vars, session):
        response.flash ='Tu comentario ha sido publicado'
 

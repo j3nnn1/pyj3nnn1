@@ -1,0 +1,605 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p4
+sS'code'
+p5
+S'# -*- coding: utf-8 -*- \n\n#########################################################################\n## This is a samples controller\n## - index is the default action of any application\n## - user is required for authentication and authorization\n## - download is for downloading files uploaded in the db (does streaming)\n## - call exposes all registered services (none by default)\n#########################################################################  \n\ndef index():\n    """\n    Esta vista va a obtener 3 post\n    """\n    # filter to join.\n    filtro = (db.articulos.id_usuario==db.usuarios.id)\n    post = db(filtro).select(db.articulos.id, db.articulos.titulo, db.articulos.fecha, db.articulos.articulo, db.usuarios.usuario,limitby=(0,3),orderby=~db.articulos.fecha)\n\n    return dict(post=post)\n\ndef about():\n    """ Informaci\xc3\xb3n sobre mi persona"""\n    return dict()\n\ndef viewpost():\n    filtro      = (db.articulos.id==request.args(0))&(db.articulos.id_usuario==db.usuarios.id)\n    post        = db(filtro).select(db.articulos.ALL, db.usuarios.usuario).first()\n    form        = SQLFORM(db.comentarios)\n    form.vars.id_articulo = post.articulos.id\n\n    #if db(db.comentarios.id_articulo==post.articulos.id).count()>0:\n    comments    = (db(db.comentarios.id_articulo==post.articulos.id).select() | "Este post no posee comentarios")\n    #else:\n    #    comments    = "Este post no posee comentarios"\n\n    if form.accepts(request.vars, session):\n       response.flash =\'Tu comentario ha sido publicado\'\n\n    return dict(post=post, form=form, comments=comments)\n\ndef user():\n    """\n    exposes:\n    http://..../[app]/default/user/login \n    http://..../[app]/default/user/logout\n    http://..../[app]/default/user/register\n    http://..../[app]/default/user/profile\n    http://..../[app]/default/user/retrieve_password\n    http://..../[app]/default/user/change_password\n    use @auth.requires_login()\n        @auth.requires_membership(\'group name\')\n        @auth.requires_permission(\'read\',\'table name\',record_id)\n    to decorate functions that need access control\n    """\n    return dict(form=auth())\n\n\ndef download():\n    """\n    allows downloading of uploaded files\n    http://..../[app]/default/download/[filename]\n    """\n    return response.download(request,db)\n\n\ndef call():\n    """\n    exposes services. for example:\n    http://..../[app]/default/call/jsonrpc\n    decorate with @services.jsonrpc the functions to expose\n    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv\n    """\n    session.forget()\n    return service()\n\nresponse._vars=response._caller(viewpost)\n'
+p6
+sS'snapshot'
+p7
+(dp8
+S'exception'
+p9
+(dp10
+S'__hash__'
+p11
+S"<method-wrapper '__hash__' of exceptions.AttributeError object>"
+p12
+sS'__setattr__'
+p13
+S"<method-wrapper '__setattr__' of exceptions.AttributeError object>"
+p14
+sS'__reduce_ex__'
+p15
+S'<built-in method __reduce_ex__ of exceptions.AttributeError object>'
+p16
+sS'__getslice__'
+p17
+S"<method-wrapper '__getslice__' of exceptions.AttributeError object>"
+p18
+sS'__getitem__'
+p19
+S"<method-wrapper '__getitem__' of exceptions.AttributeError object>"
+p20
+sS'__setstate__'
+p21
+S'<built-in method __setstate__ of exceptions.AttributeError object>'
+p22
+sS'__reduce__'
+p23
+S'<built-in method __reduce__ of exceptions.AttributeError object>'
+p24
+sS'__str__'
+p25
+S"<method-wrapper '__str__' of exceptions.AttributeError object>"
+p26
+sS'__format__'
+p27
+S'<built-in method __format__ of exceptions.AttributeError object>'
+p28
+sS'__getattribute__'
+p29
+S"<method-wrapper '__getattribute__' of exceptions.AttributeError object>"
+p30
+sS'__class__'
+p31
+S"<type 'exceptions.AttributeError'>"
+p32
+sS'__unicode__'
+p33
+S'<built-in method __unicode__ of exceptions.AttributeError object>'
+p34
+sS'__delattr__'
+p35
+S"<method-wrapper '__delattr__' of exceptions.AttributeError object>"
+p36
+sS'__subclasshook__'
+p37
+S'<built-in method __subclasshook__ of type object>'
+p38
+sS'__repr__'
+p39
+S"<method-wrapper '__repr__' of exceptions.AttributeError object>"
+p40
+sS'args'
+p41
+S'("\'str\' object has no attribute \'colnames\'",)'
+p42
+sS'__dict__'
+p43
+S'{}'
+p44
+sS'__sizeof__'
+p45
+S'<built-in method __sizeof__ of exceptions.AttributeError object>'
+p46
+sS'__doc__'
+p47
+S"'Attribute not found.'"
+p48
+sS'__init__'
+p49
+S"<method-wrapper '__init__' of exceptions.AttributeError object>"
+p50
+sS'__new__'
+p51
+S'<built-in method __new__ of type object>'
+p52
+ssS'evalue'
+p53
+S"'str' object has no attribute 'colnames'"
+p54
+sS'request'
+p55
+(dp56
+S'function'
+p57
+S"'viewpost'"
+p58
+sS'body'
+p59
+S'<cStringIO.StringO object>'
+p60
+sS'wsgi'
+p61
+S"<Storage {'start_response': <function <lambda> a...ING': 'gzip,deflate', 'HTTP_KEEP_ALIVE': '300'}}>"
+p62
+sS'extension'
+p63
+S"'html'"
+p64
+sS'vars'
+p65
+S'<Storage {}>'
+p66
+sS'cid'
+p67
+S'None'
+p68
+sS'url'
+p69
+S'<gluon.html.XML object>'
+p70
+sg41
+S"['5']"
+p71
+sS'controller'
+p72
+S"'default'"
+p73
+sS'cookies'
+p74
+S"<SimpleCookie: session_id_admin='127-0-0-1-f2e5b...'127-0-0-1-5dc66841-ff4e-4166-a5cb-65f23e1becc2'>"
+p75
+sS'application'
+p76
+S"'blog'"
+p77
+sS'ajax'
+p78
+S'False'
+p79
+sS'client'
+p80
+S"'127.0.0.1'"
+p81
+sS'env'
+p82
+S"<Storage {'http_user_agent': 'Mozilla/5.0 (X11; ...te', 'query_string': '', 'wsgi_run_once': False}>"
+p83
+sS'raw_args'
+p84
+S"'5'"
+p85
+sS'get_vars'
+p86
+S'<Storage {}>'
+p87
+sS'folder'
+p88
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/'"
+p89
+sS'now'
+p90
+S'datetime.datetime(2010, 10, 24, 19, 57, 40, 943178)'
+p91
+sS'post_vars'
+p92
+S'<Storage {}>'
+p93
+ssS'frames'
+p94
+(lp95
+(dp96
+S'file'
+p97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py'
+p98
+sS'dump'
+p99
+(dp100
+S'environment'
+p101
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p102
+sS'ccode'
+p103
+S'<code object <module> at 0x9978ec0, file "/home/...plications/blog/controllers/default.py", line 11>'
+p104
+ssS'lnum'
+p105
+I188
+sS'lines'
+p106
+(dp107
+I192
+S'        # XXX Show exception in Wing IDE if running in debugger'
+p108
+sI183
+S'        if type(code) == types.CodeType:'
+p109
+sI184
+S'            ccode = code'
+p110
+sI185
+S'        else:'
+p111
+sI186
+S'            ccode = compile2(code,layer)'
+p112
+sI187
+S''
+sI188
+S'        exec ccode in environment'
+p113
+sI189
+S'    except HTTP:'
+p114
+sI190
+S'        raise'
+p115
+sI191
+S'    except Exception:'
+p116
+ssS'call'
+p117
+S"(code='# -*- coding: utf-8 -*- \\n\\n######################...ice()\\n\\nresponse._vars=response._caller(viewpost)\\n', environment={'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}, layer='/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py')"
+p118
+sS'func'
+p119
+S'restricted'
+p120
+sa(dp121
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p122
+sg99
+(dp123
+sg105
+I76
+sg106
+(dp124
+I65
+S''
+sI66
+S'def call():'
+p125
+sI67
+S'    """'
+p126
+sI68
+S'    exposes services. for example:'
+p127
+sI69
+S'    http://..../[app]/default/call/jsonrpc'
+p128
+sI70
+S'    decorate with @services.jsonrpc the functions to expose'
+p129
+sI71
+S'    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv'
+p130
+sI72
+S'    """'
+p131
+sI73
+S'    session.forget()'
+p132
+sI74
+S'    return service()'
+p133
+ssg117
+S'()'
+p134
+sg119
+S'<module>'
+p135
+sa(dp136
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/globals.py'
+p137
+sg99
+(dp138
+S'self'
+p139
+S'undefined'
+p140
+sS'f'
+S'<function viewpost>'
+p141
+ssg105
+I96
+sg106
+(dp142
+I96
+S'        self._caller = lambda f: f()'
+p143
+sI97
+S'        self._view_environment = None'
+p144
+sI98
+S'        self._custom_commit = None'
+p145
+sI99
+S'        self._custom_rollback = None'
+p146
+sI100
+S''
+sI91
+S"        self.flash = ''           # used by the default view layout"
+p147
+sI92
+S'        self.meta = Storage()     # used by web2py_ajax.html'
+p148
+sI93
+S'        self.menu = []            # used by the default view layout'
+p149
+sI94
+S'        self.files = []           # used by web2py_ajax.html'
+p150
+sI95
+S'        self._vars = None'
+p151
+ssg117
+S'(f=<function viewpost>)'
+p152
+sg119
+S'<lambda>'
+p153
+sa(dp154
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p155
+sg99
+(dp156
+S'post.articulos'
+p157
+S"<Row {'update_record': <function <lambda> at 0x9...elete_record': <function <lambda> at 0x984c5dc>}>"
+p158
+sS').select'
+p159
+g140
+sS'comments'
+p160
+g140
+sS'db.comentarios.id_articulo'
+p161
+S'<gluon.sql.Field object>'
+p162
+sS'global db'
+p163
+S"<SQLDB {'auth_event': <Table {'origin': <gluon.s..., 'id': <gluon.sql.Field object at 0x9a6a2ec>}>}>"
+p164
+sS'post'
+p165
+S"<Row {'articulos': <Row {'update_record': <funct...5dc>}>, 'usuarios': <Row {'usuario': 'j3nnn1'}>}>"
+p166
+sS'db.comentarios'
+p167
+S"<Table {'correo': <gluon.sql.Field object at 0x9...c>, 'id': <gluon.sql.Field object at 0x9a6a2ec>}>"
+p168
+sS'post.articulos.id'
+p169
+S'5L'
+p170
+ssg105
+I32
+sg106
+(dp171
+I32
+S'    comments    = (db(db.comentarios.id_articulo==post.articulos.id).select() | "Este post no posee comentarios")'
+p172
+sI33
+S'    #else:'
+p173
+sI34
+S'    #    comments    = "Este post no posee comentarios"'
+p174
+sI35
+S''
+sI36
+S'    if form.accepts(request.vars, session):'
+p175
+sI27
+S'    post        = db(filtro).select(db.articulos.ALL, db.usuarios.usuario).first()'
+p176
+sI28
+S'    form        = SQLFORM(db.comentarios)'
+p177
+sI29
+S'    form.vars.id_articulo = post.articulos.id'
+p178
+sI30
+S''
+sI31
+S'    #if db(db.comentarios.id_articulo==post.articulos.id).count()>0:'
+p179
+ssg117
+S'()'
+p180
+sg119
+S'viewpost'
+p181
+sa(dp182
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/sql.py'
+p183
+sg99
+(dp184
+S'other.colnames'
+p185
+g140
+sS'builtinException'
+p186
+S"<type 'exceptions.Exception'>"
+p187
+sS'self'
+p188
+S'<gluon.sql.Rows object>'
+p189
+sS'self.colnames'
+p190
+S"['comentarios.id', 'comentarios.id_articulo', 'comentarios.titulo', 'comentarios.comentario', 'comentarios.nombre', 'comentarios.correo', 'comentarios.url', 'comentarios.fecha', 'comentarios.visible']"
+p191
+sS'other'
+p192
+S"'Este post no posee comentarios'"
+p193
+ssg105
+I3563
+sg106
+(dp194
+I3558
+S"        if self.colnames!=other.colnames: raise Exception, 'Cannot & incompatible Rows objects'"
+p195
+sI3559
+S'        records = self.records+other.records'
+p196
+sI3560
+S'        return Rows(self.db,records,self.colnames)'
+p197
+sI3561
+S''
+sI3562
+S'    def __or__(self, other):'
+p198
+sI3563
+S"        if self.colnames!=other.colnames: raise Exception, 'Cannot | incompatible Rows objects'"
+p199
+sI3564
+S'        records = self.records'
+p200
+sI3565
+S'        records += [record for record in other.records \\'
+p201
+sI3566
+S'                        if not record in records]'
+p202
+sI3567
+S'        return Rows(self.db,records,self.colnames)'
+p203
+ssg117
+S"(self=<gluon.sql.Rows object>, other='Este post no posee comentarios')"
+p204
+sg119
+S'__or__'
+p205
+sasS'pyver'
+p206
+S'Python 2.6.6: /usr/bin/python'
+p207
+sS'session'
+p208
+(dp209
+S'_formkey[comentarios_create]'
+p210
+S"'834fe61b-c56b-4c95-b4fb-5acd71329b47'"
+p211
+sS'auth'
+p212
+S'None'
+p213
+ssS'etype'
+p214
+S"<type 'exceptions.AttributeError'>"
+p215
+sS'date'
+p216
+S'Sun Oct 24 19:57:43 2010'
+p217
+sS'response'
+p218
+(dp219
+S'status'
+p220
+S'200'
+p221
+sg59
+S'<cStringIO.StringO object>'
+p222
+sg74
+S"<SimpleCookie: session_id_blog='127-0-0-1-5dc66841-ff4e-4166-a5cb-65f23e1becc2'>"
+p223
+sS'_vars'
+p224
+S'None'
+p225
+sS'title'
+p226
+S"'blog'"
+p227
+sS'session_file'
+p228
+S"<open file '/home/j3nnn1/git/pyj3nnn1/web2py/app...dc66841-ff4e-4166-a5cb-65f23e1becc2', mode 'rb+'>"
+p229
+sS'flash'
+p230
+S"''"
+p231
+sS'_custom_rollback'
+p232
+S'None'
+p233
+sS'session_id'
+p234
+S"'127-0-0-1-5dc66841-ff4e-4166-a5cb-65f23e1becc2'"
+p235
+sS'headers'
+p236
+S"<Storage {'Expires': 'lun, 25 oct 2010 00:27:40 ...he, must-revalidate, post-check=0, pre-check=0'}>"
+p237
+sS'meta'
+p238
+S"<Storage {'keywords': 'j3nnn1 web2py python', 'd...con web2py... ', 'author': 'Jennifer Maldonado'}>"
+p239
+sS'session_filename'
+p240
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/bl...ns/127-0-0-1-5dc66841-ff4e-4166-a5cb-65f23e1becc2'"
+p241
+sS'postprocessing'
+p242
+S'[]'
+p243
+sS'menu'
+p244
+S"[(<lazyT 'Index'>, False, <gluon.html.XML object>, []), (<lazyT 'About'>, False, <gluon.html.XML object>, []), (<lazyT 'Edit'>, False, <gluon.html.XML object>, [(<lazyT 'Controller'>, False, <gluon.html.XML object>), (<lazyT 'View'>, False, <gluon.html.XML object>), (<lazyT 'Layout'>, False, <gluon.html.XML object>), (<lazyT 'Stylesheet'>, False, <gluon.html.XML object>), (<lazyT 'DB Model'>, False, <gluon.html.XML object>), (<lazyT 'Menu Model'>, False, <gluon.html.XML object>), (<lazyT 'Database'>, False, <gluon.html.XML object>)])]"
+p245
+sS'_view_environment'
+p246
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p247
+sS'subtitle'
+p248
+S'<lazyT "it\'s me j3nnn1">'
+p249
+sS'session_id_name'
+p250
+S"'session_id_blog'"
+p251
+sS'_custom_commit'
+p252
+S'None'
+p253
+sS'_caller'
+p254
+S'<function <lambda>>'
+p255
+sS'files'
+p256
+S'[]'
+p257
+sS'view'
+p258
+S"'default/viewpost.html'"
+p259
+ssS'locals'
+p260
+(dp261
+S'self'
+p262
+S'<gluon.sql.Rows object>'
+p263
+sS'other'
+p264
+S"'Este post no posee comentarios'"
+p265
+sssS'traceback'
+p266
+S'Traceback (most recent call last):\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py", line 188, in restricted\n    exec ccode in environment\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py", line 76, in <module>\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/globals.py", line 96, in <lambda>\n    self._caller = lambda f: f()\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py", line 32, in viewpost\n    comments    = (db(db.comentarios.id_articulo==post.articulos.id).select() | "Este post no posee comentarios")\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/sql.py", line 3563, in __or__\n    if self.colnames!=other.colnames: raise Exception, \'Cannot | incompatible Rows objects\'\nAttributeError: \'str\' object has no attribute \'colnames\'\n'
+p267
+s.
