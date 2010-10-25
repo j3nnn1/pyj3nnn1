@@ -1,12 +1,10 @@
 {{extend 'layout.html'}}
-
+<div class='content'>
 {{for post in post:}}
     <div class='post'>
         {{=H3(A(post.articulos.titulo, _href=URL("viewpost", args=post.articulos.id)), _class='title')}} 
         <div class="entry"> {{=post.articulos.articulo}}</div>
-        <div class="meta">
-            {{=T("Escrito por %s el: %s" % (post.usuarios.usuario,post.articulos.fecha))}}
-        </div>
+            {{=A(T("Escrito por %s el: %s" % (post.usuarios.usuario,post.articulos.fecha)), _class='meta')}}
     </div>
 <hr />
 {{pass}}
@@ -29,3 +27,4 @@
         {{ pass }}
 </div>
 {{ pass }}
+</div>

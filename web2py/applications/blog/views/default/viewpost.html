@@ -5,9 +5,7 @@
     <div class='entry'>
 	<p> {{=post.articulos.articulo}} </p>
     </div>
-    <div class='meta'>
-	{{=T("Escrito por: ")}} {{=post.usuarios.usuario}} {{=T("el ")}} {{=post.articulos.fecha}}
-    </div>
+    {{=A(T("Escrito por: %s  el %s" % (post.usuarios.usuario, post.articulos.fecha)), _class='meta')}}
     <div class='entry'>
     {{if comments:}}
 	{{ for comment in comments: }}
