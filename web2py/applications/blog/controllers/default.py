@@ -69,6 +69,64 @@ def user():
     return dict(form=auth())
 
 
+@auth.requires_login()
+def admin():
+    
+    tableart = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records or "No posee Articulos."
+
+    return dict(tableart=tableart)
+
+
+@auth.requires_login()
+def modifypost():
+
+    if request.args(0):  #modificando un post
+
+        post   = db.articulos(request.args(0)) or redirect(URL('index'))
+	form = SQLFORM(db.articulos, post)
+
+	if form.accepts(request.vars, session):
+            response.flash ='Tu articulo ha sido actualizado'
+	elif form.errors:
+	    response.flash ='No se actualizó el artículo'
+
+    else:
+	 form=none
+	 response.flash ='No seleccionó el articulo'
+    
+    return dict(form=form)
+
+@auth.requires_login()
+def createpost():
+
+    form        = SQLFORM(db.articulos)
+    form.vars.id_usuario = 1
+
+    if form.accepts(request.vars, session):
+        response.flash ='Tu articulo ha sido publicado'
+
+    return dict(form=form)
+
+@auth.requires_login()
+def deletepost():
+
+    if request.args(0):
+
+	filtro = (db.articulos.id==request.args(0))	
+	rows   = db(filtro).delete()
+
+	if rows:
+	    response.flash ='Tu articulo ha sido eliminado'
+	else:
+	    response.flash ='No existe el articulo'
+	
+        table = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records or "No posee Articulos."
+	    
+    else:
+        redirect(URL('index'))
+
+    return dict(table=table)
+
 def download():
     """
     allows downloading of uploaded files

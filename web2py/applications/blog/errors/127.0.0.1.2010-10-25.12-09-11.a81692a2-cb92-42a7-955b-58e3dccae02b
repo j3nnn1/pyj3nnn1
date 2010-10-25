@@ -1,0 +1,617 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p4
+sS'code'
+p5
+S'# -*- coding: utf-8 -*- \n\n#########################################################################\n## This is a samples controller\n## - index is the default action of any application\n## - user is required for authentication and authorization\n## - download is for downloading files uploaded in the db (does streaming)\n## - call exposes all registered services (none by default)\n#########################################################################  \n\ndef index():\n    """\n    Esta vista va a obtener 3 post\n    """\n    # filter to join.\n    filtro = (db.articulos.id_usuario==db.usuarios.id)\n    perpage = 3                                  # Numero de articulos por pagina\n    totalposts = db(db.articulos.id > 0).count() # contamos cuantos posts hay en la bd\n    totalpages = totalposts / perpage            # division para sacar el numero de paginas\n                  \n    page = int(request.vars.page) if request.vars.page else 1\n    limit = int(page - 1) * perpage\n                         \n    if totalposts > perpage and totalpages == 1 and totalpages * perpage != totalposts:\n        totalpages = 2\n                                                        \n    post = db(filtro).select(db.articulos.ALL, db.usuarios.usuario,limitby=(limit,page*perpage),orderby=~db.articulos.fecha)\n\n    return dict(post=post,totalpages=totalpages,postpage=page)\n\ndef about():\n    """ Informaci\xc3\xb3n sobre mi persona"""\n    return dict()\n\ndef viewpost():\n    if request.args(0):\n        filtro      = ((db.articulos.id==request.args(0)) & (db.articulos.id_usuario==db.usuarios.id))\n        post        = db(filtro).select(db.articulos.ALL, db.usuarios.usuario).first()\n\n        if post:\n            form        = SQLFORM(db.comentarios)\n            form.vars.id_articulo = post.articulos.id\n            filtro          = (db.comentarios.id_articulo==post.articulos.id)\n            comments        = (db(filtro).select(db.comentarios.ALL, orderby=~db.comentarios.fecha)).records \n        else:\n            redirect(URL(\'index\'))\n\n        if form.accepts(request.vars, session):\n            response.flash =\'Tu comentario ha sido publicado\'\n    else:\n        redirect(URL(\'index\'))\n\n    return dict(post=post, form=form, comments=comments)\n\ndef user():\n    """\n    exposes:\n    http://..../[app]/default/user/login \n    http://..../[app]/default/user/logout\n    http://..../[app]/default/user/register\n    http://..../[app]/default/user/profile\n    http://..../[app]/default/user/retrieve_password\n    http://..../[app]/default/user/change_password\n    use @auth.requires_login()\n        @auth.requires_membership(\'group name\')\n        @auth.requires_permission(\'read\',\'table name\',record_id)\n    to decorate functions that need access control\n    """\n    return dict(form=auth())\n\n\n@auth.requires_login()\ndef admin():\n    \n    tableart = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records or "No posee Articulos."\n\n    return dict(tableart=tableart)\n\n\n@auth.requires_login()\ndef modifypost():\n\n    if request.args(0):  #modificando un post\n\n\tfiltro = ((db.articulos.id==request.args(0)) & (db.articulos.id_usuario==db.usuarios.id))\n        post   = db(filtro).select(db.articulos.ALL, db.usuarios.usuario).first\n\n\tif post:\n\t    form = SQLFORM(db.articulos)\n\t    form.vars.titulo = post.titulo\n\t    form.vars.articulo = post.articulo\n\t    form.vars.id_usuario = post.id_usuario\n\t    form.vars.image\t = post.image\n\telse:\n\t    response.flash =\'No existe el articulo\'\n\n\tif form.accepts(request.vars, session):\n            response.flash =\'Tu comentario ha sido publicado\'\n\n    else:\n\t response.flash =\'No existe el articulo\'\n    \n    return dict(form=form)\n\n@auth.requires_login()\ndef createpost():\n\n    form        = SQLFORM(db.articulos)\n    form.vars.id_usuario = 1\n\n    if form.accepts(request.vars, session):\n        response.flash =\'Tu articulo ha sido publicado\'\n\n    return dict(form=form)\n\n@auth.requires_login()\ndef deletepost():\n\n    if request.args(0):\n\n\tfiltro = (db.articulos.id==request.args(0))\t\n\trows   = db(filtro).delete()\n\n\tif rows:\n\t    response.flash =\'Tu articulo ha sido eliminado\'\n\telse:\n\t    response.flash =\'No existe el articulo\'\n\t\n        table = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records or "No posee Articulos."\n\t    \n    else:\n        redirect(URL(\'index\'))\n\n    return dict(table=table)\n\ndef download():\n    """\n    allows downloading of uploaded files\n    http://..../[app]/default/download/[filename]\n    """\n    return response.download(request,db)\n\n\ndef call():\n    """\n    exposes services. for example:\n    http://..../[app]/default/call/jsonrpc\n    decorate with @services.jsonrpc the functions to expose\n    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv\n    """\n    session.forget()\n    return service()\n\nresponse._vars=response._caller(modifypost)\n'
+p6
+sS'snapshot'
+p7
+(dp8
+S'exception'
+p9
+(dp10
+S'__hash__'
+p11
+S"<method-wrapper '__hash__' of exceptions.AttributeError object>"
+p12
+sS'__setattr__'
+p13
+S"<method-wrapper '__setattr__' of exceptions.AttributeError object>"
+p14
+sS'__reduce_ex__'
+p15
+S'<built-in method __reduce_ex__ of exceptions.AttributeError object>'
+p16
+sS'__getslice__'
+p17
+S"<method-wrapper '__getslice__' of exceptions.AttributeError object>"
+p18
+sS'__getitem__'
+p19
+S"<method-wrapper '__getitem__' of exceptions.AttributeError object>"
+p20
+sS'__setstate__'
+p21
+S'<built-in method __setstate__ of exceptions.AttributeError object>'
+p22
+sS'__reduce__'
+p23
+S'<built-in method __reduce__ of exceptions.AttributeError object>'
+p24
+sS'__str__'
+p25
+S"<method-wrapper '__str__' of exceptions.AttributeError object>"
+p26
+sS'__format__'
+p27
+S'<built-in method __format__ of exceptions.AttributeError object>'
+p28
+sS'__getattribute__'
+p29
+S"<method-wrapper '__getattribute__' of exceptions.AttributeError object>"
+p30
+sS'__class__'
+p31
+S"<type 'exceptions.AttributeError'>"
+p32
+sS'__unicode__'
+p33
+S'<built-in method __unicode__ of exceptions.AttributeError object>'
+p34
+sS'__delattr__'
+p35
+S"<method-wrapper '__delattr__' of exceptions.AttributeError object>"
+p36
+sS'__subclasshook__'
+p37
+S'<built-in method __subclasshook__ of type object>'
+p38
+sS'__repr__'
+p39
+S"<method-wrapper '__repr__' of exceptions.AttributeError object>"
+p40
+sS'args'
+p41
+S'("\'function\' object has no attribute \'titulo\'",)'
+p42
+sS'__dict__'
+p43
+S'{}'
+p44
+sS'__sizeof__'
+p45
+S'<built-in method __sizeof__ of exceptions.AttributeError object>'
+p46
+sS'__doc__'
+p47
+S"'Attribute not found.'"
+p48
+sS'__init__'
+p49
+S"<method-wrapper '__init__' of exceptions.AttributeError object>"
+p50
+sS'__new__'
+p51
+S'<built-in method __new__ of type object>'
+p52
+ssS'evalue'
+p53
+S"'function' object has no attribute 'titulo'"
+p54
+sS'request'
+p55
+(dp56
+S'function'
+p57
+S"'modifypost'"
+p58
+sS'body'
+p59
+S'<cStringIO.StringO object>'
+p60
+sS'wsgi'
+p61
+S"<Storage {'start_response': <function <lambda> a...ING': 'gzip,deflate', 'HTTP_KEEP_ALIVE': '115'}}>"
+p62
+sS'extension'
+p63
+S"'html'"
+p64
+sS'vars'
+p65
+S'<Storage {}>'
+p66
+sS'cid'
+p67
+S'None'
+p68
+sS'url'
+p69
+S'<gluon.html.XML object>'
+p70
+sg41
+S"['9']"
+p71
+sS'controller'
+p72
+S"'default'"
+p73
+sS'cookies'
+p74
+S"<SimpleCookie: session_id_admin='127-0-0-1-877c5...'127-0-0-1-abbacfdd-6a37-4a45-8aaf-8734a84b6dd4'>"
+p75
+sS'application'
+p76
+S"'blog'"
+p77
+sS'ajax'
+p78
+S'False'
+p79
+sS'client'
+p80
+S"'127.0.0.1'"
+p81
+sS'env'
+p82
+S"<Storage {'http_user_agent': 'Mozilla/5.0 (Windo...alse, 'path_info': '/blog/default/modifypost/9'}>"
+p83
+sS'raw_args'
+p84
+S"'9'"
+p85
+sS'get_vars'
+p86
+S'<Storage {}>'
+p87
+sS'folder'
+p88
+S"'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/'"
+p89
+sS'now'
+p90
+S'datetime.datetime(2010, 10, 25, 12, 9, 11, 590750)'
+p91
+sS'post_vars'
+p92
+S'<Storage {}>'
+p93
+ssS'frames'
+p94
+(lp95
+(dp96
+S'file'
+p97
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/restricted.py'
+p98
+sS'dump'
+p99
+(dp100
+S'environment'
+p101
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p102
+sS'ccode'
+p103
+S'<code object <module> at 0x7f495d58, file "/cygd...plications/blog/controllers/default.py", line 11>'
+p104
+ssS'lnum'
+p105
+I188
+sS'lines'
+p106
+(dp107
+I192
+S'        # XXX Show exception in Wing IDE if running in debugger'
+p108
+sI183
+S'        if type(code) == types.CodeType:'
+p109
+sI184
+S'            ccode = code'
+p110
+sI185
+S'        else:'
+p111
+sI186
+S'            ccode = compile2(code,layer)'
+p112
+sI187
+S''
+sI188
+S'        exec ccode in environment'
+p113
+sI189
+S'    except HTTP:'
+p114
+sI190
+S'        raise'
+p115
+sI191
+S'    except Exception:'
+p116
+ssS'call'
+p117
+S"(code='# -*- coding: utf-8 -*- \\n\\n######################...e()\\n\\nresponse._vars=response._caller(modifypost)\\n', environment={'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}, layer='/cygdrive/e/Documents and Settings/jmaldo03/git/...1/web2py/applications/blog/controllers/default.py')"
+p118
+sS'func'
+p119
+S'restricted'
+p120
+sa(dp121
+g97
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p122
+sg99
+(dp123
+sg105
+I154
+sg106
+(dp124
+I143
+S''
+sI144
+S'def call():'
+p125
+sI145
+S'    """'
+p126
+sI146
+S'    exposes services. for example:'
+p127
+sI147
+S'    http://..../[app]/default/call/jsonrpc'
+p128
+sI148
+S'    decorate with @services.jsonrpc the functions to expose'
+p129
+sI149
+S'    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv'
+p130
+sI150
+S'    """'
+p131
+sI151
+S'    session.forget()'
+p132
+sI152
+S'    return service()'
+p133
+ssg117
+S'()'
+p134
+sg119
+S'<module>'
+p135
+sa(dp136
+g97
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/globals.py'
+p137
+sg99
+(dp138
+S'self'
+p139
+S'undefined'
+p140
+sS'f'
+S'<function modifypost>'
+p141
+ssg105
+I96
+sg106
+(dp142
+I96
+S'        self._caller = lambda f: f()'
+p143
+sI97
+S'        self._view_environment = None'
+p144
+sI98
+S'        self._custom_commit = None'
+p145
+sI99
+S'        self._custom_rollback = None'
+p146
+sI100
+S''
+sI91
+S"        self.flash = ''           # used by the default view layout"
+p147
+sI92
+S'        self.meta = Storage()     # used by web2py_ajax.html'
+p148
+sI93
+S'        self.menu = []            # used by the default view layout'
+p149
+sI94
+S'        self.files = []           # used by web2py_ajax.html'
+p150
+sI95
+S'        self._vars = None'
+p151
+ssg117
+S'(f=<function modifypost>)'
+p152
+sg119
+S'<lambda>'
+p153
+sa(dp154
+g97
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/tools.py'
+p155
+sg99
+(dp156
+S'action'
+p157
+S'<function modifypost>'
+p158
+sS'a'
+S'()'
+p159
+sS'b'
+g44
+ssg105
+I2265
+sg106
+(dp160
+I2260
+S'                               vars=request.get_vars)'
+p161
+sI2261
+S'                    return call_or_redirect(self.settings.on_failed_authentication,'
+p162
+sI2262
+S'                                            self.settings.login_url + \\'
+p163
+sI2263
+S"                                                '?_next='+urllib.quote(next)"
+p164
+sI2264
+S'                                            )'
+p165
+sI2265
+S'                return action(*a, **b)'
+p166
+sI2266
+S'            f.__doc__ = action.__doc__'
+p167
+sI2267
+S'            f.__name__ = action.__name__'
+p168
+sI2268
+S'            f.__dict__.update(action.__dict__)'
+p169
+sI2269
+S'            return f'
+p170
+ssg117
+S'(*a=(), **b={})'
+p171
+sg119
+S'f'
+sa(dp172
+g97
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p173
+sg99
+(dp174
+S'post.titulo'
+p175
+g140
+sS'post'
+p176
+S'<bound method Rows.first of <gluon.sql.Rows object>>'
+p177
+sS'form.vars'
+p178
+S'<Storage {}>'
+p179
+sS'form'
+p180
+S'<gluon.sqlhtml.SQLFORM object>'
+p181
+sS'form.vars.titulo'
+p182
+S'None'
+p183
+ssg105
+I90
+sg106
+(dp184
+I85
+S'\tfiltro = ((db.articulos.id==request.args(0)) & (db.articulos.id_usuario==db.usuarios.id))'
+p185
+sI86
+S'        post   = db(filtro).select(db.articulos.ALL, db.usuarios.usuario).first'
+p186
+sI87
+S''
+sI88
+S'\tif post:'
+p187
+sI89
+S'\t    form = SQLFORM(db.articulos)'
+p188
+sI90
+S'\t    form.vars.titulo = post.titulo'
+p189
+sI91
+S'\t    form.vars.articulo = post.articulo'
+p190
+sI92
+S'\t    form.vars.id_usuario = post.id_usuario'
+p191
+sI93
+S'\t    form.vars.image\t = post.image'
+p192
+sI94
+S'\telse:'
+p193
+ssg117
+S'()'
+p194
+sg119
+S'modifypost'
+p195
+sasS'pyver'
+p196
+S'Python 2.6.5: /usr/bin/python'
+p197
+sS'session'
+p198
+(dp199
+S'_formkey[articulos_create]'
+p200
+S"'61685073-3084-41a5-ad6b-d2cd4cb259a8'"
+p201
+sS'_formkey[register]'
+p202
+S"'916f3654-72ab-4fe3-8c51-26ed26684973'"
+p203
+sS'flash'
+p204
+S'None'
+p205
+sS'auth'
+p206
+S"<Storage {'expiration': 3600, 'last_visit': date...y': '', 'email': 'jcmm986@gmail.com', 'id': 1}>}>"
+p207
+sS'last_orderby'
+p208
+S'None'
+p209
+sS'last_query'
+p210
+S"'db.articulos.id>0'"
+p211
+sS'_formkey[comentarios_create]'
+p212
+S"'d790f6ac-3d09-4040-9003-e1b08e3cb564'"
+p213
+sS'_formkey[articulos_1]'
+p214
+S"'074680d4-ecb2-487d-9a3c-920a47b19b26'"
+p215
+sS'_formkey[login]'
+p216
+S"'cd0d63aa-d852-4aef-8758-6b04cccb3d22'"
+p217
+ssS'etype'
+p218
+S"<type 'exceptions.AttributeError'>"
+p219
+sS'date'
+p220
+S'Mon Oct 25 12:09:11 2010'
+p221
+sS'response'
+p222
+(dp223
+S'status'
+p224
+S'200'
+p225
+sg59
+S'<cStringIO.StringO object>'
+p226
+sg74
+S"<SimpleCookie: session_id_blog='127-0-0-1-fee2cd34-3e42-44cb-bee6-3936b80cedc4'>"
+p227
+sS'_vars'
+p228
+S'None'
+p229
+sS'title'
+p230
+S"'blog'"
+p231
+sS'session_file'
+p232
+S"<open file '/cygdrive/e/Documents and Settings/j...ee2cd34-3e42-44cb-bee6-3936b80cedc4', mode 'rb+'>"
+p233
+sS'flash'
+p234
+S"''"
+p235
+sS'_custom_rollback'
+p236
+S'None'
+p237
+sS'session_id'
+p238
+S"'127-0-0-1-fee2cd34-3e42-44cb-bee6-3936b80cedc4'"
+p239
+sS'headers'
+p240
+S"<Storage {'Expires': 'Mon, 25 Oct 2010 16:39:11 ...he, must-revalidate, post-check=0, pre-check=0'}>"
+p241
+sS'meta'
+p242
+S"<Storage {'keywords': 'j3nnn1 web2py python', 'd...con web2py... ', 'author': 'Jennifer Maldonado'}>"
+p243
+sS'session_filename'
+p244
+S"'/cygdrive/e/Documents and Settings/jmaldo03/git/...ns/127-0-0-1-fee2cd34-3e42-44cb-bee6-3936b80cedc4'"
+p245
+sS'postprocessing'
+p246
+S'[]'
+p247
+sS'menu'
+p248
+S"[(<lazyT 'Index'>, False, <gluon.html.XML object>, []), (<lazyT 'About'>, False, <gluon.html.XML object>, []), (<lazyT 'Admin'>, False, <gluon.html.XML object>, []), (<lazyT 'Edit'>, False, <gluon.html.XML object>, [(<lazyT 'Controller'>, False, <gluon.html.XML object>), (<lazyT 'View'>, False, <gluon.html.XML object>), (<lazyT 'Layout'>, False, <gluon.html.XML object>), (<lazyT 'Stylesheet'>, False, <gluon.html.XML object>), (<lazyT 'DB Model'>, False, <gluon.html.XML object>), (<lazyT 'Menu Model'>, False, <gluon.html.XML object>), (<lazyT 'Database'>, False, <gluon.html.XML object>)])]"
+p249
+sS'_view_environment'
+p250
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p251
+sS'subtitle'
+p252
+S'<lazyT "it\'s me j3nnn1">'
+p253
+sS'session_id_name'
+p254
+S"'session_id_blog'"
+p255
+sS'_custom_commit'
+p256
+S'None'
+p257
+sS'_caller'
+p258
+S'<function <lambda>>'
+p259
+sS'files'
+p260
+S'[]'
+p261
+sS'view'
+p262
+S"'default/modifypost.html'"
+p263
+ssS'locals'
+p264
+(dp265
+S'filtro'
+p266
+S'<gluon.sql.Query object>'
+p267
+sS'post'
+p268
+S'<bound method Rows.first of <gluon.sql.Rows object>>'
+p269
+sS'form'
+p270
+S'<gluon.sqlhtml.SQLFORM object>'
+p271
+sssS'traceback'
+p272
+S'Traceback (most recent call last):\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/restricted.py", line 188, in restricted\n    exec ccode in environment\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/controllers/default.py", line 154, in <module>\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/globals.py", line 96, in <lambda>\n    self._caller = lambda f: f()\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/tools.py", line 2265, in f\n    return action(*a, **b)\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/controllers/default.py", line 90, in modifypost\n    form.vars.titulo = post.titulo\nAttributeError: \'function\' object has no attribute \'titulo\'\n'
+p273
+s.

@@ -1,0 +1,12 @@
+{{usertl = tweepy.api.user_timeline('j3nnn1')}}
+
+<ul>
+{{for tweet in usertl[0:4]:}}
+   <li>
+   <strong>@{{=tweet.user.screen_name}}:</strong> {{=tweet.text}}
+    </li>
+{{pass}}
+</ul>
+
+    
+

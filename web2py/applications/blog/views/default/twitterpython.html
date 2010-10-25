@@ -1,0 +1,11 @@
+<div class='twitter'>
+{{search_tweets = tweepy.api.search('python')}}
+<ul>
+{{for tweet in search_tweets[0:2]:}}
+   <li>
+   <strong>@{{=tweet.from_user}}:</strong> {{=tweet.text}}
+   </li>
+{{pass}}
+</ul>
+</div>
+

@@ -1,0 +1,495 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/views/default/twitterperl.html'
+p4
+sS'code'
+p5
+S'response.write("<div class=\'twitter\'>\\n", escape=False)\nimport tweepy\nsearch_tweets = tweepy.api.search(\'perl\')\n<ul>\nfor tweet in search_tweets:\n    response.write(\'\\n   <li> \\n   \', escape=False)\n    response.write(tweet.text)\n    response.write(\'\\n   </li>\\n\', escape=False)\n    pass\nresponse.write(\'\\n</ul>\\n</div>\\n\', escape=False)'
+p6
+sS'snapshot'
+p7
+(dp8
+S'exception'
+p9
+(dp10
+S'__getslice__'
+p11
+S"<method-wrapper '__getslice__' of exceptions.SyntaxError object>"
+p12
+sS'text'
+p13
+S"'<ul>\\n'"
+p14
+sS'__str__'
+p15
+S"<method-wrapper '__str__' of exceptions.SyntaxError object>"
+p16
+sS'__reduce__'
+p17
+S'<built-in method __reduce__ of exceptions.SyntaxError object>'
+p18
+sS'__dict__'
+p19
+S'{}'
+p20
+sS'__sizeof__'
+p21
+S'<built-in method __sizeof__ of exceptions.SyntaxError object>'
+p22
+sS'__init__'
+p23
+S"<method-wrapper '__init__' of exceptions.SyntaxError object>"
+p24
+sS'__setattr__'
+p25
+S"<method-wrapper '__setattr__' of exceptions.SyntaxError object>"
+p26
+sS'__reduce_ex__'
+p27
+S'<built-in method __reduce_ex__ of exceptions.SyntaxError object>'
+p28
+sS'__new__'
+p29
+S'<built-in method __new__ of type object>'
+p30
+sS'__format__'
+p31
+S'<built-in method __format__ of exceptions.SyntaxError object>'
+p32
+sS'__class__'
+p33
+S"<type 'exceptions.SyntaxError'>"
+p34
+sS'filename'
+p35
+S"'/cygdrive/e/Documents and Settings/jmaldo03/git/.../applications/blog/views/default/twitterperl.html'"
+p36
+sS'lineno'
+p37
+S'4'
+sS'msg'
+p38
+S"'invalid syntax'"
+p39
+sS'__doc__'
+p40
+S"'Invalid syntax.'"
+p41
+sS'__getitem__'
+p42
+S"<method-wrapper '__getitem__' of exceptions.SyntaxError object>"
+p43
+sS'__setstate__'
+p44
+S'<built-in method __setstate__ of exceptions.SyntaxError object>'
+p45
+sS'__getattribute__'
+p46
+S"<method-wrapper '__getattribute__' of exceptions.SyntaxError object>"
+p47
+sS'print_file_and_line'
+p48
+S'None'
+p49
+sS'args'
+p50
+S"('invalid syntax', ('/cygdrive/e/Documents and Settings/jmaldo03/git/.../applications/blog/views/default/twitterperl.html', 4, 1, '<ul>\\n'))"
+p51
+sS'__subclasshook__'
+p52
+S'<built-in method __subclasshook__ of type object>'
+p53
+sS'offset'
+p54
+S'1'
+sS'__unicode__'
+p55
+S'<built-in method __unicode__ of exceptions.SyntaxError object>'
+p56
+sS'__delattr__'
+p57
+S"<method-wrapper '__delattr__' of exceptions.SyntaxError object>"
+p58
+sS'__repr__'
+p59
+S"<method-wrapper '__repr__' of exceptions.SyntaxError object>"
+p60
+sS'__hash__'
+p61
+S"<method-wrapper '__hash__' of exceptions.SyntaxError object>"
+p62
+ssS'evalue'
+p63
+S'invalid syntax (twitterperl.html, line 4)'
+p64
+sS'request'
+p65
+(dp66
+S'function'
+p67
+S"'twitterperl'"
+p68
+sS'body'
+p69
+S'<cStringIO.StringO object>'
+p70
+sS'wsgi'
+p71
+S"<Storage {'start_response': <function <lambda> a...ING': 'gzip,deflate', 'HTTP_KEEP_ALIVE': '115'}}>"
+p72
+sS'extension'
+p73
+S"'html'"
+p74
+sS'vars'
+p75
+S'<Storage {}>'
+p76
+sS'cid'
+p77
+S'None'
+p78
+sS'url'
+p79
+S'<gluon.html.XML object>'
+p80
+sg50
+S'[]'
+p81
+sS'controller'
+p82
+S"'default'"
+p83
+sS'cookies'
+p84
+S"<SimpleCookie: session_id_admin='127-0-0-1-877c5...'127-0-0-1-abbacfdd-6a37-4a45-8aaf-8734a84b6dd4'>"
+p85
+sS'application'
+p86
+S"'blog'"
+p87
+sS'ajax'
+p88
+S'False'
+p89
+sS'client'
+p90
+S"'127.0.0.1'"
+p91
+sS'env'
+p92
+S"<Storage {'http_user_agent': 'Mozilla/5.0 (Windo...False, 'path_info': '/blog/default/twitterperl'}>"
+p93
+sS'raw_args'
+p94
+S'None'
+p95
+sS'get_vars'
+p96
+S'<Storage {}>'
+p97
+sS'folder'
+p98
+S"'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/'"
+p99
+sS'now'
+p100
+S'datetime.datetime(2010, 10, 25, 14, 7, 55, 11750)'
+p101
+sS'post_vars'
+p102
+S'<Storage {}>'
+p103
+ssS'frames'
+p104
+(lp105
+(dp106
+S'file'
+p107
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/restricted.py'
+p108
+sS'dump'
+p109
+(dp110
+S'code'
+p111
+S'\'response.write("<div class=\\\'twitter\\\'>\\\\n", escape...response.write(\\\'\\\\n</ul>\\\\n</div>\\\\n\\\', escape=False)\''
+p112
+sS'layer'
+p113
+S"'/cygdrive/e/Documents and Settings/jmaldo03/git/.../applications/blog/views/default/twitterperl.html'"
+p114
+sS'global compile2'
+p115
+S'<function compile2>'
+p116
+sS'ccode'
+p117
+S'undefined'
+p118
+ssS'lnum'
+p119
+I186
+sS'lines'
+p120
+(dp121
+I181
+S''
+sI182
+S'    try:'
+p122
+sI183
+S'        if type(code) == types.CodeType:'
+p123
+sI184
+S'            ccode = code'
+p124
+sI185
+S'        else:'
+p125
+sI186
+S'            ccode = compile2(code,layer)'
+p126
+sI187
+S''
+sI188
+S'        exec ccode in environment'
+p127
+sI189
+S'    except HTTP:'
+p128
+sI190
+S'        raise'
+p129
+ssS'call'
+p130
+S'(code=\'response.write("<div class=\\\'twitter\\\'>\\\\n", escape...response.write(\\\'\\\\n</ul>\\\\n</div>\\\\n\\\', escape=False)\', environment={\'A\': <class \'gluon.html.A\'>, \'Auth\': <class \'gluon.tools.Auth\'>, \'B\': <class \'gluon.html.B\'>, \'BEAUTIFY\': <class \'gluon.html.BEAUTIFY\'>, \'BODY\': <class \'gluon.html.BODY\'>, \'BR\': <class \'gluon.html.BR\'>, \'CENTER\': <class \'gluon.html.CENTER\'>, \'CLEANUP\': <class \'gluon.validators.CLEANUP\'>, \'CODE\': <class \'gluon.html.CODE\'>, \'CRYPT\': <class \'gluon.validators.CRYPT\'>, ...}, layer=\'/cygdrive/e/Documents and Settings/jmaldo03/git/.../applications/blog/views/default/twitterperl.html\')'
+p131
+sS'func'
+p132
+S'restricted'
+p133
+sa(dp134
+g107
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/restricted.py'
+p135
+sg109
+(dp136
+S'builtincompile'
+p137
+S'<built-in function compile>'
+p138
+sS'code'
+p139
+S'\'response.write("<div class=\\\'twitter\\\'>\\\\n", escape...response.write(\\\'\\\\n</ul>\\\\n</div>\\\\n\\\', escape=False)\''
+p140
+sS'code.rstrip'
+p141
+S'<built-in method rstrip of str object>'
+p142
+sS').replace'
+p143
+g118
+sS'layer'
+p144
+S"'/cygdrive/e/Documents and Settings/jmaldo03/git/.../applications/blog/views/default/twitterperl.html'"
+p145
+ssg119
+I173
+sg120
+(dp146
+I168
+S''
+sI169
+S'def compile2(code,layer):'
+p147
+sI170
+S'    """'
+p148
+sI171
+S"    The +'\\n' is necessary else compile fails when code ends in a comment."
+p149
+sI172
+S'    """'
+p150
+sI173
+S"    return compile(code.rstrip().replace('\\r\\n','\\n')+'\\n', layer, 'exec')"
+p151
+sI174
+S''
+sI175
+S"def restricted(code, environment={}, layer='Unknown'):"
+p152
+sI176
+S'    """'
+p153
+sI177
+S'    runs code in environment and returns the output. if an exception occurs'
+p154
+ssg130
+S'(code=\'response.write("<div class=\\\'twitter\\\'>\\\\n", escape...response.write(\\\'\\\\n</ul>\\\\n</div>\\\\n\\\', escape=False)\', layer=\'/cygdrive/e/Documents and Settings/jmaldo03/git/.../applications/blog/views/default/twitterperl.html\')'
+p155
+sg132
+S'compile2'
+p156
+sasS'pyver'
+p157
+S'Python 2.6.5: /usr/bin/python'
+p158
+sS'session'
+p159
+(dp160
+S'_formkey[articulos_create]'
+p161
+S"'d07b4814-e7aa-44a8-9a1a-41286b414fe0'"
+p162
+sS'_formkey[register]'
+p163
+S"'916f3654-72ab-4fe3-8c51-26ed26684973'"
+p164
+sS'flash'
+p165
+S'None'
+p166
+sS'auth'
+p167
+S'None'
+p168
+sS'last_orderby'
+p169
+S'None'
+p170
+sS'_formkey[articulos_9]'
+p171
+S"'4a8f3fc4-9a7e-40c9-b07c-62826c13caad'"
+p172
+sS'_formkey[comentarios_create]'
+p173
+S"'d4c449d3-5629-48bb-98dd-69183ef85760'"
+p174
+sS'last_query'
+p175
+S"'db.articulos.id>0'"
+p176
+sS'_formkey[login]'
+p177
+S"'1c5e24c0-5245-481d-a45d-847711bfb466'"
+p178
+sS'_formkey[articulos_1]'
+p179
+S"'9f93caa9-1338-41bd-b2d0-c2e11a492973'"
+p180
+sS'_formkey[articulos_14]'
+p181
+S"'ef12ed53-c7bf-483d-b495-d43a8088a6ab'"
+p182
+ssS'etype'
+p183
+S"<type 'exceptions.SyntaxError'>"
+p184
+sS'date'
+p185
+S'Mon Oct 25 14:07:55 2010'
+p186
+sS'response'
+p187
+(dp188
+S'status'
+p189
+S'200'
+p190
+sg69
+S'<cStringIO.StringO object>'
+p191
+sg84
+S"<SimpleCookie: session_id_blog='127-0-0-1-fee2cd34-3e42-44cb-bee6-3936b80cedc4'>"
+p192
+sS'_vars'
+p193
+g20
+sS'title'
+p194
+S'"It\'s me"'
+p195
+sS'session_file'
+p196
+S"<open file '/cygdrive/e/Documents and Settings/j...ee2cd34-3e42-44cb-bee6-3936b80cedc4', mode 'rb+'>"
+p197
+sS'flash'
+p198
+S"''"
+p199
+sS'_custom_rollback'
+p200
+S'None'
+p201
+sS'session_id'
+p202
+S"'127-0-0-1-fee2cd34-3e42-44cb-bee6-3936b80cedc4'"
+p203
+sS'headers'
+p204
+S"<Storage {'Expires': 'Mon, 25 Oct 2010 18:37:55 ...he, must-revalidate, post-check=0, pre-check=0'}>"
+p205
+sS'meta'
+p206
+S"<Storage {'keywords': 'j3nnn1 web2py python', 'd...con web2py... ', 'author': 'Jennifer Maldonado'}>"
+p207
+sS'session_filename'
+p208
+S"'/cygdrive/e/Documents and Settings/jmaldo03/git/...ns/127-0-0-1-fee2cd34-3e42-44cb-bee6-3936b80cedc4'"
+p209
+sS'postprocessing'
+p210
+S'[]'
+p211
+sS'menu'
+p212
+S"[(<lazyT 'Index'>, False, <gluon.html.XML object>, []), (<lazyT 'About'>, False, <gluon.html.XML object>, []), (<lazyT 'Admin'>, False, <gluon.html.XML object>, [])]"
+p213
+sS'_view_environment'
+p214
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p215
+sS'subtitle'
+p216
+S'<lazyT "it\'s me j3nnn1">'
+p217
+sS'session_id_name'
+p218
+S"'session_id_blog'"
+p219
+sS'_custom_commit'
+p220
+S'None'
+p221
+sS'_caller'
+p222
+S'<function <lambda>>'
+p223
+sS'files'
+p224
+S'[]'
+p225
+sS'view'
+p226
+S"'default/twitterperl.html'"
+p227
+ssS'locals'
+p228
+(dp229
+g3
+S"'/cygdrive/e/Documents and Settings/jmaldo03/git/.../applications/blog/views/default/twitterperl.html'"
+p230
+sg5
+S'\'response.write("<div class=\\\'twitter\\\'>\\\\n", escape...response.write(\\\'\\\\n</ul>\\\\n</div>\\\\n\\\', escape=False)\''
+p231
+sssS'traceback'
+p232
+S'Traceback (most recent call last):\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/restricted.py", line 186, in restricted\n    ccode = compile2(code,layer)\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/restricted.py", line 173, in compile2\n    return compile(code.rstrip().replace(\'\\r\\n\',\'\\n\')+\'\\n\', layer, \'exec\')\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/views/default/twitterperl.html", line 4\n    <ul>\n    ^\nSyntaxError: invalid syntax\n'
+p233
+s.

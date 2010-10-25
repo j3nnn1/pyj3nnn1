@@ -1,0 +1,703 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/views/default/admin.html'
+p4
+sS'code'
+p5
+S'response.write(\'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\\n<!--\\nDesign by Free CSS Templates\\nhttp://www.freecsstemplates.org\\nReleased for free under a Creative Commons Attribution 2.5 License\\n\\nName       : Blogging\\nDescription: A two-column, fixed-width design for 1024x768 screen resolutions.\\nVersion    : 1.0\\nReleased   : 20090208\\n\\n-->\\n<html xmlns="http://www.w3.org/1999/xhtml">\\n <head>\\n  <title>\\n   \', escape=False)\nresponse.write(response.title or request.application)\nresponse.write(\'\\n  </title>\\n  \', escape=False)\nresponse.files.append(URL(request.application,\'static\',\'plugin_layouts/layouts/Blogging/style.css\'))\nresponse.write(\'\\n\', escape=False)\nresponse.files.append(URL(\'static\',\'superfish.js\'))\nresponse.write(\'\\n  \', escape=False)\nresponse.files.insert(0,URL(r=request,c=\'static\',f=\'jquery.js\'))\nresponse.files.insert(1,URL(r=request,c=\'static\',f=\'calendar.css\'))\nresponse.files.insert(2,URL(r=request,c=\'static\',f=\'calendar.js\'))\nfor _item in response.meta or []:\n    response.write(\'\\n     <meta name="\', escape=False)\n    response.write(_item)\n    response.write(\'" content="\', escape=False)\n    response.write(response.meta[_item])\n    response.write(\'" />\', escape=False)\n    pass\nfor _k,_file in enumerate(response.files or []):\n    if _file in response.files[:_k]:\n        continue\n    elif _file.lower().endswith(\'.css\'):\n        response.write(\'\\n     <link href="\', escape=False)\n        response.write(_file)\n        response.write(\'" rel="stylesheet" type="text/css" />\', escape=False)\n    elif _file.lower().endswith(\'.js\'):\n        response.write(\'\\n     <script src="\', escape=False)\n        response.write(_file)\n        response.write(\'" type="text/javascript"></script>\', escape=False)\n        pass\n    pass\nresponse.write(\'\\n<script type="text/javascript"><!--\\nfunction popup(url) {\\n  newwindow=window.open(url,\\\'name\\\',\\\'height=400,width=600\\\');\\n  if (window.focus) newwindow.focus();\\n  return false;\\n}\\nfunction collapse(id) { jQuery(\\\'#\\\'+id).slideToggle(); }\\nfunction fade(id,value) { if(value>0) jQuery(\\\'#\\\'+id).hide().fadeIn(\\\'slow\\\'); else jQuery(\\\'#\\\'+id).show().fadeOut(\\\'slow\\\'); }\\nfunction ajax(u,s,t) {\\n    query = \\\'\\\';\\n    if (typeof s == "string") {\\n        d = jQuery(s).serialize();\\n        if(d){ query = d; }\\n    } else {\\n        pcs = [];\\n        for(i=0; i<s.length; i++) {\\n            q = jQuery("[name="+s[i]+"]").serialize();\\n            if(q){pcs.push(q);}\\n        }\\n        if (pcs.length>0){query = pcs.join("&");}\\n    }\\n    jQuery.ajax({type: "POST", url: u, data: query, success: function(msg) { if(t) { if(t==\\\':eval\\\') eval(msg); else jQuery("#" + t).html(msg); } } }); \\n}\\nString.prototype.reverse = function () { return this.split(\\\'\\\').reverse().join(\\\'\\\');};\\nfunction web2py_ajax_init() {\\n  jQuery(\\\'.hidden\\\').hide();\\n  jQuery(\\\'.error\\\').hide().slideDown(\\\'slow\\\');\\n  jQuery(\\\'.flash\\\').click(function() { jQuery(this).fadeOut(\\\'slow\\\'); return false; });\\n  jQuery(\\\'input[type=submit]\\\').click(function(){var t=jQuery(this);t.hide();t.after(\\\'<input class="submit_disabled" disabled="disabled" type="submit" name="\\\'+t.attr("name")+\\\'_dummy" value="\\\'+t.val()+\\\'">\\\')});\\n  jQuery(\\\'input.integer\\\').keyup(function(){this.value=this.value.reverse().replace(/[^0-9\\\\-]|\\\\-(?=.)/g,\\\'\\\').reverse();});\\n  jQuery(\\\'input.double,input.decimal\\\').keyup(function(){this.value=this.value.reverse().replace(/[^0-9\\\\-\\\\.]|[\\\\-](?=.)|[\\\\.](?=[0-9]*[\\\\.])/g,\\\'\\\').reverse();});\\n  jQuery("input[type=\\\'checkbox\\\'].delete").each(function(){jQuery(this).click(function() { if(this.checked) if(!confirm("\', escape=False)\nresponse.write(T(\'Sure you want to delete this object?\'))\nresponse.write(\'")) this.checked=false; });});\\n  try {jQuery("input.date").focus( function() {Calendar.setup({\\n     inputField:this.id, ifFormat:"\', escape=False)\nresponse.write(T(\'%Y-%m-%d\'))\nresponse.write(\'", showsTime:false\\n  }); }); } catch(e) {};\\n  try { jQuery("input.datetime").focus( function() {Calendar.setup({\\n     inputField:this.id, ifFormat:"\', escape=False)\nresponse.write(T(\'%Y-%m-%d %H:%M:%S\'))\nresponse.write(\'", showsTime: true,timeFormat: "24"\\n  }); }); } catch(e) {};\\n  try { jQuery("input.time").clockpick({\\n      starthour:0, endhour:23, showminutes:true, military:true\\n  }); } catch(e) {};\\n};\\njQuery(document).ready(function(){\\n   jQuery(\\\'.flash\\\').hide();\\n   if(jQuery(\\\'.flash\\\').html()!=\\\'\\\') jQuery(\\\'.flash\\\').slideDown(\\\'slow\\\');\\n   web2py_ajax_init();});\\n\\nfunction web2py_trap_form(action,target) {\\n   jQuery(\\\'#\\\'+target+\\\' form\\\').each(function(i){\\n      var form=jQuery(this);\\n      if(!form.hasClass(\\\'no_trap\\\'))\\n        form.submit(function(obj){\\n         jQuery(\\\'.flash\\\').hide().html(\\\'\\\');\\n         web2py_ajax_page(\\\'post\\\',action,form.serialize(),target);\\n         return false;\\n      });\\n   });\\n}\\n\\nfunction web2py_ajax_page(method,action,data,target) {\\n  jQuery.ajax({\\\'type\\\':method,\\\'url\\\':action,\\\'data\\\':data,\\n    \\\'beforeSend\\\':function(xhr) {\\n      xhr.setRequestHeader(\\\'web2py-component-location\\\',document.location);\\n      xhr.setRequestHeader(\\\'web2py-component-element\\\',target);},\\n    \\\'complete\\\':function(xhr,text){\\n      var html=xhr.responseText;\\n      var content=xhr.getResponseHeader(\\\'web2py-component-content\\\'); \\n      var command=xhr.getResponseHeader(\\\'web2py-component-command\\\');\\n      var flash=xhr.getResponseHeader(\\\'web2py-component-flash\\\');\\n      var t = jQuery(\\\'#\\\'+target);\\n      if(content==\\\'prepend\\\') t.prepend(html); \\n      else if(content==\\\'append\\\') t.append(html);\\n      else if(content!=\\\'hide\\\') t.html(html);  \\n      web2py_trap_form(action,target);\\n      web2py_ajax_init();      \\n      if(command) eval(command);\\n      if(flash) jQuery(\\\'.flash\\\').html(flash).slideDown();\\n      }\\n    });\\n}\\nfunction web2py_component(action,target) {\\n    jQuery(document).ready(function(){ web2py_ajax_page(\\\'get\\\',action,null,target); });\\n}\\n//--></script>\\n\', escape=False)\nresponse.write(\'\\n  <style>\\nul.web2py-menu-vertical { width: 150px; position: relative; top:1em; left:1em;  z-index:30; border:0; margin:0; padding: 0; list-style: none; text-decoration: none;}\\nul.web2py-menu-vertical li { margin:0; padding:0; border:0; width: 150px; background: black; text-align:left;}\\nul.web2py-menu-vertical li a { margin:0; padding: 1px 3px 1px 3px; border:0; width: 144px; color: white; font-size:12px;}\\ndiv.flash { position: fixed; float: right; padding: 10px; top: 10px; right: 30px; opacity: 0.75; margin: 10px 10px 10px 10px; text-align: center; clear: both; color: #fff; font-size: 11pt; text-align: center; vertical-align: middle; cursor: pointer; background: black; border: 2px solid #fff; -moz-border-radius: 5px; -webkit-border-radius: 5px; z-index: 2; }\\ndiv.error { background-color: red; color: white; padding: 3px; }\\n.auth_navbar { text-align:right; z-index:20; position: absolute; top: 2px; right:30px; border:0; padding:0 }\\n  </style>\\n </head>\\n <body>\\n  <!-- start header -->\\n  \', escape=False)\ntry:\n    response.write(auth.navbar(action=URL(\'default\',\'user\')))\nexcept:pass\nresponse.write(\'\\n\\n  <div id="wrapper">\\n   <div id="header">\\n    <div id="menu">\\n     \', escape=False)\nresponse.write(MENU(response.menu,_class=\'web2py-menu\'))\nresponse.write(\'\\n    <script>\\n      jQuery(document).ready(function(){jQuery(\\\'ul.web2py-menu\\\').superfish({delay:400});});\\n    </script>\\n    </div>\\n    <!-- end #menu -->\\n    <div id="search">\\n     <form method="get" action="">\\n      <fieldset>\\n       <input type="text" name="s" id="search-text" size="15" />\\n       <input type="submit" id="search-submit" value="Search" />\\n      </fieldset>\\n     </form>\\n    </div>\\n    <!-- end #search -->\\n   </div>\\n   <!-- end #header -->\\n   <div id="logo">\\n    <h1>\\n     \', escape=False)\nresponse.write(response.title or request.application)\nresponse.write(\'\\n    </h1>\\n    <p>\\n     <em>\\n      template design by\\n      <a href="#">\\n       Expropiada Templates\\n      </a>\\n     </em>\\n    </p>\\n   </div>\\n   <hr />\\n   <!-- end #logo -->\\n   <!-- end #header-wrapper -->\\n   <div id="page">\\n    <div id="content">\\n     <div class="flash">\', escape=False)\nresponse.write(response.flash or \'\')\nresponse.write(\'</div>\\n     \', escape=False)\nresponse.write(" \\n<div class=\'content\'>\\n    <ul>\\n        <li> ", escape=False)\nresponse.write(H3(A(T("Crear nueva entrada"), _class=\'link\', _href=\'createpost\'), _class=\'title\'))\nresponse.write(\' </li>\\n\\t<li> \', escape=False)\nresponse.write(H3(A(T("Modificar o Eliminar Entrada"), _class=\'link\'), _class=\'title\'))\nresponse.write(\'</li>\\n    </ul>\\n\', escape=False)\n#=tableart\nresponse.write("\\n<table class=\'table\'>\\n", escape=False)\nfor registro in tableart:\n    response.write(\'\\n    <tr>\\n\\t<td>\\n\\t    \', escape=False)\n    response.write(T(registro.articulos.titulo))\n    response.write(\'\\n\\t</td>\\n\\t<td>\\n\\t    \', escape=False)\n    response.write(T(registro.articulos.fecha))\n    response.write(\'\\n\\t</td>\\n\\t<td>\\n\\t    \', escape=False)\n    #=A(registro.articulos.id, _href=\'modifypost\',args=registro.id)\n    response.write(\'\\n\\t</td>\\n\\t<td>\\n\\t    \', escape=False)\n    #=A(registro.articulos.id, _href=\'deletepost\',args=registro.id)\n    response.write(\'\\n\\t</td>\\n\', escape=False)\n    pass\nresponse.write(\'\\n    </tr>\\n</table>\\n</div>\\n\\n\', escape=False)\nresponse.write(\'\\n    </div>\\n    <!-- end #content -->\\n    <div id="sidebar">\\n     <ul>\\n      <li>\\n       <h2> Twitter Busqueda: perl</h2>\\n       <p>\\n        Mauris vitae nisl nec metus placerat perdiet est. Phasellus dapibus semper urna. Pellentesque ornare, orci in consectetuer hendrerit, volutpat.\\n       </p>\\n      </li>\\n      <li>\\n       <h2>\\n        Twitter Busqueda: python\\n       </h2>\\n       <ul>\\n        <li>\\n         <a href="#">\\n         </a>\\n         <a href="#">\\n          Nec metus sed donec\\n         </a>\\n        </li>\\n        <li>\\n         <a href="#">\\n          Magna lacus bibendum mauris\\n         </a>\\n        </li>\\n        <li>\\n         <a href="#">\\n          Velit semper nisi molestie\\n         </a>\\n        </li>\\n        <li>\\n         <a href="#">\\n          Eget tempor eget nonummy\\n         </a>\\n        </li>\\n        <li>\\n         <a href="#">\\n          Nec metus sed donec\\n         </a>\\n        </li>\\n       </ul>\\n      </li>\\n     </ul>\\n     <ul>\\n     <li>\\n       <h2>\\n        Mi Twitter\\n       </h2>\\n       <p> aca va twitter </p>\\n      </li>\\n     <ul>\\n    </div>\\n    <!-- end #sidebar -->\\n    <div style="clear: both;">\\n     &nbsp;\\n    </div>\\n   </div>\\n   <!-- end #page -->\\n   <div id="footer">\\n    <p> .:B106 d3 j3nnn1:.</p>\\n   </div>\\n   <!-- end #footer -->\\n  </div>\\n </body>\\n</html>\\n\', escape=False)'
+p6
+sS'snapshot'
+p7
+(dp8
+S'exception'
+p9
+(dp10
+S'__hash__'
+p11
+S"<method-wrapper '__hash__' of exceptions.AttributeError object>"
+p12
+sS'__setattr__'
+p13
+S"<method-wrapper '__setattr__' of exceptions.AttributeError object>"
+p14
+sS'__reduce_ex__'
+p15
+S'<built-in method __reduce_ex__ of exceptions.AttributeError object>'
+p16
+sS'__getslice__'
+p17
+S"<method-wrapper '__getslice__' of exceptions.AttributeError object>"
+p18
+sS'__getitem__'
+p19
+S"<method-wrapper '__getitem__' of exceptions.AttributeError object>"
+p20
+sS'__setstate__'
+p21
+S'<built-in method __setstate__ of exceptions.AttributeError object>'
+p22
+sS'__reduce__'
+p23
+S'<built-in method __reduce__ of exceptions.AttributeError object>'
+p24
+sS'__str__'
+p25
+S"<method-wrapper '__str__' of exceptions.AttributeError object>"
+p26
+sS'__format__'
+p27
+S'<built-in method __format__ of exceptions.AttributeError object>'
+p28
+sS'__getattribute__'
+p29
+S"<method-wrapper '__getattribute__' of exceptions.AttributeError object>"
+p30
+sS'__class__'
+p31
+S"<type 'exceptions.AttributeError'>"
+p32
+sS'__unicode__'
+p33
+S'<built-in method __unicode__ of exceptions.AttributeError object>'
+p34
+sS'__delattr__'
+p35
+S"<method-wrapper '__delattr__' of exceptions.AttributeError object>"
+p36
+sS'__subclasshook__'
+p37
+S'<built-in method __subclasshook__ of type object>'
+p38
+sS'__repr__'
+p39
+S"<method-wrapper '__repr__' of exceptions.AttributeError object>"
+p40
+sS'args'
+p41
+S'("\'datetime.datetime\' object has no attribute \'rsplit\'",)'
+p42
+sS'__dict__'
+p43
+S'{}'
+p44
+sS'__sizeof__'
+p45
+S'<built-in method __sizeof__ of exceptions.AttributeError object>'
+p46
+sS'__doc__'
+p47
+S"'Attribute not found.'"
+p48
+sS'__init__'
+p49
+S"<method-wrapper '__init__' of exceptions.AttributeError object>"
+p50
+sS'__new__'
+p51
+S'<built-in method __new__ of type object>'
+p52
+ssS'evalue'
+p53
+S"'datetime.datetime' object has no attribute 'rsplit'"
+p54
+sS'request'
+p55
+(dp56
+S'function'
+p57
+S"'admin'"
+p58
+sS'body'
+p59
+S'<cStringIO.StringO object>'
+p60
+sS'wsgi'
+p61
+S"<Storage {'start_response': <function <lambda> a...ING': 'gzip,deflate', 'HTTP_KEEP_ALIVE': '115'}}>"
+p62
+sS'extension'
+p63
+S"'html'"
+p64
+sS'vars'
+p65
+S'<Storage {}>'
+p66
+sS'cid'
+p67
+S'None'
+p68
+sS'url'
+p69
+S'<gluon.html.XML object>'
+p70
+sg41
+S'[]'
+p71
+sS'controller'
+p72
+S"'default'"
+p73
+sS'cookies'
+p74
+S"<SimpleCookie: session_id_admin='127-0-0-1-877c5...'127-0-0-1-abbacfdd-6a37-4a45-8aaf-8734a84b6dd4'>"
+p75
+sS'application'
+p76
+S"'blog'"
+p77
+sS'ajax'
+p78
+S'False'
+p79
+sS'client'
+p80
+S"'127.0.0.1'"
+p81
+sS'env'
+p82
+S"<Storage {'http_user_agent': 'Mozilla/5.0 (Windo...nce': False, 'path_info': '/blog/default/admin'}>"
+p83
+sS'raw_args'
+p84
+S'None'
+p85
+sS'get_vars'
+p86
+S'<Storage {}>'
+p87
+sS'folder'
+p88
+S"'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/'"
+p89
+sS'now'
+p90
+S'datetime.datetime(2010, 10, 25, 11, 4, 35, 490750)'
+p91
+sS'post_vars'
+p92
+S'<Storage {}>'
+p93
+ssS'frames'
+p94
+(lp95
+(dp96
+S'file'
+p97
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/restricted.py'
+p98
+sS'dump'
+p99
+(dp100
+S'environment'
+p101
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p102
+sS'ccode'
+p103
+S'<code object <module> at 0xf67770, file "/cygdri...lications/blog/views/default/admin.html", line 1>'
+p104
+ssS'lnum'
+p105
+I188
+sS'lines'
+p106
+(dp107
+I192
+S'        # XXX Show exception in Wing IDE if running in debugger'
+p108
+sI183
+S'        if type(code) == types.CodeType:'
+p109
+sI184
+S'            ccode = code'
+p110
+sI185
+S'        else:'
+p111
+sI186
+S'            ccode = compile2(code,layer)'
+p112
+sI187
+S''
+sI188
+S'        exec ccode in environment'
+p113
+sI189
+S'    except HTTP:'
+p114
+sI190
+S'        raise'
+p115
+sI191
+S'    except Exception:'
+p116
+ssS'call'
+p117
+S'(code=\'response.write(\\\'<!DOCTYPE html PUBLIC "-//W3C//D...->\\\\n  </div>\\\\n </body>\\\\n</html>\\\\n\\\', escape=False)\', environment={\'A\': <class \'gluon.html.A\'>, \'Auth\': <class \'gluon.tools.Auth\'>, \'B\': <class \'gluon.html.B\'>, \'BEAUTIFY\': <class \'gluon.html.BEAUTIFY\'>, \'BODY\': <class \'gluon.html.BODY\'>, \'BR\': <class \'gluon.html.BR\'>, \'CENTER\': <class \'gluon.html.CENTER\'>, \'CLEANUP\': <class \'gluon.validators.CLEANUP\'>, \'CODE\': <class \'gluon.html.CODE\'>, \'CRYPT\': <class \'gluon.validators.CRYPT\'>, ...}, layer=\'/cygdrive/e/Documents and Settings/jmaldo03/git/...web2py/applications/blog/views/default/admin.html\')'
+p118
+sS'func'
+p119
+S'restricted'
+p120
+sa(dp121
+g97
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/views/default/admin.html'
+p122
+sg99
+(dp123
+sg105
+I60
+sg106
+(dp124
+I64
+S"    #=A(registro.articulos.id, _href='deletepost',args=registro.id)"
+p125
+sI65
+S"    response.write('\\n\\t</td>\\n', escape=False)"
+p126
+sI66
+S'    pass'
+p127
+sI67
+S"response.write('\\n    </tr>\\n</table>\\n</div>\\n\\n', escape=False)"
+p128
+sI68
+S'response.write(\'\\n    </div>\\n    <!-- end #content -->\\n    <div id="sidebar">\\n     <ul>\\n      <li>\\n       <h2> Twitter Busqueda: perl</h2>\\n       <p>\\n        Mauris vitae nisl nec metus placerat perdiet est. Phasellus dapibus semper urna. Pellentesque ornare, orci in consectetuer hendrerit, volutpat.\\n       </p>\\n      </li>\\n      <li>\\n       <h2>\\n        Twitter Busqueda: python\\n       </h2>\\n       <ul>\\n        <li>\\n         <a href="#">\\n         </a>\\n         <a href="#">\\n          Nec metus sed donec\\n         </a>\\n        </li>\\n        <li>\\n         <a href="#">\\n          Magna lacus bibendum mauris\\n         </a>\\n        </li>\\n        <li>\\n         <a href="#">\\n          Velit semper nisi molestie\\n         </a>\\n        </li>\\n        <li>\\n         <a href="#">\\n          Eget tempor eget nonummy\\n         </a>\\n        </li>\\n        <li>\\n         <a href="#">\\n          Nec metus sed donec\\n         </a>\\n        </li>\\n       </ul>\\n      </li>\\n     </ul>\\n     <ul>\\n     <li>\\n       <h2>\\n        Mi Twitter\\n       </h2>\\n       <p> aca va twitter </p>\\n      </li>\\n     <ul>\\n    </div>\\n    <!-- end #sidebar -->\\n    <div style="clear: both;">\\n     &nbsp;\\n    </div>\\n   </div>\\n   <!-- end #page -->\\n   <div id="footer">\\n    <p> .:B106 d3 j3nnn1:.</p>\\n   </div>\\n   <!-- end #footer -->\\n  </div>\\n </body>\\n</html>\\n\', escape=False)'
+p129
+sI51
+S"response.write(' </li>\\n\\t<li> ', escape=False)"
+p130
+sI52
+S'response.write(H3(A(T("Modificar o Eliminar Entrada"), _class=\'link\'), _class=\'title\'))'
+p131
+sI53
+S"response.write('</li>\\n    </ul>\\n', escape=False)"
+p132
+sI54
+S'#=tableart'
+p133
+sI55
+S'response.write("\\n<table class=\'table\'>\\n", escape=False)'
+p134
+sI56
+S'for registro in tableart:'
+p135
+sI57
+S"    response.write('\\n    <tr>\\n\\t<td>\\n\\t    ', escape=False)"
+p136
+sI58
+S'    response.write(T(registro.articulos.titulo))'
+p137
+sI59
+S"    response.write('\\n\\t</td>\\n\\t<td>\\n\\t    ', escape=False)"
+p138
+sI60
+S'    response.write(T(registro.articulos.fecha))'
+p139
+sI61
+S"    response.write('\\n\\t</td>\\n\\t<td>\\n\\t    ', escape=False)"
+p140
+sI62
+S"    #=A(registro.articulos.id, _href='modifypost',args=registro.id)"
+p141
+sI63
+S"    response.write('\\n\\t</td>\\n\\t<td>\\n\\t    ', escape=False)"
+p142
+ssg117
+S'()'
+p143
+sg119
+S'<module>'
+p144
+sa(dp145
+g97
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/globals.py'
+p146
+sg99
+(dp147
+S'self.body.write'
+p148
+S'<built-in method write of cStringIO.StringO object>'
+p149
+sS'self.body'
+p150
+S'<cStringIO.StringO object>'
+p151
+sS'self'
+p152
+S"<Storage {'status': 200, 'body': <cStringIO.Stri...bject at 0x7f61156c>], '_custom_rollback': None}>"
+p153
+sS'global xmlescape'
+p154
+S'<function xmlescape>'
+p155
+sS'data'
+p156
+S"<lazyT '2010-10-25 10:22:16'>"
+p157
+ssg105
+I105
+sg106
+(dp158
+I100
+S''
+sI101
+S'    def write(self, data, escape=True):'
+p159
+sI102
+S'        if not escape:'
+p160
+sI103
+S'            self.body.write(str(data))'
+p161
+sI104
+S'        else:'
+p162
+sI105
+S'            self.body.write(xmlescape(data))'
+p163
+sI106
+S''
+sI107
+S'    def render(self, *a, **b):'
+p164
+sI108
+S'        if len(a) > 2:'
+p165
+sI109
+S"            raise SyntaxError, 'Response.render can be called with two arguments, at most'"
+p166
+ssg117
+S"(self=<Storage {'status': 200, 'body': <cStringIO.Stri...bject at 0x7f61156c>], '_custom_rollback': None}>, data=<lazyT '2010-10-25 10:22:16'>, escape=True)"
+p167
+sg119
+S'write'
+p168
+sa(dp169
+g97
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/html.py'
+p170
+sg99
+(dp171
+S'builtinstr'
+p172
+S"<type 'str'>"
+p173
+sS'data'
+p174
+S"<lazyT '2010-10-25 10:22:16'>"
+p175
+ssg105
+I116
+sg106
+(dp176
+I111
+S'    except TypeError:'
+p177
+sI112
+S'        pass'
+p178
+sI113
+S''
+sI114
+S'    # otherwise, make it a string'
+p179
+sI115
+S'    if not isinstance(data, (str, unicode)):'
+p180
+sI116
+S'        data = str(data)'
+p181
+sI117
+S'    elif isinstance(data, unicode):'
+p182
+sI118
+S"        data = data.encode('utf8', 'xmlcharrefreplace')"
+p183
+sI119
+S''
+sI120
+S'    # ... and do the escaping'
+p184
+ssg117
+S"(data=<lazyT '2010-10-25 10:22:16'>, quote=True)"
+p185
+sg119
+S'xmlescape'
+p186
+sa(dp187
+g97
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/languages.py'
+p188
+sg99
+(dp189
+S'self.T.translate'
+p190
+S'<bound method translator.translate of <gluon.languages.translator object>>'
+p191
+sS'self.s'
+p192
+g44
+sS'self'
+p193
+S"<lazyT '2010-10-25 10:22:16'>"
+p194
+sS'self.T'
+p195
+S'<gluon.languages.translator object>'
+p196
+sS'self.m'
+p197
+S'datetime.datetime(2010, 10, 25, 10, 22, 16)'
+p198
+ssg105
+I131
+sg106
+(dp199
+I128
+S'        return "<lazyT %s>" % (repr(str(self.m)), )'
+p200
+sI129
+S''
+sI130
+S'    def __str__(self):'
+p201
+sI131
+S'        return self.T.translate(self.m, self.s)'
+p202
+sI132
+S''
+sI133
+S'    def __eq__(self, other):'
+p203
+sI134
+S'        return self.T.translate(self.m, self.s) == other'
+p204
+sI135
+S''
+sI126
+S''
+sI127
+S'    def __repr__(self):'
+p205
+ssg117
+S"(self=<lazyT '2010-10-25 10:22:16'>)"
+p206
+sg119
+g25
+sa(dp207
+g97
+S'/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/languages.py'
+p208
+sg99
+(dp209
+S'tokens'
+p210
+S'undefined'
+p211
+sS'message'
+p212
+S'datetime.datetime(2010, 10, 25, 10, 22, 16)'
+p213
+sS'message.rsplit'
+p214
+g211
+ssg105
+I259
+sg106
+(dp215
+I256
+S"        T(' hello world ## token') -> 'hello world'"
+p216
+sI257
+S"        T('hello ## world ## token') -> 'hello ## world'"
+p217
+sI258
+S'        """'
+p218
+sI259
+S"        tokens = message.rsplit('##', 1)"
+p219
+sI260
+S'        if len(tokens) == 2:'
+p220
+sI261
+S'            tokens[0] = tokens[0].strip()'
+p221
+sI262
+S"            message = tokens[0] + '##' + tokens[1].strip()"
+p222
+sI263
+S'        mt = self.t.get(message, None)'
+p223
+sI254
+S''
+sI255
+S"        T(' hello world ') -> ' hello world '"
+p224
+ssg117
+S'(self=<gluon.languages.translator object>, message=datetime.datetime(2010, 10, 25, 10, 22, 16), symbols={})'
+p225
+sg119
+S'translate'
+p226
+sasS'pyver'
+p227
+S'Python 2.6.5: /usr/bin/python'
+p228
+sS'session'
+p229
+(dp230
+S'_formkey[articulos_create]'
+p231
+S"'68f19dfb-14f8-4a54-841a-288009cb3447'"
+p232
+sS'_formkey[register]'
+p233
+S"'916f3654-72ab-4fe3-8c51-26ed26684973'"
+p234
+sS'flash'
+p235
+S'None'
+p236
+sS'auth'
+p237
+S"<Storage {'expiration': 3600, 'last_visit': date...y': '', 'id': 1, 'email': 'jcmm986@gmail.com'}>}>"
+p238
+sS'last_orderby'
+p239
+S'None'
+p240
+sS'last_query'
+p241
+S"'db.articulos.id>0'"
+p242
+sS'_formkey[comentarios_create]'
+p243
+S"'d790f6ac-3d09-4040-9003-e1b08e3cb564'"
+p244
+sS'_formkey[articulos_1]'
+p245
+S"'074680d4-ecb2-487d-9a3c-920a47b19b26'"
+p246
+sS'_formkey[login]'
+p247
+S"'cd0d63aa-d852-4aef-8758-6b04cccb3d22'"
+p248
+ssS'etype'
+p249
+S"<type 'exceptions.AttributeError'>"
+p250
+sS'date'
+p251
+S'Mon Oct 25 11:04:35 2010'
+p252
+sS'response'
+p253
+(dp254
+S'status'
+p255
+S'200'
+p256
+sg59
+S'<cStringIO.StringO object>'
+p257
+sg74
+S"<SimpleCookie: session_id_blog='127-0-0-1-fee2cd34-3e42-44cb-bee6-3936b80cedc4'>"
+p258
+sS'_vars'
+p259
+S"{'tableart': [<Row {'articulos': <Row {'update_record': <funct...te_record': <function <lambda> at 0x7f5cb224>}>}>, <Row {'articulos': <Row {'update_record': <funct...te_record': <function <lambda> at 0x7f8cf304>}>}>, <Row {'articulos': <Row {'update_record': <funct...te_record': <function <lambda> at 0x7f8cf10c>}>}>, <Row {'articulos': <Row {'update_record': <funct...te_record': <function <lambda> at 0x7f8cf6f4>}>}>, <Row {'articulos': <Row {'update_record': <funct...te_record': <function <lambda> at 0x7f8cf4c4>}>}>, <Row {'articulos': <Row {'update_record': <funct...te_record': <function <lambda> at 0x7f8cff7c>}>}>, <Row {'articulos': <Row {'update_record': <funct...te_record': <function <lambda> at 0x7f8cf844>}>}>, <Row {'articulos': <Row {'update_record': <funct...te_record': <function <lambda> at 0x7f8cf454>}>}>]}"
+p260
+sS'title'
+p261
+S"'blog'"
+p262
+sS'session_file'
+p263
+S"<open file '/cygdrive/e/Documents and Settings/j...ee2cd34-3e42-44cb-bee6-3936b80cedc4', mode 'rb+'>"
+p264
+sS'flash'
+p265
+S"''"
+p266
+sS'_custom_rollback'
+p267
+S'None'
+p268
+sS'session_id'
+p269
+S"'127-0-0-1-fee2cd34-3e42-44cb-bee6-3936b80cedc4'"
+p270
+sS'headers'
+p271
+S"<Storage {'Expires': 'Mon, 25 Oct 2010 15:34:35 ...he, must-revalidate, post-check=0, pre-check=0'}>"
+p272
+sS'meta'
+p273
+S"<Storage {'keywords': 'j3nnn1 web2py python', 'd...con web2py... ', 'author': 'Jennifer Maldonado'}>"
+p274
+sS'session_filename'
+p275
+S"'/cygdrive/e/Documents and Settings/jmaldo03/git/...ns/127-0-0-1-fee2cd34-3e42-44cb-bee6-3936b80cedc4'"
+p276
+sS'postprocessing'
+p277
+S'[]'
+p278
+sS'menu'
+p279
+S"[(<lazyT 'Index'>, False, <gluon.html.XML object>, []), (<lazyT 'About'>, False, <gluon.html.XML object>, []), (<lazyT 'Admin'>, False, <gluon.html.XML object>, []), (<lazyT 'Edit'>, False, <gluon.html.XML object>, [(<lazyT 'Controller'>, False, <gluon.html.XML object>), (<lazyT 'View'>, False, <gluon.html.XML object>), (<lazyT 'Layout'>, False, <gluon.html.XML object>), (<lazyT 'Stylesheet'>, False, <gluon.html.XML object>), (<lazyT 'DB Model'>, False, <gluon.html.XML object>), (<lazyT 'Menu Model'>, False, <gluon.html.XML object>), (<lazyT 'Database'>, False, <gluon.html.XML object>)])]"
+p280
+sS'_view_environment'
+p281
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p282
+sS'subtitle'
+p283
+S'<lazyT "it\'s me j3nnn1">'
+p284
+sS'session_id_name'
+p285
+S"'session_id_blog'"
+p286
+sS'_custom_commit'
+p287
+S'None'
+p288
+sS'_caller'
+p289
+S'<function <lambda>>'
+p290
+sS'files'
+p291
+S'[<gluon.html.XML object>, <gluon.html.XML object>, <gluon.html.XML object>, <gluon.html.XML object>, <gluon.html.XML object>]'
+p292
+sS'view'
+p293
+S"'default/admin.html'"
+p294
+ssS'locals'
+p295
+(dp296
+S'symbols'
+p297
+g44
+sS'message'
+p298
+S'datetime.datetime(2010, 10, 25, 10, 22, 16)'
+p299
+sS'self'
+p300
+S'<gluon.languages.translator object>'
+p301
+sssS'traceback'
+p302
+S'Traceback (most recent call last):\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/restricted.py", line 188, in restricted\n    exec ccode in environment\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/applications/blog/views/default/admin.html", line 60, in <module>\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/globals.py", line 105, in write\n    self.body.write(xmlescape(data))\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/html.py", line 116, in xmlescape\n    data = str(data)\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/languages.py", line 131, in __str__\n    return self.T.translate(self.m, self.s)\n  File "/cygdrive/e/Documents and Settings/jmaldo03/git/pyj3nnn1/pyj3nnn1/web2py/gluon/languages.py", line 259, in translate\n    tokens = message.rsplit(\'##\', 1)\nAttributeError: \'datetime.datetime\' object has no attribute \'rsplit\'\n'
+p303
+s.

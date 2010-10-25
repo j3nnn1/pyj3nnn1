@@ -1,22 +1,26 @@
 (dp1
-S'id_usuario'
+S'fecha'
 p2
-S'INTEGER REFERENCES usuarios(id) ON DELETE CASCADE'
-p3
-sS'titulo'
-p4
-S'CHAR(255)'
-p5
-sS'fecha'
-p6
 S'TIMESTAMP'
-p7
+p3
 sS'articulo'
-p8
+p4
 S'TEXT'
+p5
+sS'image'
+p6
+S'CHAR(512)'
+p7
+sS'id_usuario'
+p8
+S'INTEGER REFERENCES usuarios(id) ON DELETE CASCADE'
 p9
-sS'id'
+sS'titulo'
 p10
-S'INTEGER PRIMARY KEY AUTOINCREMENT'
+S'CHAR(255)'
 p11
+sS'id'
+p12
+S'INTEGER PRIMARY KEY AUTOINCREMENT'
+p13
 s.

@@ -302,3 +302,5 @@ success!
 timestamp: 2010-10-24T16:53:50.886252
 ALTER TABLE articulos ADD image VARCHAR(512);
 success!
+timestamp: 2010-10-25T08:18:27.704750
+ALTER TABLE articulos ADD image CHAR(512);

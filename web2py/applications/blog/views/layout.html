@@ -30,7 +30,7 @@ div.error { background-color: red; color: white; padding: 3px; }
  <body>
   <!-- start header -->
   {{try:}}{{=auth.navbar(action=URL('default','user'))}}{{except:pass}}
-
+  {{import tweepy}}
   <div id="wrapper">
    <div id="header">
     <div id="menu">
@@ -40,14 +40,14 @@ div.error { background-color: red; color: white; padding: 3px; }
     </script>
     </div>
     <!-- end #menu -->
-    <div id="search">
+    <!--<div id="search">
      <form method="get" action="">
       <fieldset>
        <input type="text" name="s" id="search-text" size="15" />
        <input type="submit" id="search-submit" value="Search" />
       </fieldset>
      </form>
-    </div>
+    </div> -->
     <!-- end #search -->
    </div>
    <!-- end #header -->
@@ -75,55 +75,20 @@ div.error { background-color: red; color: white; padding: 3px; }
     <!-- end #content -->
     <div id="sidebar">
      <ul>
-      <li>
-       <h2> Twitter Busqueda: perl</h2>
-       <p>
-        Mauris vitae nisl nec metus placerat perdiet est. Phasellus dapibus semper urna. Pellentesque ornare, orci in consectetuer hendrerit, volutpat.
-       </p>
-      </li>
-      <li>
-       <h2>
-        Twitter Busqueda: python
-       </h2>
-       <ul>
-        <li>
-         <a href="#">
-         </a>
-         <a href="#">
-          Nec metus sed donec
-         </a>
-        </li>
-        <li>
-         <a href="#">
-          Magna lacus bibendum mauris
-         </a>
-        </li>
-        <li>
-         <a href="#">
-          Velit semper nisi molestie
-         </a>
-        </li>
-        <li>
-         <a href="#">
-          Eget tempor eget nonummy
-         </a>
-        </li>
-        <li>
-         <a href="#">
-          Nec metus sed donec
-         </a>
-        </li>
-       </ul>
-      </li>
+         <li>
+            <h2> Mi Twitter </h2>
+            <p>{{include 'default/twitterme.html'}} </p>
+         </li>
+         <li>
+            <h2> Twitter Busqueda: perl</h2>
+            <p> {{include './default/twitterperl.html'}} </p>
+         </li>
+
+         <li>
+            <h2> Twitter Busqueda: python </h2>
+	    <p> {{include 'default/twitterpython.html'}} </p>
+         </li>
      </ul>
-     <ul>
-     <li>
-       <h2>
-        Mi Twitter
-       </h2>
-       <p> aca va twitter </p>
-      </li>
-     <ul>
     </div>
     <!-- end #sidebar -->
     <div style="clear: both;">

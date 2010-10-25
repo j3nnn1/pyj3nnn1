@@ -13,7 +13,8 @@ if request.env.web2py_runtime_gae:            # if running on Google App Engine
     # session.connect(request, response, db = MEMDB(Client()))
 else:                                         # else use a normal relational database
     #db = DAL('sqlite://storage.sqlite')       # if not, use SQLite or other DB
-    db = DAL('mysql://j3nnn1:j3nnn1@angvp.com/j3nnn1_blog') 
+    #db = DAL('mysql://j3nnn1:j3nnn1@angvp.com/j3nnn1_blog') 
+    db = DAL('sqlite://storage.sqlite')
 ## if no need for session
 # session.forget()
 
@@ -42,11 +43,12 @@ auth.settings.hmac_key = 'sha512:f3d5ade2-9740-497b-92a8-a0d5169de496'   # befor
 auth.define_tables()                           # creates all needed tables
 auth.settings.mailer = mail                    # for user email verification
 auth.settings.registration_requires_verification = False
-auth.settings.registration_requires_approval = False
+auth.settings.registration_requires_approval = True #el usuario a registrarse requiere aprobacion
 auth.messages.verify_email = 'Click on the link http://'+request.env.http_host+URL(r=request,c='default',f='user',args=['verify_email'])+'/%(key)s to verify your email'
 auth.settings.reset_password_requires_verification = True
 auth.messages.reset_password = 'Click on the link http://'+request.env.http_host+URL(r=request,c='default',f='user',args=['reset_password'])+'/%(key)s to reset your password'
 
+auth.settings.actions_disabled.append('register') #bloqueando el acceso al registro
 #########################################################################
 ## If you need to use OpenID, Facebook, MySpace, Twitter, Linkedin, etc.
 ## register with janrain.com, uncomment and customize following
@@ -92,6 +94,7 @@ db.define_table('articulos',
         Field('id_usuario',db.usuarios, readable=False, writable=False),
         Field('image', 'upload'))
         
+db.articulos.id.readable=db.articulos.id.writable=False
 
 db.define_table('comentarios',
         Field('id_articulo', db.articulos, readable=False, writable=False),
