@@ -1,12 +1,12 @@
 {{extend 'layout.html'}}
 
 {{for post in post:}}
-    <div class="titulo">
-        <h3> {{=A(post.articulos.titulo, _href=URL("viewpost", args=post.articulos.id))}} </h3>
-    </div>
-    <div class="contenido"> {{=post.articulos.articulo}}</div>
-    <div class="subtitulo">
+    <div class='post'>
+        {{=H3(A(post.articulos.titulo, _href=URL("viewpost", args=post.articulos.id)), _class='title')}} 
+        <div class="entry"> {{=post.articulos.articulo}}</div>
+        <div class="meta">
             {{=T("Escrito por %s el: %s" % (post.usuarios.usuario,post.articulos.fecha))}}
+        </div>
     </div>
 <hr />
 {{pass}}
