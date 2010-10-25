@@ -10,8 +10,8 @@
 {{pass}}
 <br />
 <!-- Paginador -->
+<div class="pages">
 {{ if totalpages > 1:}}
-    <div class="pages">
         Paginas: 
     {{ for i in range(1, totalpages+1): }}
         <span class="page">
@@ -25,6 +25,6 @@
                 {{ pass }}
         </span>
         {{ pass }}
-</div>
 {{ pass }}
+</div>
 </div>
