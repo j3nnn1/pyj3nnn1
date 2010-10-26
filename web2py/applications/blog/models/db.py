@@ -12,9 +12,9 @@ if request.env.web2py_runtime_gae:            # if running on Google App Engine
     # from google.appengine.api.memcache import Client
     # session.connect(request, response, db = MEMDB(Client()))
 else:                                         # else use a normal relational database
-    db = DAL('sqlite://storage.sqlite')       # if not, use SQLite or other DB
+    #db = DAL('sqlite://storage.sqlite')       # if not, use SQLite or other DB
     #db = DAL('mysql://j3nnn1:j3nnn1@angvp.com/j3nnn1_blog')
-    #db = DAL('mysql://j3nnn1:j3nnn1@localhost/blogweb2py') 
+    db = DAL('mysql://j3nnn1:j3nnn1@localhost/blogweb2py') 
     
 ## if no need for session
 # session.forget()
