@@ -26,6 +26,7 @@ def index():
     filtro = (db.articulos.id_usuario==db.auth_user.id)
     post = db(filtro).select(db.articulos.ALL, db.auth_user.first_name, limitby=(limit,page*perpage),orderby=~db.articulos.fecha)
     comments  = [db((db.comentarios.id_articulo == i.articulos.id)&(db.comentarios.visible == '1')).count() for i in post]
+	
     return dict(post=post,totalpages=totalpages,postpage=page,comments=comments)
 
 def about():
