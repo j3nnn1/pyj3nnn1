@@ -3,7 +3,7 @@ S'flash'
 p2
 NsS'_formkey[articulos_create]'
 p3
-S'64c37ccb-bf13-4208-a90d-fdce8e1b8e24'
+S'bc51b342-d6c6-45f1-a972-8ca2833f794d'
 p4
 sS'_formkey[login]'
 p5
@@ -32,7 +32,7 @@ p14
 cdatetime
 datetime
 p15
-(S'\x07\xda\n\x1a\x0e\x17\x03\x02\xdc\xcb'
+(S"\x07\xda\n\x1a\x0f'/\x0e\x18\xc5"
 tRp16
 sS'user'
 p17
@@ -93,6 +93,7 @@ sg17
 g30
 sbsS'_formkey[comentarios_create]'
 p34
-S'0ade0703-d3bd-43a0-9343-f0f385df3056'
+S'95e5090b-92df-46c7-8cdb-26d182f14d11'
 p35
+s.p35
 s.

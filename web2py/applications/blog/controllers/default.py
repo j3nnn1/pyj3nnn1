@@ -35,15 +35,19 @@ def about():
 
 def viewpost():
     if request.args(0):
+        #consulta en bd de un articulo en especifico
         filtro      = ((db.articulos.id==request.args(0)) & (db.articulos.id_usuario==db.auth_user.id))
         post        = db(filtro).select(db.articulos.ALL, db.auth_user.first_name).first()
 
         if post:
+            #creando FORM de los comentarios
             form        = SQLFORM(db.comentarios)
             form.vars.id_articulo = post.articulos.id
+
+            #obteniendo registros de los comentarios visibles
             filtro          = ((db.comentarios.id_articulo==post.articulos.id)&(db.comentarios.visible=='1'))
             comments        = (db(filtro).select(db.comentarios.ALL, orderby=~db.comentarios.fecha)).records 
-	    #print db._lastsql
+	        #print db._lastsql util para saber ultima consulta ejecutada
         else:
             redirect(URL('index'))
 
@@ -73,10 +77,23 @@ def user():
 
 @auth.requires_login()
 def admin():
-    
-    tableart = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records
+    #listando articulos disponible 
+    perpage=6
+    totalposts = db(db.articulos.id > 0).count() # contamos cuantos posts hay en la bd
 
-    return dict(tableart=tableart)
+    totalpages = totalposts / perpage
+
+    page=int(request.args(0)) if request.args(0) else 1
+    limit = int(page - 1) * perpage
+
+    if totalposts > perpage and totalpages == 1 and totalpages * perpage != totalposts:
+        totalpages = 2
+
+    filtro = (db.articulos.id_usuario==db.auth_user.id)
+    tableart = db(filtro).select(db.articulos.ALL, limitby=(limit,page*perpage),orderby=~db.articulos.fecha).records
+    #tableart = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records
+    
+    return dict(tableart=tableart, totalpages=totalpages, postpage=page)
 
 
 @auth.requires_login()

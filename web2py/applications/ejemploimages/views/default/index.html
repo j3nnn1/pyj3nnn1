@@ -1,7 +1,0 @@
-{{extend 'layout.html'}}
-<h1> Nuestras Imagenes </h1>
-<ul>
-    {{for image in images:}}
-        {{=LI(A(image.title, _href=URL("show", args=image.id)))}}
-     {{pass}}
-</ul>

@@ -38,3 +38,5 @@ class vehiculo:
            print 'No se puede frenar, wow Vehículo esta detenido!'
         else:
             self.detenido=1
+
+
