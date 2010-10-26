@@ -8,7 +8,7 @@
 	</div>
     {{pass}}
     <div class='entry'>
-	<p>{{=post.articulos.articulo}} </p>
+	<p>{{=XML(post.articulos.articulo)}} </p>
     </div>
     {{=A(T("Escrito por: %s  el %s" % (post.auth_user.first_name, post.articulos.fecha.strftime('%d de %B del %Y'))), _class='meta')}}
     <div class='entry'>
