@@ -101,11 +101,20 @@ def modifypost():
 @auth.requires_login()
 def createpost():
 
+    import tweepy
     form        = SQLFORM(db.articulos)
     form.vars.id_usuario = auth.user.id
 
     if form.accepts(request.vars, session):
+        consumer_key    ='thClbkKdFy4QhXrOtlJaHg'
+        consumer_secret ='0zLHboJRauF6LnsQWpeGY4XD4KpWU4uCDdv8evE8nE'
+        key             ='64244883-Orq6ABYBjwjuEei06PmDeJqGUPiB2iWFB87DPmdlv'
+        secret          ='ACBw2GaQ7LdcfbFJQGUJOvXJoNxi1wYCWHmHMzRWl3I'
+        authen  =  tweepy.OAuthHandler(consumer_key, consumer_secret)
+        authen.set_access_token(key, secret)        
         response.flash ='Tu articulo ha sido publicado'
+        api = tweepy.API(authen) 
+        #api.update_status('Tweets de prueba: #cursoweb2py #proyectoblog chequea mi nuevo post en mi blog')
 
     return dict(form=form)
 
