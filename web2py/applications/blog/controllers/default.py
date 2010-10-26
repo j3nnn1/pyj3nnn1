@@ -152,12 +152,19 @@ def grantcomment():
         if request.args(1)=='True':   #visible o no
             filtro = (db.comentarios.id==request.args(0)) 
             db(filtro).update(visible=0)
-        else:
+            response.flash='El Comentario estará visible'
+
+        elif request.args(1)=='False':
             filtro = (db.comentarios.id==request.args(0))
             db(filtro).update(visible=1)
+            response.flash='El Comentario estará visible'
 
-        response.flash='El Comentario estará visible'
+        elif request.args(1)=='delete':
+            filtro = (db.comentarios.id==request.args(0))
+            db(filtro).delete()
+            response.flash='Comentario Eliminado'
 
     filtro = (db.comentarios.id_articulo==db.articulos.id)
     comments = db(filtro).select(db.comentarios.ALL, db.articulos.titulo).records
+
     return dict(comments=comments)

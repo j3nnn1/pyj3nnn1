@@ -1,0 +1,527 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p4
+sS'code'
+p5
+S'# -*- coding: utf-8 -*- \n\n#########################################################################\n## This is a samples controller\n## - index is the default action of any application\n## - user is required for authentication and authorization\n## - download is for downloading files uploaded in the db (does streaming)\n## - call exposes all registered services (none by default)\n#########################################################################  \n\ndef index():\n    """\n    Esta vista va a obtener 3 post\n    """\n    # filter to join.\n    perpage = 3                                  # Numero de articulos por pagina\n    totalposts = db(db.articulos.id > 0).count() # contamos cuantos posts hay en la bd\n    totalpages = totalposts / perpage            # division para sacar el numero de paginas\n                  \n    page = int(request.vars.page) if request.vars.page else 1\n    limit = int(page - 1) * perpage\n                         \n    if totalposts > perpage and totalpages == 1 and totalpages * perpage != totalposts:\n        totalpages = 2\n\n    filtro = (db.articulos.id_usuario==db.usuarios.id)\n    post = db(filtro).select(db.articulos.ALL, db.usuarios.usuario, limitby=(limit,page*perpage),orderby=~db.articulos.fecha)\n    comments  = [db((db.comentarios.id_articulo == i.articulos.id)&(db.comentarios.visible == \'1\')).count() for i in post]\n    return dict(post=post,totalpages=totalpages,postpage=page,comments=comments)\n\ndef about():\n    """ Informaci\xc3\xb3n sobre mi persona"""\n    return dict()\n\ndef viewpost():\n    if request.args(0):\n        filtro      = ((db.articulos.id==request.args(0)) & (db.articulos.id_usuario==db.usuarios.id))\n        post        = db(filtro).select(db.articulos.ALL, db.usuarios.usuario).first()\n\n        if post:\n            form        = SQLFORM(db.comentarios)\n            form.vars.id_articulo = post.articulos.id\n            filtro          = ((db.comentarios.id_articulo==post.articulos.id)&(db.comentarios.visible==\'1\'))\n            comments        = (db(filtro).select(db.comentarios.ALL, orderby=~db.comentarios.fecha)).records \n\t    #print db._lastsql\n        else:\n            redirect(URL(\'index\'))\n\n        if form.accepts(request.vars, session):\n            response.flash =\'Tu comentario ha sido publicado\'\n    else:\n        redirect(URL(\'index\'))\n\n    return dict(post=post, form=form, comments=comments)\n\ndef user():\n    """\n    exposes:\n    http://..../[app]/default/user/login \n    http://..../[app]/default/user/logout\n    http://..../[app]/default/user/register\n    http://..../[app]/default/user/profile\n    http://..../[app]/default/user/retrieve_password\n    http://..../[app]/default/user/change_password\n    use @auth.requires_login()\n        @auth.requires_membership(\'group name\')\n        @auth.requires_permission(\'read\',\'table name\',record_id)\n    to decorate functions that need access control\n    """\n    return dict(form=auth())\n\n\n@auth.requires_login()\ndef admin():\n    \n    tableart = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records or "No posee Articulos."\n\n    return dict(tableart=tableart)\n\n\n@auth.requires_login()\ndef modifypost():\n\n    if request.args(0):  #modificando un post\n\n        post   = db.articulos(request.args(0)) or redirect(URL(\'index\'))\n\tform = SQLFORM(db.articulos, post)\n\n\tif form.accepts(request.vars, session):\n            response.flash =\'Tu articulo ha sido actualizado\'\n\telif form.errors:\n\t    response.flash =\'No se actualiz\xc3\xb3 el art\xc3\xadculo\'\n\n    else:\n\t form=none\n\t response.flash =\'No seleccion\xc3\xb3 el articulo\'\n    \n    return dict(form=form)\n\n@auth.requires_login()\ndef createpost():\n\n    form        = SQLFORM(db.articulos)\n    form.vars.id_usuario = 1\n\n    if form.accepts(request.vars, session):\n        response.flash =\'Tu articulo ha sido publicado\'\n\n    return dict(form=form)\n\n@auth.requires_login()\ndef deletepost():\n\n    if request.args(0):\n\n\tfiltro = (db.articulos.id==request.args(0))\t\n\trows   = db(filtro).delete()\n\n\tif rows:\n\t    response.flash =\'Tu articulo ha sido eliminado\'\n\telse:\n\t    response.flash =\'No existe el articulo\'\n\t\n        table = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records or "No posee Articulos."\n\t    \n    else:\n        redirect(URL(\'index\'))\n\n    return dict(table=table)\n\ndef download():\n    """\n    allows downloading of uploaded files\n    http://..../[app]/default/download/[filename]\n    """\n    return response.download(request,db)\n\n\ndef call():\n    """\n    exposes services. for example:\n    http://..../[app]/default/call/jsonrpc\n    decorate with @services.jsonrpc the functions to expose\n    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv\n    """\n    session.forget()\n    return service()\n\ndef grantcomment():\n    \n    if request.args(0):             #id comentario.\n        if request.args(1)==\'True\':   #visible o no\n            filtro = (db.comentarios.id==request.args(0)) \n            db(filtro).update(visible=0)\n            response.flash=\'El Comentario estar\xc3\xa1 visible\'\n\n        elif request.args(1)==\'False\':\n            filtro = (db.comentarios.id==request.args(0))\n            db(filtro).update(visible=1)\n            response.flash=\'El Comentario estar\xc3\xa1 visible\'\n\n        elif request.args(1)==\'delete\':\n            filtro = (db.comentarios.id==request.args(0))\n            db(filtro).delete(visible=1)\n            response.flash=\'Comentario Eliminado\'\n\n    filtro = (db.comentarios.id_articulo==db.articulos.id)\n    comments = db(filtro).select(db.comentarios.ALL, db.articulos.titulo).records\n\n    return dict(comments=comments)\n\nresponse._vars=response._caller(grantcomment)\n'
+p6
+sS'snapshot'
+p7
+(dp8
+S'exception'
+p9
+(dp10
+S'__hash__'
+p11
+S"<method-wrapper '__hash__' of exceptions.TypeError object>"
+p12
+sS'__setattr__'
+p13
+S"<method-wrapper '__setattr__' of exceptions.TypeError object>"
+p14
+sS'__reduce_ex__'
+p15
+S'<built-in method __reduce_ex__ of exceptions.TypeError object>'
+p16
+sS'__getslice__'
+p17
+S"<method-wrapper '__getslice__' of exceptions.TypeError object>"
+p18
+sS'__getitem__'
+p19
+S"<method-wrapper '__getitem__' of exceptions.TypeError object>"
+p20
+sS'__setstate__'
+p21
+S'<built-in method __setstate__ of exceptions.TypeError object>'
+p22
+sS'__reduce__'
+p23
+S'<built-in method __reduce__ of exceptions.TypeError object>'
+p24
+sS'__str__'
+p25
+S"<method-wrapper '__str__' of exceptions.TypeError object>"
+p26
+sS'__format__'
+p27
+S'<built-in method __format__ of exceptions.TypeError object>'
+p28
+sS'__getattribute__'
+p29
+S"<method-wrapper '__getattribute__' of exceptions.TypeError object>"
+p30
+sS'__class__'
+p31
+S"<type 'exceptions.TypeError'>"
+p32
+sS'__unicode__'
+p33
+S'<built-in method __unicode__ of exceptions.TypeError object>'
+p34
+sS'__delattr__'
+p35
+S"<method-wrapper '__delattr__' of exceptions.TypeError object>"
+p36
+sS'__subclasshook__'
+p37
+S'<built-in method __subclasshook__ of type object>'
+p38
+sS'__repr__'
+p39
+S"<method-wrapper '__repr__' of exceptions.TypeError object>"
+p40
+sS'args'
+p41
+S'("delete() got an unexpected keyword argument \'visible\'",)'
+p42
+sS'__dict__'
+p43
+S'{}'
+p44
+sS'__sizeof__'
+p45
+S'<built-in method __sizeof__ of exceptions.TypeError object>'
+p46
+sS'__doc__'
+p47
+S"'Inappropriate argument type.'"
+p48
+sS'__init__'
+p49
+S"<method-wrapper '__init__' of exceptions.TypeError object>"
+p50
+sS'__new__'
+p51
+S'<built-in method __new__ of type object>'
+p52
+ssS'evalue'
+p53
+S"delete() got an unexpected keyword argument 'visible'"
+p54
+sS'request'
+p55
+(dp56
+S'function'
+p57
+S"'grantcomment'"
+p58
+sS'body'
+p59
+S'<cStringIO.StringO object>'
+p60
+sS'wsgi'
+p61
+S"<Storage {'start_response': <function <lambda> a...>, 'HTTP_ACCEPT_ENCODING': 'gzip,deflate,sdch'}}>"
+p62
+sS'extension'
+p63
+S"'html'"
+p64
+sS'vars'
+p65
+S'<Storage {}>'
+p66
+sS'cid'
+p67
+S'None'
+p68
+sS'url'
+p69
+S'<gluon.html.XML object>'
+p70
+sg41
+S"['6', 'delete']"
+p71
+sS'controller'
+p72
+S"'default'"
+p73
+sS'cookies'
+p74
+S"<SimpleCookie: session_id_admin='127-0-0-1-3ee7f...'127-0-0-1-fe3dd1f3-580c-48f7-bd9d-954d65cf1cf1'>"
+p75
+sS'application'
+p76
+S"'blog'"
+p77
+sS'ajax'
+p78
+S'False'
+p79
+sS'client'
+p80
+S"'127.0.0.1'"
+p81
+sS'env'
+p82
+S"<Storage {'http_user_agent': 'Mozilla/5.0 (X11; ...th_info': '/blog/default/grantcomment/6/delete'}>"
+p83
+sS'raw_args'
+p84
+S"'6/delete'"
+p85
+sS'get_vars'
+p86
+S'<Storage {}>'
+p87
+sS'folder'
+p88
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/'"
+p89
+sS'now'
+p90
+S'datetime.datetime(2010, 10, 25, 23, 9, 2, 380123)'
+p91
+sS'post_vars'
+p92
+S'<Storage {}>'
+p93
+ssS'frames'
+p94
+(lp95
+(dp96
+S'file'
+p97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py'
+p98
+sS'dump'
+p99
+(dp100
+S'environment'
+p101
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p102
+sS'ccode'
+p103
+S'<code object <module> at 0x97378d8, file "/home/...plications/blog/controllers/default.py", line 11>'
+p104
+ssS'lnum'
+p105
+I188
+sS'lines'
+p106
+(dp107
+I192
+S'        # XXX Show exception in Wing IDE if running in debugger'
+p108
+sI183
+S'        if type(code) == types.CodeType:'
+p109
+sI184
+S'            ccode = code'
+p110
+sI185
+S'        else:'
+p111
+sI186
+S'            ccode = compile2(code,layer)'
+p112
+sI187
+S''
+sI188
+S'        exec ccode in environment'
+p113
+sI189
+S'    except HTTP:'
+p114
+sI190
+S'        raise'
+p115
+sI191
+S'    except Exception:'
+p116
+ssS'call'
+p117
+S"(code='# -*- coding: utf-8 -*- \\n\\n######################...)\\n\\nresponse._vars=response._caller(grantcomment)\\n', environment={'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}, layer='/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py')"
+p118
+sS'func'
+p119
+S'restricted'
+p120
+sa(dp121
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p122
+sg99
+(dp123
+sg105
+I172
+sg106
+(dp124
+I161
+S''
+sI162
+S"        elif request.args(1)=='delete':"
+p125
+sI163
+S'            filtro = (db.comentarios.id==request.args(0))'
+p126
+sI164
+S'            db(filtro).delete(visible=1)'
+p127
+sI165
+S"            response.flash='Comentario Eliminado'"
+p128
+sI166
+S''
+sI167
+S'    filtro = (db.comentarios.id_articulo==db.articulos.id)'
+p129
+sI168
+S'    comments = db(filtro).select(db.comentarios.ALL, db.articulos.titulo).records'
+p130
+sI169
+S''
+sI170
+S'    return dict(comments=comments)'
+p131
+ssg117
+S'()'
+p132
+sg119
+S'<module>'
+p133
+sa(dp134
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/globals.py'
+p135
+sg99
+(dp136
+S'self'
+p137
+S'undefined'
+p138
+sS'f'
+S'<function grantcomment>'
+p139
+ssg105
+I96
+sg106
+(dp140
+I96
+S'        self._caller = lambda f: f()'
+p141
+sI97
+S'        self._view_environment = None'
+p142
+sI98
+S'        self._custom_commit = None'
+p143
+sI99
+S'        self._custom_rollback = None'
+p144
+sI100
+S''
+sI91
+S"        self.flash = ''           # used by the default view layout"
+p145
+sI92
+S'        self.meta = Storage()     # used by web2py_ajax.html'
+p146
+sI93
+S'        self.menu = []            # used by the default view layout'
+p147
+sI94
+S'        self.files = []           # used by web2py_ajax.html'
+p148
+sI95
+S'        self._vars = None'
+p149
+ssg117
+S'(f=<function grantcomment>)'
+p150
+sg119
+S'<lambda>'
+p151
+sa(dp152
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p153
+sg99
+(dp154
+S'global db'
+p155
+S"<SQLDB {'auth_event': <Table {'origin': <gluon.s..., 'id': <gluon.sql.Field object at 0x9993ecc>}>}>"
+p156
+sS'filtro'
+p157
+S'<gluon.sql.Query object>'
+p158
+sS').delete'
+p159
+g138
+sS'visible'
+p160
+g138
+ssg105
+I164
+sg106
+(dp161
+I160
+S"            response.flash='El Comentario estar\xc3\xa1 visible'"
+p162
+sI161
+S''
+sI162
+S"        elif request.args(1)=='delete':"
+p163
+sI163
+S'            filtro = (db.comentarios.id==request.args(0))'
+p164
+sI164
+S'            db(filtro).delete(visible=1)'
+p165
+sI165
+S"            response.flash='Comentario Eliminado'"
+p166
+sI166
+S''
+sI167
+S'    filtro = (db.comentarios.id_articulo==db.articulos.id)'
+p167
+sI168
+S'    comments = db(filtro).select(db.comentarios.ALL, db.articulos.titulo).records'
+p168
+sI159
+S'            db(filtro).update(visible=1)'
+p169
+ssg117
+S'()'
+p170
+sg119
+S'grantcomment'
+p171
+sasS'pyver'
+p172
+S'Python 2.6.6: /usr/bin/python'
+p173
+sS'session'
+p174
+(dp175
+S'flash'
+p176
+S'None'
+p177
+sS'auth'
+p178
+S"<Storage {'expiration': 3600, 'user': <Storage {...0, 10, 25, 23, 9, 2, 380123), 'remember': False}>"
+p179
+sS'_formkey[comentarios_create]'
+p180
+S"'f56e3870-8f19-442f-8717-7b69306b699c'"
+p181
+sS'_formkey[login]'
+p182
+S"'8ac886fd-017b-4f51-8031-3d488b68f8ee'"
+p183
+ssS'etype'
+p184
+S"<type 'exceptions.TypeError'>"
+p185
+sS'date'
+p186
+S'Mon Oct 25 23:09:03 2010'
+p187
+sS'response'
+p188
+(dp189
+S'status'
+p190
+S'200'
+p191
+sg59
+S'<cStringIO.StringO object>'
+p192
+sg74
+S"<SimpleCookie: session_id_blog='127-0-0-1-fe3dd1f3-580c-48f7-bd9d-954d65cf1cf1'>"
+p193
+sS'_vars'
+p194
+S'None'
+p195
+sS'title'
+p196
+S'"It\'s me"'
+p197
+sS'session_file'
+p198
+S"<open file '/home/j3nnn1/git/pyj3nnn1/web2py/app...e3dd1f3-580c-48f7-bd9d-954d65cf1cf1', mode 'rb+'>"
+p199
+sS'flash'
+p200
+S"''"
+p201
+sS'_custom_rollback'
+p202
+S'None'
+p203
+sS'session_id'
+p204
+S"'127-0-0-1-fe3dd1f3-580c-48f7-bd9d-954d65cf1cf1'"
+p205
+sS'headers'
+p206
+S"<Storage {'Expires': 'mar, 26 oct 2010 03:39:02 ...he, must-revalidate, post-check=0, pre-check=0'}>"
+p207
+sS'meta'
+p208
+S"<Storage {'keywords': 'j3nnn1 web2py python', 'd...con web2py... ', 'author': 'Jennifer Maldonado'}>"
+p209
+sS'session_filename'
+p210
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/bl...ns/127-0-0-1-fe3dd1f3-580c-48f7-bd9d-954d65cf1cf1'"
+p211
+sS'postprocessing'
+p212
+S'[]'
+p213
+sS'menu'
+p214
+S"[(<lazyT 'Index'>, False, <gluon.html.XML object>, []), (<lazyT 'About'>, False, <gluon.html.XML object>, []), (<lazyT 'Admin'>, False, <gluon.html.XML object>, [])]"
+p215
+sS'_view_environment'
+p216
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p217
+sS'subtitle'
+p218
+S'<lazyT "it\'s me j3nnn1">'
+p219
+sS'session_id_name'
+p220
+S"'session_id_blog'"
+p221
+sS'_custom_commit'
+p222
+S'None'
+p223
+sS'_caller'
+p224
+S'<function <lambda>>'
+p225
+sS'files'
+p226
+S'[]'
+p227
+sS'view'
+p228
+S"'default/grantcomment.html'"
+p229
+ssS'locals'
+p230
+(dp231
+S'filtro'
+p232
+S'<gluon.sql.Query object>'
+p233
+sssS'traceback'
+p234
+S'Traceback (most recent call last):\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py", line 188, in restricted\n    exec ccode in environment\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py", line 172, in <module>\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/globals.py", line 96, in <lambda>\n    self._caller = lambda f: f()\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py", line 164, in grantcomment\n    db(filtro).delete(visible=1)\nTypeError: delete() got an unexpected keyword argument \'visible\'\n'
+p235
+s.

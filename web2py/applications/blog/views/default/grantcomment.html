@@ -17,6 +17,9 @@
     <th>
 	{{=T("Visible")}}
     </th>
+    <th>
+	{{=T("Acción")}}
+    </th>
 </tr>
 <form action='grantcomment' method=post>
 {{for registro in comments:}}
@@ -33,6 +36,9 @@
 	<td>
 	    {{visible = lambda x: x and 'Si' or 'No'}}
 	    {{=A(visible(registro.comentarios.visible), _class='link', _href=URL('grantcomment', args=[registro.comentarios.id ,registro.comentarios.visible]))}}
+	</td>
+	<td>
+	    {{=A('Eliminar', _class='link', _href=URL('grantcomment', args=[registro.comentarios.id, 'delete']))}}
 	</td>
 {{pass}}
     </tr>
