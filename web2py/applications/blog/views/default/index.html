@@ -1,7 +1,6 @@
 {{extend 'layout.html'}}
 <div class="content">
 {{x=0}}
-
 {{if not post:}}
    {{=DIV(H2(T(" No existen Artículos"), _class='title'), _class='post')}}
 {{pass}}
@@ -16,7 +15,7 @@
                 {{=XML(p.articulos.articulo)}}
             {{pass}}
         </div>
-        {{=A(T("Escrito por %s el: %s Comentarios(%s)" % (p.auth_user.first_name,p.articulos.fecha,comments[x])), _class='meta')}}
+        {{=A(T("Escrito por %s el: %s Comentarios(%s)" % (p.auth_user.first_name,p.articulos.fecha.strftime('%d de %B del %Y'),comments[x])), _class='meta')}}
     </div>
 <hr />
 {{x=x+1}}

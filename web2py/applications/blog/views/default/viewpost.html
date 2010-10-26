@@ -10,7 +10,7 @@
     <div class='entry'>
 	<p>{{=post.articulos.articulo}} </p>
     </div>
-    {{=A(T("Escrito por: %s  el %s" % (post.auth_user.first_name, post.articulos.fecha)), _class='meta')}}
+    {{=A(T("Escrito por: %s  el %s" % (post.auth_user.first_name, post.articulos.fecha.strftime('%d de %B del %Y'))), _class='meta')}}
     <div class='entry'>
     {{if comments:}}
 	{{ for comment in comments: }}
@@ -19,7 +19,7 @@
             {{=B(T("Web: "))}} {{=(comment.comentarios.url or "No tiene Url")}} <br />
             {{=B(T("Comentario: "))}}<br />
             {{=comment.comentarios.comentario}} <br />
-            {{=B(T("Escrito el:"))}} {{=comment.comentarios.fecha}} <br /><br />
+            {{=B(T("Escrito el:"))}} {{=comment.comentarios.fecha.strftime('%d de %B del %Y')}} <br /><br />
     {{pass}}
     {{else:}}
         {{=H3(T("Este post no tiene comentarios aun, sé el primero en dejar uno"))}}
