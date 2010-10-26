@@ -1,0 +1,23 @@
+{{extend 'layout.html'}}
+{{import gluon.contrib.markdown}}
+
+<h2>Image Title: {{=image.title}}</h2>
+
+{{if admin:}}
+[<a href = "/{{=request.application}}/default/update/{{=image.id}}">edit</a>]
+{{pass}}
+
+<img width="200p" align="right" src = "/{{=request.application}}/default/download/{{=image.file}}" WIDTH="400">
+{{=gluon.contrib.markdown.WIKI(str(image.body))}}
+
+{{if len(comments):}}
+<h3>Comments</h3>
+{{for comment in comments:}}
+{{=comment.author}} says <i>{{=comment.body}}</i><br><br/>
+{{pass}}
+{{else:}}
+<h3>No comments yet</h3>
+{{pass}}
+
+{{=myform}}
+<a href = "/{{=request.application}}/default/index/">{{="go back to main page"}}</a><br/>

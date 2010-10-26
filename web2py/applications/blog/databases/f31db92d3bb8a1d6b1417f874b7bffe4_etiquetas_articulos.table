@@ -1,0 +1,14 @@
+(dp1
+S'id_articulo'
+p2
+S'INT, INDEX id_articulo__idx (id_articulo), FOREIGN KEY (id_articulo) REFERENCES articulos(id) ON DELETE CASCADE'
+p3
+sS'id'
+p4
+S'INT AUTO_INCREMENT NOT NULL'
+p5
+sS'id_etiqueta'
+p6
+S'INT, INDEX id_etiqueta__idx (id_etiqueta), FOREIGN KEY (id_etiqueta) REFERENCES etiquetas(id) ON DELETE CASCADE'
+p7
+s.

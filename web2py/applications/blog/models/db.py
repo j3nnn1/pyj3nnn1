@@ -13,7 +13,8 @@ if request.env.web2py_runtime_gae:            # if running on Google App Engine
     # session.connect(request, response, db = MEMDB(Client()))
 else:                                         # else use a normal relational database
     #db = DAL('sqlite://storage.sqlite')       # if not, use SQLite or other DB
-    db = DAL('mysql://j3nnn1:j3nnn1@angvp.com/j3nnn1_blog') 
+    #db = DAL('mysql://j3nnn1:j3nnn1@angvp.com/j3nnn1_blog')
+    db = DAL('mysql://j3nnn1:j3nnn1@localhost/blogweb2py') 
     
 ## if no need for session
 # session.forget()
@@ -48,7 +49,7 @@ auth.messages.verify_email = 'Click on the link http://'+request.env.http_host+U
 auth.settings.reset_password_requires_verification = True
 auth.messages.reset_password = 'Click on the link http://'+request.env.http_host+URL(r=request,c='default',f='user',args=['reset_password'])+'/%(key)s to reset your password'
 
-auth.settings.actions_disabled.append('register') #bloqueando el acceso al registro
+#auth.settings.actions_disabled.append('register') #bloqueando el acceso al registro
 #########################################################################
 ## If you need to use OpenID, Facebook, MySpace, Twitter, Linkedin, etc.
 ## register with janrain.com, uncomment and customize following
@@ -79,19 +80,14 @@ crud.settings.auth = None                      # =auth to enforce authorization 
 #########################################################################
 
 
-db.define_table('usuarios',
-        Field('usuario', 'string', requires= [IS_NOT_EMPTY(),IS_NOT_IN_DB(db,'usuarios.usuario')], required=True), 
-        Field('clave', 'password', requires= [CRYPT(),IS_NOT_EMPTY()], required=True),
-        Field('correo', 'string',  readable=False, writable=True, requires= [IS_NOT_EMPTY(), IS_NOT_IN_DB(db,'usuarios.correo')], required=True))
-
 import datetime
 now = datetime.datetime.today()
 
 db.define_table('articulos',
         Field('titulo',    'string',  requires=[IS_NOT_EMPTY(),IS_NOT_IN_DB(db,'articulos.titulo')], required=True),
         Field('articulo',  'text',    requires=IS_NOT_EMPTY(),required=True),
-        Field('fecha',     'datetime',default=now),
-        Field('id_usuario',db.usuarios, readable=False, writable=False),
+        Field('fecha',     'datetime',default=now, readable=False, writable=False),
+        Field('id_usuario', db.auth_user, readable=False, writable=False),
         Field('image', 'upload'))
         
 db.articulos.id.readable=db.articulos.id.writable=False
@@ -103,7 +99,7 @@ db.define_table('comentarios',
         Field('nombre',      'string',requires = IS_NOT_EMPTY(), required=True),
         Field('correo',      'string',requires = [IS_EMAIL(), IS_NOT_EMPTY()],     required=True),
         Field('url',         'string',required=False),
-        Field('fecha',       'datetime', default=now),
+        Field('fecha',       'datetime', default=now, readable=False, writable=False),
         Field('visible',     'boolean', readable=False, writable=False, default='F'))
 
 db.comentarios.id.readable=db.comentarios.id.writable=False

@@ -1,0 +1,58 @@
+timestamp: 2008-02-04T21:35:02.828000
+CREATE TABLE authors(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	author_name CHAR(32),
+	author_email CHAR(32)
+);
+success!
+timestamp: 2008-02-04T21:35:39.796000
+CREATE TABLE posts(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	post_title CHAR(32),
+	post_text TEXT,
+	post_author REFERENCES authors(id) ON DELETE CASCADE,
+	post_time CHAR(32),
+	post_status CHAR(32)
+);
+success!
+timestamp: 2008-02-04T21:35:39.906000
+CREATE TABLE comments(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	comment_author CHAR(32),
+	comment_author_email CHAR(32),
+	comment_text TEXT,
+	comment_time CHAR(32)
+);
+success!
+timestamp: 2008-02-04T21:35:40
+CREATE TABLE categories(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	category_name CHAR(32)
+);
+success!
+timestamp: 2008-02-04T21:36:17.437000
+CREATE TABLE cat_to_post(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	cat_id REFERENCES categories(id) ON DELETE CASCADE,
+	post_id REFERENCES posts(id) ON DELETE CASCADE
+);
+success!
+timestamp: 2008-02-04T21:36:17.546000
+CREATE TABLE links(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	link_title CHAR(32),
+	link_url CHAR(32)
+);
+success!
+timestamp: 2008-02-06T14:56:41.921000
+ALTER TABLE posts ADD COLUMN post_type CHAR(32);
+success!
+timestamp: 2008-02-07T19:22:38.671000
+ALTER TABLE comments ADD COLUMN post_id REFERENCES posts(id) ON DELETE CASCADE;
+success!
+timestamp: 2008-02-08T16:44:23.935000
+ALTER TABLE comments ADD COLUMN comment_author_website CHAR(32);
+success!
+timestamp: 2008-02-10T15:30:15.890000
+ALTER TABLE posts ADD COLUMN post_category CHAR(32);
+success!

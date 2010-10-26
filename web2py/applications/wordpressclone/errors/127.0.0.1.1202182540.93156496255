@@ -1,0 +1,17 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'applications/blog/models/db.py'
+p4
+sS'code'
+p5
+S'# try something like\ndb=SQLDB("sqlite://db.db")\n\nimport datetime\n\ndb.define_table(\'authors\',\n    SQLField(\'author_name\', requires=True),\n    SQLField(\'author_email\', requires=True))\n\ndb.define_table(\'posts\',\n    SQLField(\'post_title\', requires=True),\n    SQLField(\'post_text\', \'text\'),\n    SQLField(\'post_author\', db.authors, requires=True),\n    SQLField(\'post_time\', default=datetime.datetime.today()),\n    SQLField(\'post_status\', requires=True))\n\ndb.define_table(\'comments\',\n    SQLField(\'comment_author\'),\n    SQLField(\'comment_author_email\', requires=True),\n    SQLField(\'comment_text\', \'text\', requires=True),\n    SQLField(\'comment_time\', requires=True, default=datetime.datetime.today()))\n\ndb.define_table(\'categories\',\n    SQLField(\'category_name\', requires=True))\n\ndb.define_table(\'cat_to_post\',\n    SQLField(\'cat_id\', db.categories, requires=True),\n    SQLField(\'post_id\', db.post, requires=True))\n    \ndb.define_table(\'links\',\n    SQLField(\'link_title\', requires=True),\n    SQLField(\'link_url\', requires=True))\n\ndb.authors.author_email.requires = [IS_EMAIL(), IS_NOT_IN_DB(db, \'authors.author_email\')]\ndb.posts.post_author.requires = IS_IN_DB(db, \'authors.id\', \'authors.author_name\')\ndb.posts.post_status.requires = IS_IN_SET([\'published\', \'unpublished\'])\ndb.cat_to_post.post_id.requires = IS_IN_DB(db, \'posts.id\', \'posts.post_title\')\ndb.cat_to_post.cat_id.requires = IS_IN_DB(db, \'categories.id\', \'categories.category_name\')'
+p6
+sS'traceback'
+p7
+S'Traceback (most recent call last):\n  File "gluon\\restricted.pyc", line 60, in restricted\n  File "applications/blog/models/db.py", line 28, in <module>\n  File "gluon\\sql.pyc", line 174, in __getattr__\nKeyError: \'post\'\n'
+p8
+s.

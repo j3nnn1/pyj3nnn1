@@ -2,6 +2,7 @@
 <div class='content' align='center'>
 {{=DIV(H2(T("Aprobar comentarios."), _class='title'), _align='center')}}
 <br/>
+{{if comments:}}
 <div id='adminpost'>
 <table>
 <tr>
@@ -45,4 +46,8 @@
 </form>
 </table>
 </div>
+{{pass}}
+{{if not comments:}}
+{{=DIV(H2(T("No Existen Comentarios"), _class='title'), _class='post')}}
+{{pass}}
 </div>

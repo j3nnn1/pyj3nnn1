@@ -1,0 +1,26 @@
+(dp1
+S'check_version'
+p2
+I00
+sS'flash'
+p3
+NsS'pam_user'
+p4
+NsS'authorized'
+p5
+I01
+sS'last_time'
+p6
+F1288067587.0365369
+s.led with md5sum: 025558119b2338a30c061c186788f776'
+tRp5
+sS'pam_user'
+p6
+NsS'authorized'
+p7
+I01
+sS'last_time'
+p8
+F1288067567.779861
+s.9741
+s.

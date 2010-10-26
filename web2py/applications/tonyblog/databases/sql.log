@@ -1,0 +1,36 @@
+timestamp: 2008-01-13T18:29:29.874492
+CREATE TABLE image(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	title CHAR(32),
+	file CHAR(64)
+);
+success!
+timestamp: 2008-01-13T18:29:29.878242
+CREATE TABLE comment(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	author CHAR(32),
+	email CHAR(32),
+	body TEXT,
+	image_id REFERENCES image(id) ON DELETE CASCADE
+);
+success!
+timestamp: 2008-01-29T13:23:35.052681
+ALTER TABLE image ADD COLUMN body TEXT;
+success!
+timestamp: 2008-02-01T02:46:20.829338
+CREATE TABLE user(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	email CHAR(32),
+	password CHAR(32),
+	verification CHAR(32)
+);
+success!
+timestamp: 2008-02-01T02:49:47.148224
+ALTER TABLE user ADD COLUMN usr_name CHAR(32);
+success!
+timestamp: 2008-02-01T09:03:59.788124
+CREATE TABLE pagename(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	title CHAR(32)
+);
+success!

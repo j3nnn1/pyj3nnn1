@@ -1,0 +1,18 @@
+(dp1
+S'body'
+p2
+S'TEXT'
+p3
+sS'id'
+p4
+S'INTEGER PRIMARY KEY AUTOINCREMENT'
+p5
+sS'file'
+p6
+S'CHAR(64)'
+p7
+sS'title'
+p8
+S'CHAR(32)'
+p9
+s.

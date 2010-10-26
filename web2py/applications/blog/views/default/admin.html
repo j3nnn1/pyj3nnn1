@@ -6,36 +6,42 @@
         <li> {{=H3(A(T("Gestionar Comentarios"), _class='link', _href='grantcomment'), _class='title')}} </li>
 	<li> {{=H3(A(T("Modificar o Eliminar artículo"), _class='link'), _class='title')}}</li>
     </ul>
-<div id='adminpost'>
-<table>
-<tr>
-    <th>
-	{{=T("Título")}}
-    </th>
-    <th>
-	{{=T("Fecha de Creación")}}
-    </th>
-    <th colspan=2 align='center'>
-	{{=T("Acciones")}}
-    </th>
-</tr>
-{{for registro in tableart:}}
-    <tr>
-	<td>
-	    {{=T(registro.articulos.titulo)}}
-	</td>
-	<td>
-	    {{=registro.articulos.fecha}}
-	</td>
-	<td>
-	    {{=A(T("Modificar artículo"), _href=URL('modifypost', args=registro.articulos.id), _class='link')}}
-	</td>
-	<td>
-	    {{=A(T("Eliminar artículo"), _href=URL('deletepost', args=registro.articulos.id), _class='link')}}
-	</td>
-{{pass}}
-    </tr>
-</table>
-</div>
-</div>
 
+{{if not tableart:}}
+    {{=DIV(H2(T("No existen artículos"), _class='title'), _class='post')}}
+{{pass}}
+
+<div id='adminpost'>
+{{if tableart:}}
+    <table>
+        <tr>
+            <th>
+	    {{=T("Título")}}
+            </th>
+            <th>
+	    {{=T("Fecha de Creación")}}
+            </th>
+    	    <th colspan=2 align='center'>
+	    {{=T("Acciones")}}
+            </th>
+        </tr>
+	    {{for registro in tableart:}}
+    	<tr>
+	    <td>
+	        {{=T(registro.articulos.titulo)}}
+	    </td>
+	    <td>
+	        {{=registro.articulos.fecha}}
+	    </td>
+	    <td>
+	        {{=A(T("Modificar artículo"), _href=URL('modifypost', args=registro.articulos.id), _class='link')}}
+	    </td>
+	    <td>
+	        {{=A(T("Eliminar artículo"), _href=URL('deletepost', args=registro.articulos.id), _class='link')}}
+	    </td>
+        </tr>
+            {{pass}}
+	{{pass}}
+    </table>
+</div>
+</div>

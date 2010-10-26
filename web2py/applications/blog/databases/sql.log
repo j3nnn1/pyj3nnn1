@@ -1,208 +1,9 @@
-timestamp: 2010-10-22T23:35:49.442021
-CREATE TABLE auth_user(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    first_name CHAR(128),
-    last_name CHAR(128),
-    email CHAR(512),
-    password CHAR(512),
-    registration_key CHAR(512),
-    reset_password_key CHAR(512)
-);
-success!
-timestamp: 2010-10-22T23:35:49.449828
-CREATE TABLE auth_group(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    role CHAR(512),
-    description TEXT
-);
-success!
-timestamp: 2010-10-22T23:35:49.454275
-CREATE TABLE auth_membership(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER REFERENCES auth_user(id) ON DELETE CASCADE,
-    group_id INTEGER REFERENCES auth_group(id) ON DELETE CASCADE
-);
-success!
-timestamp: 2010-10-22T23:35:49.462128
-CREATE TABLE auth_permission(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    group_id INTEGER REFERENCES auth_group(id) ON DELETE CASCADE,
-    name CHAR(512),
-    table_name CHAR(512),
-    record_id INTEGER
-);
-success!
-timestamp: 2010-10-22T23:35:49.469137
-CREATE TABLE auth_event(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    time_stamp TIMESTAMP,
-    client_ip CHAR(512),
-    user_id INTEGER REFERENCES auth_user(id) ON DELETE CASCADE,
-    origin CHAR(512),
-    description TEXT
-);
-success!
-timestamp: 2010-10-23T23:44:49.071121
-CREATE TABLE usuarios(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    usuario CHAR(512),
-    password CHAR(512),
-    correo CHAR(512)
-);
-success!
-timestamp: 2010-10-23T23:44:49.111460
-CREATE TABLE articulos(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    titulo CHAR(255),
-    articulo TEXT,
-    fecha TIMESTAMP,
-    id_usuario INTEGER REFERENCES usuarios(id) ON DELETE CASCADE
-);
-success!
-timestamp: 2010-10-23T23:44:49.117151
-CREATE TABLE comentarios(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_articulo INTEGER REFERENCES articulos(id) ON DELETE CASCADE,
-    titulo CHAR(512),
-    comentario CHAR(512),
-    nombre CHAR(512),
-    correo CHAR(512),
-    url CHAR(512)
-);
-success!
-timestamp: 2010-10-23T23:44:49.121067
-CREATE TABLE etiquetas(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nombre CHAR(512)
-);
-success!
-timestamp: 2010-10-23T23:44:49.126683
-CREATE TABLE etiquetas_articulos(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_etiqueta INTEGER REFERENCES etiquetas(id) ON DELETE CASCADE,
-    id_articulo INTEGER REFERENCES articulos(id) ON DELETE CASCADE
-);
-success!
-timestamp: 2010-10-24T00:50:27.431658
-ALTER TABLE comentarios ADD fecha TIMESTAMP;
-timestamp: 2010-10-24T00:50:27.439068
-ALTER TABLE comentarios ADD visible CHAR(1);
-timestamp: 2010-10-24T11:33:26.300720
-ALTER TABLE usuarios ADD clave CHAR(512);
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-DELETE FROM usuarios;
-DELETE FROM sqlite_sequence WHERE name='usuarios';
-success!
-timestamp: 2010-10-24T13:52:54.417721
-CREATE TABLE auth_user(
-    id INT AUTO_INCREMENT NOT NULL,
-    first_name VARCHAR(128),
-    last_name VARCHAR(128),
-    email VARCHAR(512),
-    password VARCHAR(512),
-    registration_key VARCHAR(512),
-    reset_password_key VARCHAR(512),
-    PRIMARY KEY(id)
-) ENGINE=InnoDB CHARACTER SET utf8;
-timestamp: 2010-10-24T13:53:58.157813
-CREATE TABLE auth_user(
-    id INT AUTO_INCREMENT NOT NULL,
-    first_name VARCHAR(128),
-    last_name VARCHAR(128),
-    email VARCHAR(512),
-    password VARCHAR(512),
-    registration_key VARCHAR(512),
-    reset_password_key VARCHAR(512),
-    PRIMARY KEY(id)
-) ENGINE=InnoDB CHARACTER SET utf8;
-timestamp: 2010-10-24T13:54:38.221429
-CREATE TABLE usuarios(
-    id INT AUTO_INCREMENT NOT NULL,
-    usuario VARCHAR(512),
-    clave VARCHAR(512),
-    correo VARCHAR(512),
-    PRIMARY KEY(id)
-) ENGINE=InnoDB CHARACTER SET utf8;
-timestamp: 2010-10-24T13:56:51.786533
-CREATE TABLE auth_user(
-    id INT AUTO_INCREMENT NOT NULL,
-    first_name VARCHAR(128),
-    last_name VARCHAR(128),
-    email VARCHAR(512),
-    password VARCHAR(512),
-    registration_key VARCHAR(512),
-    reset_password_key VARCHAR(512),
-    PRIMARY KEY(id)
-) ENGINE=InnoDB CHARACTER SET utf8;
-timestamp: 2010-10-24T13:57:57.565684
+
+timestamp: 2010-10-26T00:55:21.088575
+ALTER TABLE articulos ADD id_usuario__tmp INT, ADD INDEX id_usuario__idx (id_usuario), ADD FOREIGN KEY (id_usuario) REFERENCES auth_user(id) ON DELETE CASCADE;
+timestamp: 2010-10-26T00:58:34.180909
+ALTER TABLE articulos ADD id_usuario__tmp INT, ADD INDEX id_usuario__idx (id_usuario), ADD FOREIGN KEY (id_usuario) REFERENCES auth_user(id) ON DELETE CASCADE;
+timestamp: 2010-10-26T01:03:55.282019
 CREATE TABLE auth_user(
     id INT AUTO_INCREMENT NOT NULL,
     first_name VARCHAR(128),
@@ -214,7 +15,7 @@ CREATE TABLE auth_user(
     PRIMARY KEY(id)
 ) ENGINE=InnoDB CHARACTER SET utf8;
 success!
-timestamp: 2010-10-24T13:57:57.849371
+timestamp: 2010-10-26T01:03:55.488377
 CREATE TABLE auth_group(
     id INT AUTO_INCREMENT NOT NULL,
     role VARCHAR(512),
@@ -222,7 +23,7 @@ CREATE TABLE auth_group(
     PRIMARY KEY(id)
 ) ENGINE=InnoDB CHARACTER SET utf8;
 success!
-timestamp: 2010-10-24T13:57:58.198374
+timestamp: 2010-10-26T01:03:55.509168
 CREATE TABLE auth_membership(
     id INT AUTO_INCREMENT NOT NULL,
     user_id INT, INDEX user_id__idx (user_id), FOREIGN KEY (user_id) REFERENCES auth_user(id) ON DELETE CASCADE,
@@ -230,7 +31,7 @@ CREATE TABLE auth_membership(
     PRIMARY KEY(id)
 ) ENGINE=InnoDB CHARACTER SET utf8;
 success!
-timestamp: 2010-10-24T13:57:58.503596
+timestamp: 2010-10-26T01:03:55.579090
 CREATE TABLE auth_permission(
     id INT AUTO_INCREMENT NOT NULL,
     group_id INT, INDEX group_id__idx (group_id), FOREIGN KEY (group_id) REFERENCES auth_group(id) ON DELETE CASCADE,
@@ -240,7 +41,7 @@ CREATE TABLE auth_permission(
     PRIMARY KEY(id)
 ) ENGINE=InnoDB CHARACTER SET utf8;
 success!
-timestamp: 2010-10-24T13:57:58.779785
+timestamp: 2010-10-26T01:03:55.668891
 CREATE TABLE auth_event(
     id INT AUTO_INCREMENT NOT NULL,
     time_stamp DATETIME,
@@ -251,26 +52,18 @@ CREATE TABLE auth_event(
     PRIMARY KEY(id)
 ) ENGINE=InnoDB CHARACTER SET utf8;
 success!
-timestamp: 2010-10-24T13:57:59.059738
-CREATE TABLE usuarios(
-    id INT AUTO_INCREMENT NOT NULL,
-    usuario VARCHAR(512),
-    clave VARCHAR(512),
-    correo VARCHAR(512),
-    PRIMARY KEY(id)
-) ENGINE=InnoDB CHARACTER SET utf8;
-success!
-timestamp: 2010-10-24T13:57:59.342544
+timestamp: 2010-10-26T01:03:55.688727
 CREATE TABLE articulos(
     id INT AUTO_INCREMENT NOT NULL,
     titulo VARCHAR(512),
     articulo LONGTEXT,
     fecha DATETIME,
-    id_usuario INT, INDEX id_usuario__idx (id_usuario), FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE,
+    id_usuario INT, INDEX id_usuario__idx (id_usuario), FOREIGN KEY (id_usuario) REFERENCES auth_user(id) ON DELETE CASCADE,
+    image VARCHAR(512),
     PRIMARY KEY(id)
 ) ENGINE=InnoDB CHARACTER SET utf8;
 success!
-timestamp: 2010-10-24T13:57:59.639667
+timestamp: 2010-10-26T01:03:55.698019
 CREATE TABLE comentarios(
     id INT AUTO_INCREMENT NOT NULL,
     id_articulo INT, INDEX id_articulo__idx (id_articulo), FOREIGN KEY (id_articulo) REFERENCES articulos(id) ON DELETE CASCADE,
@@ -284,14 +77,14 @@ CREATE TABLE comentarios(
     PRIMARY KEY(id)
 ) ENGINE=InnoDB CHARACTER SET utf8;
 success!
-timestamp: 2010-10-24T13:57:59.934093
+timestamp: 2010-10-26T01:03:55.712497
 CREATE TABLE etiquetas(
     id INT AUTO_INCREMENT NOT NULL,
     nombre VARCHAR(512),
     PRIMARY KEY(id)
 ) ENGINE=InnoDB CHARACTER SET utf8;
 success!
-timestamp: 2010-10-24T13:58:00.225349
+timestamp: 2010-10-26T01:03:55.719346
 CREATE TABLE etiquetas_articulos(
     id INT AUTO_INCREMENT NOT NULL,
     id_etiqueta INT, INDEX id_etiqueta__idx (id_etiqueta), FOREIGN KEY (id_etiqueta) REFERENCES etiquetas(id) ON DELETE CASCADE,
@@ -299,8 +92,5 @@ CREATE TABLE etiquetas_articulos(
     PRIMARY KEY(id)
 ) ENGINE=InnoDB CHARACTER SET utf8;
 success!
-timestamp: 2010-10-24T16:53:50.886252
-ALTER TABLE articulos ADD image VARCHAR(512);
-success!
-timestamp: 2010-10-25T08:18:27.704750
-ALTER TABLE articulos ADD image CHAR(512);
+timestamp: 2010-10-26T02:05:04.183043
+ALTER TABLE articulos ADD id_usuario__tmp INT, ADD INDEX id_usuario__idx (id_usuario), ADD FOREIGN KEY (id_usuario) REFERENCES auth_user(id) ON DELETE CASCADE;

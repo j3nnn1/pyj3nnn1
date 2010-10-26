@@ -1,0 +1,500 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/views/default/index.html'
+p4
+sS'code'
+p5
+S'response.write(\'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\\n<!--\\nDesign by Free CSS Templates\\nhttp://www.freecsstemplates.org\\nReleased for free under a Creative Commons Attribution 2.5 License\\n\\nName       : Blogging\\nDescription: A two-column, fixed-width design for 1024x768 screen resolutions.\\nVersion    : 1.0\\nReleased   : 20090208\\n\\n-->\\n<html xmlns="http://www.w3.org/1999/xhtml">\\n <head>\\n  <title>\\n   \', escape=False)\nresponse.write(response.title or request.application)\nresponse.write(\'\\n  </title>\\n  \', escape=False)\nresponse.files.append(URL(request.application,\'static\',\'plugin_layouts/layouts/Blogging/style.css\'))\nresponse.write(\'\\n\', escape=False)\nresponse.files.append(URL(\'static\',\'superfish.js\'))\nresponse.write(\'\\n  \', escape=False)\nresponse.files.insert(0,URL(r=request,c=\'static\',f=\'jquery.js\'))\nresponse.files.insert(1,URL(r=request,c=\'static\',f=\'calendar.css\'))\nresponse.files.insert(2,URL(r=request,c=\'static\',f=\'calendar.js\'))\nfor _item in response.meta or []:\n    response.write(\'\\n     <meta name="\', escape=False)\n    response.write(_item)\n    response.write(\'" content="\', escape=False)\n    response.write(response.meta[_item])\n    response.write(\'" />\', escape=False)\n    pass\nfor _k,_file in enumerate(response.files or []):\n    if _file in response.files[:_k]:\n        continue\n    elif _file.lower().endswith(\'.css\'):\n        response.write(\'\\n     <link href="\', escape=False)\n        response.write(_file)\n        response.write(\'" rel="stylesheet" type="text/css" />\', escape=False)\n    elif _file.lower().endswith(\'.js\'):\n        response.write(\'\\n     <script src="\', escape=False)\n        response.write(_file)\n        response.write(\'" type="text/javascript"></script>\', escape=False)\n        pass\n    pass\nresponse.write(\'\\n<script type="text/javascript"><!--\\nfunction popup(url) {\\n  newwindow=window.open(url,\\\'name\\\',\\\'height=400,width=600\\\');\\n  if (window.focus) newwindow.focus();\\n  return false;\\n}\\nfunction collapse(id) { jQuery(\\\'#\\\'+id).slideToggle(); }\\nfunction fade(id,value) { if(value>0) jQuery(\\\'#\\\'+id).hide().fadeIn(\\\'slow\\\'); else jQuery(\\\'#\\\'+id).show().fadeOut(\\\'slow\\\'); }\\nfunction ajax(u,s,t) {\\n    query = \\\'\\\';\\n    if (typeof s == "string") {\\n        d = jQuery(s).serialize();\\n        if(d){ query = d; }\\n    } else {\\n        pcs = [];\\n        for(i=0; i<s.length; i++) {\\n            q = jQuery("[name="+s[i]+"]").serialize();\\n            if(q){pcs.push(q);}\\n        }\\n        if (pcs.length>0){query = pcs.join("&");}\\n    }\\n    jQuery.ajax({type: "POST", url: u, data: query, success: function(msg) { if(t) { if(t==\\\':eval\\\') eval(msg); else jQuery("#" + t).html(msg); } } }); \\n}\\nString.prototype.reverse = function () { return this.split(\\\'\\\').reverse().join(\\\'\\\');};\\nfunction web2py_ajax_init() {\\n  jQuery(\\\'.hidden\\\').hide();\\n  jQuery(\\\'.error\\\').hide().slideDown(\\\'slow\\\');\\n  jQuery(\\\'.flash\\\').click(function() { jQuery(this).fadeOut(\\\'slow\\\'); return false; });\\n  jQuery(\\\'input[type=submit]\\\').click(function(){var t=jQuery(this);t.hide();t.after(\\\'<input class="submit_disabled" disabled="disabled" type="submit" name="\\\'+t.attr("name")+\\\'_dummy" value="\\\'+t.val()+\\\'">\\\')});\\n  jQuery(\\\'input.integer\\\').keyup(function(){this.value=this.value.reverse().replace(/[^0-9\\\\-]|\\\\-(?=.)/g,\\\'\\\').reverse();});\\n  jQuery(\\\'input.double,input.decimal\\\').keyup(function(){this.value=this.value.reverse().replace(/[^0-9\\\\-\\\\.]|[\\\\-](?=.)|[\\\\.](?=[0-9]*[\\\\.])/g,\\\'\\\').reverse();});\\n  jQuery("input[type=\\\'checkbox\\\'].delete").each(function(){jQuery(this).click(function() { if(this.checked) if(!confirm("\', escape=False)\nresponse.write(T(\'Sure you want to delete this object?\'))\nresponse.write(\'")) this.checked=false; });});\\n  try {jQuery("input.date").focus( function() {Calendar.setup({\\n     inputField:this.id, ifFormat:"\', escape=False)\nresponse.write(T(\'%Y-%m-%d\'))\nresponse.write(\'", showsTime:false\\n  }); }); } catch(e) {};\\n  try { jQuery("input.datetime").focus( function() {Calendar.setup({\\n     inputField:this.id, ifFormat:"\', escape=False)\nresponse.write(T(\'%Y-%m-%d %H:%M:%S\'))\nresponse.write(\'", showsTime: true,timeFormat: "24"\\n  }); }); } catch(e) {};\\n  try { jQuery("input.time").clockpick({\\n      starthour:0, endhour:23, showminutes:true, military:true\\n  }); } catch(e) {};\\n};\\njQuery(document).ready(function(){\\n   jQuery(\\\'.flash\\\').hide();\\n   if(jQuery(\\\'.flash\\\').html()!=\\\'\\\') jQuery(\\\'.flash\\\').slideDown(\\\'slow\\\');\\n   web2py_ajax_init();});\\n\\nfunction web2py_trap_form(action,target) {\\n   jQuery(\\\'#\\\'+target+\\\' form\\\').each(function(i){\\n      var form=jQuery(this);\\n      if(!form.hasClass(\\\'no_trap\\\'))\\n        form.submit(function(obj){\\n         jQuery(\\\'.flash\\\').hide().html(\\\'\\\');\\n         web2py_ajax_page(\\\'post\\\',action,form.serialize(),target);\\n         return false;\\n      });\\n   });\\n}\\n\\nfunction web2py_ajax_page(method,action,data,target) {\\n  jQuery.ajax({\\\'type\\\':method,\\\'url\\\':action,\\\'data\\\':data,\\n    \\\'beforeSend\\\':function(xhr) {\\n      xhr.setRequestHeader(\\\'web2py-component-location\\\',document.location);\\n      xhr.setRequestHeader(\\\'web2py-component-element\\\',target);},\\n    \\\'complete\\\':function(xhr,text){\\n      var html=xhr.responseText;\\n      var content=xhr.getResponseHeader(\\\'web2py-component-content\\\'); \\n      var command=xhr.getResponseHeader(\\\'web2py-component-command\\\');\\n      var flash=xhr.getResponseHeader(\\\'web2py-component-flash\\\');\\n      var t = jQuery(\\\'#\\\'+target);\\n      if(content==\\\'prepend\\\') t.prepend(html); \\n      else if(content==\\\'append\\\') t.append(html);\\n      else if(content!=\\\'hide\\\') t.html(html);  \\n      web2py_trap_form(action,target);\\n      web2py_ajax_init();      \\n      if(command) eval(command);\\n      if(flash) jQuery(\\\'.flash\\\').html(flash).slideDown();\\n      }\\n    });\\n}\\nfunction web2py_component(action,target) {\\n    jQuery(document).ready(function(){ web2py_ajax_page(\\\'get\\\',action,null,target); });\\n}\\n//--></script>\\n\', escape=False)\nresponse.write(\'\\n  <style>\\nul.web2py-menu-vertical { width: 150px; position: relative; top:1em; left:1em;  z-index:30; border:0; margin:0; padding: 0; list-style: none; text-decoration: none;}\\nul.web2py-menu-vertical li { margin:0; padding:0; border:0; width: 150px; background: black; text-align:left;}\\nul.web2py-menu-vertical li a { margin:0; padding: 1px 3px 1px 3px; border:0; width: 144px; color: white; font-size:12px;}\\ndiv.flash { position: fixed; float: right; padding: 10px; top: 10px; right: 30px; opacity: 0.75; margin: 10px 10px 10px 10px; text-align: center; clear: both; color: #fff; font-size: 11pt; text-align: center; vertical-align: middle; cursor: pointer; background: black; border: 2px solid #fff; -moz-border-radius: 5px; -webkit-border-radius: 5px; z-index: 2; }\\ndiv.error { background-color: red; color: white; padding: 3px; }\\n.auth_navbar { text-align:right; z-index:20; position: absolute; top: 2px; right:30px; border:0; padding:0 }\\n  </style>\\n </head>\\n <body>\\n  <!-- start header -->\\n  \', escape=False)\ntry:\n    response.write(auth.navbar(action=URL(\'default\',\'user\')))\nexcept:pass\nresponse.write(\'\\n  \', escape=False)\nimport tweepy\nresponse.write(\'\\n  <div id="wrapper">\\n   <div id="header">\\n    <div id="menu">\\n     \', escape=False)\nresponse.write(MENU(response.menu,_class=\'web2py-menu\'))\nresponse.write(\'\\n    <script>\\n      jQuery(document).ready(function(){jQuery(\\\'ul.web2py-menu\\\').superfish({delay:400});});\\n    </script>\\n    </div>\\n    <!-- end #menu -->\\n    <!--<div id="search">\\n     <form method="get" action="">\\n      <fieldset>\\n       <input type="text" name="s" id="search-text" size="15" />\\n       <input type="submit" id="search-submit" value="Search" />\\n      </fieldset>\\n     </form>\\n    </div> -->\\n    <!-- end #search -->\\n   </div>\\n   <!-- end #header -->\\n   <div id="logo">\\n    <h1>\\n     \', escape=False)\nresponse.write(response.title or request.application)\nresponse.write(\'\\n    </h1>\\n    <p>\\n     <em>\\n      template design by\\n      <a href="#">\\n       Expropiada Templates\\n      </a>\\n     </em>\\n    </p>\\n   </div>\\n   <hr />\\n   <!-- end #logo -->\\n   <!-- end #header-wrapper -->\\n   <div id="page">\\n    <div id="content">\\n     <div class="flash">\', escape=False)\nresponse.write(response.flash or \'\')\nresponse.write(\'</div>\\n     \', escape=False)\nresponse.write(\'\\n<div class="content">\\n\', escape=False)\nx=0\nresponse.write(\'\\n\', escape=False)\nrecorta = lambda x,y: A(\' \'.join(x[:30])+\' Leer mas...\',_href=URL("viewpost",args=y))\nresponse.write(\'\\n\', escape=False)\nread_more = lambda x,y: len(x.split()) < 30 and x or recorta(x.split(),y)\nresponse.write(\'\\n\\n\', escape=False)\nfor p in post:\n    response.write(\'\\n    <div class="post">\\n        \', escape=False)\n    response.write(H3(A(p.articulos.titulo, _href=URL("viewpost", args=p.articulos.id)), _class=\'title\'))\n    response.write(\' \\n        <div class="entry"> \', escape=False)\n    response.write(read_more(p.articulos.articulo,p.articulos.id))\n    response.write(\'</div>\\n            \', escape=False)\n    response.write(A(T("Escrito por %s el: %s Comentarios(%s)" % (p.usuarios.usuario,p.articulos.fecha,comments[x])), _class=\'meta\'))\n    response.write(\'\\n    </div>\\n<hr />\\n\', escape=False)\n    x=x+1\n    response.write(\'\\n\', escape=False)\n    pass\nresponse.write(\'\\n<br />\\n<!-- Paginador -->\\n<div class="pages">\\n\', escape=False)\nif totalpages > 1:\n    response.write(\'\\n        Paginas: \\n    \', escape=False)\n    for i in range(1, totalpages+1):\n        response.write(\'\\n        <span class="page">\\n            \', escape=False)\n        if postpage == i and i>1:\n            response.write(\' \\n                <a href="/blog/?page=\', escape=False)\n            response.write(i-1)\n            response.write(\'">Atras</a>\\n                \', escape=False)\n            pass\n        response.write(\' \\n            \', escape=False)\n    else:\n        response.write(\'\\n                \', escape=False)\n        if i < totalpages+1 and postpage != i:\n            response.write(\'\\n                    <a href="/blog/?page=\', escape=False)\n            response.write(postpage+1)\n            response.write(\'">Adelante</a>\\n                    \', escape=False)\n            pass\n        response.write(\'\\n                \', escape=False)\n        pass\n    response.write(\'\\n        </span>\\n        \', escape=False)\n    pass\nresponse.write(\'\\n\', escape=False)\npass\nresponse.write(\'\\n</div>\\n</div>\\n\\n\', escape=False)\nresponse.write(\'\\n    </div>\\n    <!-- end #content -->\\n    <div id="sidebar">\\n     <ul>\\n         <li>\\n            <h2> Mi Timeline </h2>\\n            <p>\', escape=False)\nusertl = tweepy.api.user_timeline(\'j3nnn1\')\nresponse.write(\'\\n\\n<ul>\\n\', escape=False)\nfor tweet in usertl[0:4]:\n    response.write(\'\\n   <li>\\n   <strong>@\', escape=False)\n    response.write(tweet.user.screen_name)\n    response.write(\':</strong> \', escape=False)\n    response.write(tweet.text)\n    response.write(\'\\n    </li>\\n\', escape=False)\n    pass\nresponse.write(\'\\n</ul>\\n\\n    \\n\\n\', escape=False)\nresponse.write(\' </p>\\n         </li>\\n         <li>\\n            <h2> Menciones en Twitter </h2>\\n            <p> \', escape=False)\nresponse.write("<div class=\'twitter\'>\\n", escape=False)\nsearch_tweets = tweepy.api.search(\'@j3nnn1\')\nresponse.write(\'\\n<ul>\\n\', escape=False)\nfor tweet in search_tweets[0:2]:\n    response.write(\'\\n   <li> \\n   <strong>@\', escape=False)\n    response.write(tweet.from_user)\n    response.write(\':</strong> \', escape=False)\n    response.write(tweet.text)\n    response.write(\'\\n   </li>\\n\', escape=False)\n    pass\nresponse.write(\'\\n</ul>\\n</div>\\n\', escape=False)\nresponse.write(\' </p>\\n         </li>\\n\\n         <li>\\n            <h2> Twitter Busqueda: python </h2>\\n\\t    <p> \', escape=False)\nresponse.write("<div class=\'twitter\'>\\n", escape=False)\nsearch_tweets = tweepy.api.search(\'python\')\nresponse.write(\'\\n<ul>\\n\', escape=False)\nfor tweet in search_tweets[0:2]:\n    response.write(\'\\n   <li>\\n   <strong>@\', escape=False)\n    response.write(tweet.from_user)\n    response.write(\':</strong> \', escape=False)\n    response.write(tweet.text)\n    response.write(\'\\n   </li>\\n\', escape=False)\n    pass\nresponse.write(\'\\n</ul>\\n</div>\\n\\n\', escape=False)\nresponse.write(\' </p>\\n         </li>\\n     </ul>\\n    </div>\\n    <!-- end #sidebar -->\\n    <div style="clear: both;">\\n     &nbsp;\\n    </div>\\n   </div>\\n   <!-- end #page -->\\n   <div id="footer">\\n    <p> .:B106 d3 j3nnn1:.</p>\\n   </div>\\n   <!-- end #footer -->\\n  </div>\\n </body>\\n</html>\\n\', escape=False)'
+p6
+sS'snapshot'
+p7
+(dp8
+S'exception'
+p9
+(dp10
+S'__hash__'
+p11
+S"<method-wrapper '__hash__' of exceptions.KeyError object>"
+p12
+sS'__setattr__'
+p13
+S"<method-wrapper '__setattr__' of exceptions.KeyError object>"
+p14
+sS'__reduce_ex__'
+p15
+S'<built-in method __reduce_ex__ of exceptions.KeyError object>'
+p16
+sS'__getslice__'
+p17
+S"<method-wrapper '__getslice__' of exceptions.KeyError object>"
+p18
+sS'__getitem__'
+p19
+S"<method-wrapper '__getitem__' of exceptions.KeyError object>"
+p20
+sS'__setstate__'
+p21
+S'<built-in method __setstate__ of exceptions.KeyError object>'
+p22
+sS'__reduce__'
+p23
+S'<built-in method __reduce__ of exceptions.KeyError object>'
+p24
+sS'__str__'
+p25
+S"<method-wrapper '__str__' of exceptions.KeyError object>"
+p26
+sS'__format__'
+p27
+S'<built-in method __format__ of exceptions.KeyError object>'
+p28
+sS'__getattribute__'
+p29
+S"<method-wrapper '__getattribute__' of exceptions.KeyError object>"
+p30
+sS'__class__'
+p31
+S"<type 'exceptions.KeyError'>"
+p32
+sS'__unicode__'
+p33
+S'<built-in method __unicode__ of exceptions.KeyError object>'
+p34
+sS'__delattr__'
+p35
+S"<method-wrapper '__delattr__' of exceptions.KeyError object>"
+p36
+sS'__subclasshook__'
+p37
+S'<built-in method __subclasshook__ of type object>'
+p38
+sS'__repr__'
+p39
+S"<method-wrapper '__repr__' of exceptions.KeyError object>"
+p40
+sS'args'
+p41
+S"('usuarios',)"
+p42
+sS'__dict__'
+p43
+S'{}'
+p44
+sS'__sizeof__'
+p45
+S'<built-in method __sizeof__ of exceptions.KeyError object>'
+p46
+sS'__doc__'
+p47
+S"'Mapping key not found.'"
+p48
+sS'__init__'
+p49
+S"<method-wrapper '__init__' of exceptions.KeyError object>"
+p50
+sS'__new__'
+p51
+S'<built-in method __new__ of type object>'
+p52
+ssS'evalue'
+p53
+S"'usuarios'"
+p54
+sS'request'
+p55
+(dp56
+S'function'
+p57
+S"'index'"
+p58
+sS'body'
+p59
+S'<cStringIO.StringO object>'
+p60
+sS'wsgi'
+p61
+S"<Storage {'start_response': <function <lambda> a...>, 'HTTP_ACCEPT_ENCODING': 'gzip,deflate,sdch'}}>"
+p62
+sS'extension'
+p63
+S"'html'"
+p64
+sS'vars'
+p65
+S'<Storage {}>'
+p66
+sS'cid'
+p67
+S'None'
+p68
+sS'url'
+p69
+S'<gluon.html.XML object>'
+p70
+sg41
+S'[]'
+p71
+sS'controller'
+p72
+S"'default'"
+p73
+sS'cookies'
+p74
+S"<SimpleCookie: session_id_admin='127-0-0-1-141ff3cd-2335-410e-9c97-0f82f65830c1'>"
+p75
+sS'application'
+p76
+S"'blog'"
+p77
+sS'ajax'
+p78
+S'False'
+p79
+sS'client'
+p80
+S"'127.0.0.1'"
+p81
+sS'env'
+p82
+S"<Storage {'http_user_agent': 'Mozilla/5.0 (X11; ...nce': False, 'path_info': '/blog/default/index'}>"
+p83
+sS'raw_args'
+p84
+S'None'
+p85
+sS'get_vars'
+p86
+S'<Storage {}>'
+p87
+sS'folder'
+p88
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/'"
+p89
+sS'now'
+p90
+S'datetime.datetime(2010, 10, 26, 0, 55, 56, 898512)'
+p91
+sS'post_vars'
+p92
+S'<Storage {}>'
+p93
+ssS'frames'
+p94
+(lp95
+(dp96
+S'file'
+p97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py'
+p98
+sS'dump'
+p99
+(dp100
+S'environment'
+p101
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p102
+sS'ccode'
+p103
+S'<code object <module> at 0x9d12728, file "/home/...lications/blog/views/default/index.html", line 1>'
+p104
+ssS'lnum'
+p105
+I188
+sS'lines'
+p106
+(dp107
+I192
+S'        # XXX Show exception in Wing IDE if running in debugger'
+p108
+sI183
+S'        if type(code) == types.CodeType:'
+p109
+sI184
+S'            ccode = code'
+p110
+sI185
+S'        else:'
+p111
+sI186
+S'            ccode = compile2(code,layer)'
+p112
+sI187
+S''
+sI188
+S'        exec ccode in environment'
+p113
+sI189
+S'    except HTTP:'
+p114
+sI190
+S'        raise'
+p115
+sI191
+S'    except Exception:'
+p116
+ssS'call'
+p117
+S'(code=\'response.write(\\\'<!DOCTYPE html PUBLIC "-//W3C//D...->\\\\n  </div>\\\\n </body>\\\\n</html>\\\\n\\\', escape=False)\', environment={\'A\': <class \'gluon.html.A\'>, \'Auth\': <class \'gluon.tools.Auth\'>, \'B\': <class \'gluon.html.B\'>, \'BEAUTIFY\': <class \'gluon.html.BEAUTIFY\'>, \'BODY\': <class \'gluon.html.BODY\'>, \'BR\': <class \'gluon.html.BR\'>, \'CENTER\': <class \'gluon.html.CENTER\'>, \'CLEANUP\': <class \'gluon.validators.CLEANUP\'>, \'CODE\': <class \'gluon.html.CODE\'>, \'CRYPT\': <class \'gluon.validators.CRYPT\'>, ...}, layer=\'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/views/default/index.html\')'
+p118
+sS'func'
+p119
+S'restricted'
+p120
+sa(dp121
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/views/default/index.html'
+p122
+sg99
+(dp123
+sg105
+I64
+sg106
+(dp124
+I64
+S'    response.write(A(T("Escrito por %s el: %s Comentarios(%s)" % (p.usuarios.usuario,p.articulos.fecha,comments[x])), _class=\'meta\'))'
+p125
+sI65
+S"    response.write('\\n    </div>\\n<hr />\\n', escape=False)"
+p126
+sI66
+S'    x=x+1'
+p127
+sI67
+S"    response.write('\\n', escape=False)"
+p128
+sI68
+S'    pass'
+p129
+sI69
+S'response.write(\'\\n<br />\\n<!-- Paginador -->\\n<div class="pages">\\n\', escape=False)'
+p130
+sI70
+S'if totalpages > 1:'
+p131
+sI71
+S"    response.write('\\n        Paginas: \\n    ', escape=False)"
+p132
+sI72
+S'    for i in range(1, totalpages+1):'
+p133
+sI73
+S'        response.write(\'\\n        <span class="page">\\n            \', escape=False)'
+p134
+sI74
+S'        if postpage == i and i>1:'
+p135
+sI55
+S"response.write('\\n', escape=False)"
+p136
+sI56
+S'read_more = lambda x,y: len(x.split()) < 30 and x or recorta(x.split(),y)'
+p137
+sI57
+S"response.write('\\n\\n', escape=False)"
+p138
+sI58
+S'for p in post:'
+p139
+sI59
+S'    response.write(\'\\n    <div class="post">\\n        \', escape=False)'
+p140
+sI60
+S'    response.write(H3(A(p.articulos.titulo, _href=URL("viewpost", args=p.articulos.id)), _class=\'title\'))'
+p141
+sI61
+S'    response.write(\' \\n        <div class="entry"> \', escape=False)'
+p142
+sI62
+S'    response.write(read_more(p.articulos.articulo,p.articulos.id))'
+p143
+sI63
+S"    response.write('</div>\\n            ', escape=False)"
+p144
+ssg117
+S'()'
+p145
+sg119
+S'<module>'
+p146
+sa(dp147
+g97
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/sql.py'
+p148
+sg99
+(dp149
+S'self'
+p150
+S"<Row {'auth_user': <Row {'first_name': 'Jennifer...ete_record': <function <lambda> at 0x9cbaa3c>}>}>"
+p151
+sS'dict.__getitem__'
+p152
+S"<method '__getitem__' of 'dict' objects>"
+p153
+sS'key'
+p154
+S"'usuarios'"
+p155
+sS'builtindict'
+p156
+S"<type 'dict'>"
+p157
+ssg105
+I731
+sg106
+(dp158
+I726
+S''
+sI727
+S'    def __setitem__(self, key, value):'
+p159
+sI728
+S'        dict.__setitem__(self, str(key), value)'
+p160
+sI729
+S''
+sI730
+S'    def __getattr__(self, key):'
+p161
+sI731
+S'        return dict.__getitem__(self,key)'
+p162
+sI732
+S''
+sI733
+S'    def __setattr__(self, key, value):'
+p163
+sI734
+S'        dict.__setitem__(self,key,value)'
+p164
+sI735
+S''
+ssg117
+S"(self=<Row {'auth_user': <Row {'first_name': 'Jennifer...ete_record': <function <lambda> at 0x9cbaa3c>}>}>, key='usuarios')"
+p165
+sg119
+S'__getattr__'
+p166
+sasS'pyver'
+p167
+S'Python 2.6.6: /usr/bin/python'
+p168
+sS'session'
+p169
+(dp170
+S'auth'
+p171
+S'None'
+p172
+ssS'etype'
+p173
+S"<type 'exceptions.KeyError'>"
+p174
+sS'date'
+p175
+S'Tue Oct 26 00:55:56 2010'
+p176
+sS'response'
+p177
+(dp178
+S'status'
+p179
+S'200'
+p180
+sg59
+S'<cStringIO.StringO object>'
+p181
+sg74
+S"<SimpleCookie: session_id_blog='127-0-0-1-06a309d5-aad6-4ce7-aaaf-71d18e34d70d'>"
+p182
+sS'_vars'
+p183
+S"{'comments': [0, 0, 0], 'post': <gluon.sql.Rows object>, 'postpage': 1, 'totalpages': 2}"
+p184
+sS'title'
+p185
+S'"It\'s me"'
+p186
+sS'menu'
+p187
+S"[(<lazyT 'Index'>, False, <gluon.html.XML object>, []), (<lazyT 'About'>, False, <gluon.html.XML object>, []), (<lazyT 'Admin'>, False, <gluon.html.XML object>, [])]"
+p188
+sS'flash'
+p189
+S"''"
+p190
+sS'session_new'
+p191
+S'True'
+p192
+sS'_custom_rollback'
+p193
+S'None'
+p194
+sS'session_id'
+p195
+S"'127-0-0-1-06a309d5-aad6-4ce7-aaaf-71d18e34d70d'"
+p196
+sS'headers'
+p197
+S"<Storage {'Expires': 'mar, 26 oct 2010 05:25:56 ...he, must-revalidate, post-check=0, pre-check=0'}>"
+p198
+sS'meta'
+p199
+S"<Storage {'keywords': 'j3nnn1 web2py python', 'd...con web2py... ', 'author': 'Jennifer Maldonado'}>"
+p200
+sS'session_filename'
+p201
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/bl...ns/127-0-0-1-06a309d5-aad6-4ce7-aaaf-71d18e34d70d'"
+p202
+sS'postprocessing'
+p203
+S'[]'
+p204
+sS'_caller'
+p205
+S'<function <lambda>>'
+p206
+sS'_view_environment'
+p207
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p208
+sS'subtitle'
+p209
+S'<lazyT "it\'s me j3nnn1">'
+p210
+sS'session_id_name'
+p211
+S"'session_id_blog'"
+p212
+sS'_custom_commit'
+p213
+S'None'
+p214
+sS'files'
+p215
+S'[<gluon.html.XML object>, <gluon.html.XML object>, <gluon.html.XML object>, <gluon.html.XML object>, <gluon.html.XML object>]'
+p216
+sS'view'
+p217
+S"'default/index.html'"
+p218
+ssS'locals'
+p219
+(dp220
+S'self'
+p221
+S"<Row {'auth_user': <Row {'first_name': 'Jennifer...ete_record': <function <lambda> at 0x9cbaa3c>}>}>"
+p222
+sS'key'
+p223
+S"'usuarios'"
+p224
+sssS'traceback'
+p225
+S'Traceback (most recent call last):\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py", line 188, in restricted\n    exec ccode in environment\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/views/default/index.html", line 64, in <module>\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/sql.py", line 731, in __getattr__\n    return dict.__getitem__(self,key)\nKeyError: \'usuarios\'\n'
+p226
+s.

@@ -23,8 +23,8 @@ def index():
     if totalposts > perpage and totalpages == 1 and totalpages * perpage != totalposts:
         totalpages = 2
 
-    filtro = (db.articulos.id_usuario==db.usuarios.id)
-    post = db(filtro).select(db.articulos.ALL, db.usuarios.usuario, limitby=(limit,page*perpage),orderby=~db.articulos.fecha)
+    filtro = (db.articulos.id_usuario==db.auth_user.id)
+    post = db(filtro).select(db.articulos.ALL, db.auth_user.first_name, limitby=(limit,page*perpage),orderby=~db.articulos.fecha)
     comments  = [db((db.comentarios.id_articulo == i.articulos.id)&(db.comentarios.visible == '1')).count() for i in post]
     return dict(post=post,totalpages=totalpages,postpage=page,comments=comments)
 
@@ -34,8 +34,8 @@ def about():
 
 def viewpost():
     if request.args(0):
-        filtro      = ((db.articulos.id==request.args(0)) & (db.articulos.id_usuario==db.usuarios.id))
-        post        = db(filtro).select(db.articulos.ALL, db.usuarios.usuario).first()
+        filtro      = ((db.articulos.id==request.args(0)) & (db.articulos.id_usuario==db.auth_user.id))
+        post        = db(filtro).select(db.articulos.ALL, db.auth_user.first_name).first()
 
         if post:
             form        = SQLFORM(db.comentarios)
@@ -73,7 +73,7 @@ def user():
 @auth.requires_login()
 def admin():
     
-    tableart = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records or "No posee Articulos."
+    tableart = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records
 
     return dict(tableart=tableart)
 
@@ -101,7 +101,7 @@ def modifypost():
 def createpost():
 
     form        = SQLFORM(db.articulos)
-    form.vars.id_usuario = 1
+    form.vars.id_usuario = auth.user.id
 
     if form.accepts(request.vars, session):
         response.flash ='Tu articulo ha sido publicado'
@@ -152,12 +152,12 @@ def grantcomment():
         if request.args(1)=='True':   #visible o no
             filtro = (db.comentarios.id==request.args(0)) 
             db(filtro).update(visible=0)
-            response.flash='El Comentario estará visible'
+            response.flash='visibilidad del Comentario cambiada'
 
         elif request.args(1)=='False':
             filtro = (db.comentarios.id==request.args(0))
             db(filtro).update(visible=1)
-            response.flash='El Comentario estará visible'
+            response.flash='visibilidad del Comentario cambiada'
 
         elif request.args(1)=='delete':
             filtro = (db.comentarios.id==request.args(0))

@@ -1,0 +1,17 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'applications/blog/controllers/default.py'
+p4
+sS'code'
+p5
+S"def index():\n    posts=db(db.posts.post_status=='published').select(db.posts.ALL)\n    return dict(posts=posts)\n\ndef post():\n    try: post_id=int(request.args[0])\n    except: redirect(URL(r=request,f='index'))\n    post=db(db.posts.id=post_id).select(db.posts.ALL)\n    comment_form=SQLFORM(db.comments.ALL)\n    return dict(post=post,comment_form=comment_form)\n\nresponse._vars=index()"
+p6
+sS'traceback'
+p7
+S'Traceback (most recent call last):\n  File "gluon\\restricted.pyc", line 59, in restricted\n  File "applications/blog/controllers/default.py", line 8\n    post=db(db.posts.id=post_id).select(db.posts.ALL)\nSyntaxError: keyword can\'t be an expression\n'
+p8
+s.

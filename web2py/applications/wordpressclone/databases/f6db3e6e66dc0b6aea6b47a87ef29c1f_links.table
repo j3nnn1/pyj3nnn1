@@ -1,0 +1,14 @@
+(dp1
+S'link_title'
+p2
+S'CHAR(32)'
+p3
+sS'link_url'
+p4
+S'CHAR(32)'
+p5
+sS'id'
+p6
+S'INTEGER PRIMARY KEY AUTOINCREMENT'
+p7
+s.
