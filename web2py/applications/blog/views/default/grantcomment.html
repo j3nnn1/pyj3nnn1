@@ -1,6 +1,7 @@
 {{extend 'layout.html'}} 
 <div class='content' align='center'>
 {{=DIV(H2(T("Aprobar comentarios."), _class='title'), _align='center')}}
+<br/>
 <div id='adminpost'>
 <table>
 <tr>
@@ -30,7 +31,8 @@
 	    {{=registro.comentarios.fecha}}
 	</td>
 	<td>
-	    {{=INPUT(_type='checkbox', _name='visible', _value='False')}}
+	    {{visible = lambda x: x and 'Si' or 'No'}}
+	    {{=A(visible(registro.comentarios.visible), _class='link', _href=URL('grantcomment', args=[registro.comentarios.id ,registro.comentarios.visible]))}}
 	</td>
 {{pass}}
     </tr>

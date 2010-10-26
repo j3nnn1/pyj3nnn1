@@ -1,0 +1,462 @@
+(dp1
+S'output'
+p2
+S''
+sS'layer'
+p3
+S'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'
+p4
+sS'code'
+p5
+S'# -*- coding: utf-8 -*- \n\n#########################################################################\n## This is a samples controller\n## - index is the default action of any application\n## - user is required for authentication and authorization\n## - download is for downloading files uploaded in the db (does streaming)\n## - call exposes all registered services (none by default)\n#########################################################################  \n\ndef index():\n    """\n    Esta vista va a obtener 3 post\n    """\n    # filter to join.\n    perpage = 3                                  # Numero de articulos por pagina\n    totalposts = db(db.articulos.id > 0).count() # contamos cuantos posts hay en la bd\n    totalpages = totalposts / perpage            # division para sacar el numero de paginas\n                  \n    page = int(request.vars.page) if request.vars.page else 1\n    limit = int(page - 1) * perpage\n                         \n    if totalposts > perpage and totalpages == 1 and totalpages * perpage != totalposts:\n        totalpages = 2\n\n    filtro = (db.articulos.id_usuario==db.usuarios.id)\n    post = db(filtro).select(db.articulos.ALL, db.usuarios.usuario, limitby=(limit,page*perpage),orderby=~db.articulos.fecha)\n    comments  = [db(db.comentarios.id_articulo == i.articulos.id).count() for i in post]\n    return dict(post=post,totalpages=totalpages,postpage=page,comments=comments)\n\ndef about():\n    """ Informaci\xc3\xb3n sobre mi persona"""\n    return dict()\n\ndef viewpost():\n    if request.args(0):\n        filtro      = ((db.articulos.id==request.args(0)) & (db.articulos.id_usuario==db.usuarios.id))\n        post        = db(filtro).select(db.articulos.ALL, db.usuarios.usuario).first()\n\n        if post:\n            form        = SQLFORM(db.comentarios)\n            form.vars.id_articulo = post.articulos.id\n            filtro          = ((db.comentarios.id_articulo==post.articulos.id)&(db.comentarios.visible==\'1\'))\n            comments        = (db(filtro).select(db.comentarios.ALL, orderby=~db.comentarios.fecha)).records \n\t    #print db._lastsql\n        else:\n            redirect(URL(\'index\'))\n\n        if form.accepts(request.vars, session):\n            response.flash =\'Tu comentario ha sido publicado\'\n    else:\n        redirect(URL(\'index\'))\n\n    return dict(post=post, form=form, comments=comments)\n\ndef user():\n    """\n    exposes:\n    http://..../[app]/default/user/login \n    http://..../[app]/default/user/logout\n    http://..../[app]/default/user/register\n    http://..../[app]/default/user/profile\n    http://..../[app]/default/user/retrieve_password\n    http://..../[app]/default/user/change_password\n    use @auth.requires_login()\n        @auth.requires_membership(\'group name\')\n        @auth.requires_permission(\'read\',\'table name\',record_id)\n    to decorate functions that need access control\n    """\n    return dict(form=auth())\n\n\n@auth.requires_login()\ndef admin():\n    \n    tableart = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records or "No posee Articulos."\n\n    return dict(tableart=tableart)\n\n\n@auth.requires_login()\ndef modifypost():\n\n    if request.args(0):  #modificando un post\n\n        post   = db.articulos(request.args(0)) or redirect(URL(\'index\'))\n\tform = SQLFORM(db.articulos, post)\n\n\tif form.accepts(request.vars, session):\n            response.flash =\'Tu articulo ha sido actualizado\'\n\telif form.errors:\n\t    response.flash =\'No se actualiz\xc3\xb3 el art\xc3\xadculo\'\n\n    else:\n\t form=none\n\t response.flash =\'No seleccion\xc3\xb3 el articulo\'\n    \n    return dict(form=form)\n\n@auth.requires_login()\ndef createpost():\n\n    form        = SQLFORM(db.articulos)\n    form.vars.id_usuario = 1\n\n    if form.accepts(request.vars, session):\n        response.flash =\'Tu articulo ha sido publicado\'\n\n    return dict(form=form)\n\n@auth.requires_login()\ndef deletepost():\n\n    if request.args(0):\n\n\tfiltro = (db.articulos.id==request.args(0))\t\n\trows   = db(filtro).delete()\n\n\tif rows:\n\t    response.flash =\'Tu articulo ha sido eliminado\'\n\telse:\n\t    response.flash =\'No existe el articulo\'\n\t\n        table = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records or "No posee Articulos."\n\t    \n    else:\n        redirect(URL(\'index\'))\n\n    return dict(table=table)\n\ndef download():\n    """\n    allows downloading of uploaded files\n    http://..../[app]/default/download/[filename]\n    """\n    return response.download(request,db)\n\n\ndef call():\n    """\n    exposes services. for example:\n    http://..../[app]/default/call/jsonrpc\n    decorate with @services.jsonrpc the functions to expose\n    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv\n    """\n    session.forget()\n    return service()\n\ndef grantcomment():\n    comments=\'\'\n\n    if request.args(0):     #id comentario.\n        if request.args(1): #visible o no\n\t        filtro = ((db.comentarios.visible==\'0\')&(db.comentarios.id==request.args(0))) \n            db(filtro).update(visible=1)\n\t    \n        else:\n\t        filtro = ((db.comentarios.visible==\'1\')&(db.comentarios.id==request.args(0)))\n            db(filtro).update(visible=0)\n\t    \n\tif form.accepts(request.vars, session):\n        response.flash=\'El Comentario estar\xc3\xa1 visible\'\n    else:\n        comments = db().select(db.comentarios.ALL).records\n    \n    return dict(comments=comments)\n\nresponse._vars=response._caller(viewpost)\n'
+p6
+sS'snapshot'
+p7
+(dp8
+S'exception'
+p9
+(dp10
+S'__getslice__'
+p11
+S"<method-wrapper '__getslice__' of exceptions.IndentationError object>"
+p12
+sS'text'
+p13
+S"'            db(filtro).update(visible=1)\\n'"
+p14
+sS'__str__'
+p15
+S"<method-wrapper '__str__' of exceptions.IndentationError object>"
+p16
+sS'__reduce__'
+p17
+S'<built-in method __reduce__ of exceptions.IndentationError object>'
+p18
+sS'__dict__'
+p19
+S'{}'
+p20
+sS'__sizeof__'
+p21
+S'<built-in method __sizeof__ of exceptions.IndentationError object>'
+p22
+sS'__init__'
+p23
+S"<method-wrapper '__init__' of exceptions.IndentationError object>"
+p24
+sS'__setattr__'
+p25
+S"<method-wrapper '__setattr__' of exceptions.IndentationError object>"
+p26
+sS'__reduce_ex__'
+p27
+S'<built-in method __reduce_ex__ of exceptions.IndentationError object>'
+p28
+sS'__new__'
+p29
+S'<built-in method __new__ of type object>'
+p30
+sS'__format__'
+p31
+S'<built-in method __format__ of exceptions.IndentationError object>'
+p32
+sS'__class__'
+p33
+S"<type 'exceptions.IndentationError'>"
+p34
+sS'filename'
+p35
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'"
+p36
+sS'lineno'
+p37
+S'155'
+p38
+sS'msg'
+p39
+S"'unindent does not match any outer indentation level'"
+p40
+sS'__doc__'
+p41
+S"'Improper indentation.'"
+p42
+sS'__getitem__'
+p43
+S"<method-wrapper '__getitem__' of exceptions.IndentationError object>"
+p44
+sS'__setstate__'
+p45
+S'<built-in method __setstate__ of exceptions.IndentationError object>'
+p46
+sS'__getattribute__'
+p47
+S"<method-wrapper '__getattribute__' of exceptions.IndentationError object>"
+p48
+sS'print_file_and_line'
+p49
+S'None'
+p50
+sS'args'
+p51
+S"('unindent does not match any outer indentation level', ('/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py', 155, 41, '            db(filtro).update(visible=1)\\n'))"
+p52
+sS'__subclasshook__'
+p53
+S'<built-in method __subclasshook__ of type object>'
+p54
+sS'offset'
+p55
+S'41'
+p56
+sS'__unicode__'
+p57
+S'<built-in method __unicode__ of exceptions.IndentationError object>'
+p58
+sS'__delattr__'
+p59
+S"<method-wrapper '__delattr__' of exceptions.IndentationError object>"
+p60
+sS'__repr__'
+p61
+S"<method-wrapper '__repr__' of exceptions.IndentationError object>"
+p62
+sS'__hash__'
+p63
+S"<method-wrapper '__hash__' of exceptions.IndentationError object>"
+p64
+ssS'evalue'
+p65
+S'unindent does not match any outer indentation level (default.py, line 155)'
+p66
+sS'request'
+p67
+(dp68
+S'function'
+p69
+S"'viewpost'"
+p70
+sS'body'
+p71
+S'<cStringIO.StringO object>'
+p72
+sS'wsgi'
+p73
+S"<Storage {'start_response': <function <lambda> a...>, 'HTTP_ACCEPT_ENCODING': 'gzip,deflate,sdch'}}>"
+p74
+sS'extension'
+p75
+S"'html'"
+p76
+sS'vars'
+p77
+S'<Storage {}>'
+p78
+sS'cid'
+p79
+S'None'
+p80
+sS'url'
+p81
+S'<gluon.html.XML object>'
+p82
+sg51
+S"['5']"
+p83
+sS'controller'
+p84
+S"'default'"
+p85
+sS'cookies'
+p86
+S"<SimpleCookie: session_id_admin='127-0-0-1-3ee7f...'127-0-0-1-fe3dd1f3-580c-48f7-bd9d-954d65cf1cf1'>"
+p87
+sS'application'
+p88
+S"'blog'"
+p89
+sS'ajax'
+p90
+S'False'
+p91
+sS'client'
+p92
+S"'127.0.0.1'"
+p93
+sS'env'
+p94
+S"<Storage {'http_user_agent': 'Mozilla/5.0 (X11; ... False, 'path_info': '/blog/default/viewpost/5'}>"
+p95
+sS'raw_args'
+p96
+S"'5'"
+p97
+sS'get_vars'
+p98
+S'<Storage {}>'
+p99
+sS'folder'
+p100
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/'"
+p101
+sS'now'
+p102
+S'datetime.datetime(2010, 10, 25, 21, 52, 21, 789946)'
+p103
+sS'post_vars'
+p104
+S'<Storage {}>'
+p105
+ssS'frames'
+p106
+(lp107
+(dp108
+S'file'
+p109
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py'
+p110
+sS'dump'
+p111
+(dp112
+S'code'
+p113
+S"'# -*- coding: utf-8 -*- \\n\\n######################...ents)\\n\\nresponse._vars=response._caller(viewpost)\\n'"
+p114
+sS'layer'
+p115
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'"
+p116
+sS'global compile2'
+p117
+S'<function compile2>'
+p118
+sS'ccode'
+p119
+S'undefined'
+p120
+ssS'lnum'
+p121
+I186
+sS'lines'
+p122
+(dp123
+I181
+S''
+sI182
+S'    try:'
+p124
+sI183
+S'        if type(code) == types.CodeType:'
+p125
+sI184
+S'            ccode = code'
+p126
+sI185
+S'        else:'
+p127
+sI186
+S'            ccode = compile2(code,layer)'
+p128
+sI187
+S''
+sI188
+S'        exec ccode in environment'
+p129
+sI189
+S'    except HTTP:'
+p130
+sI190
+S'        raise'
+p131
+ssS'call'
+p132
+S"(code='# -*- coding: utf-8 -*- \\n\\n######################...ents)\\n\\nresponse._vars=response._caller(viewpost)\\n', environment={'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}, layer='/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py')"
+p133
+sS'func'
+p134
+S'restricted'
+p135
+sa(dp136
+g109
+S'/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py'
+p137
+sg111
+(dp138
+S'builtincompile'
+p139
+S'<built-in function compile>'
+p140
+sS'code'
+p141
+S"'# -*- coding: utf-8 -*- \\n\\n######################...ents)\\n\\nresponse._vars=response._caller(viewpost)\\n'"
+p142
+sS'code.rstrip'
+p143
+S'<built-in method rstrip of str object>'
+p144
+sS').replace'
+p145
+g120
+sS'layer'
+p146
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'"
+p147
+ssg121
+I173
+sg122
+(dp148
+I168
+S''
+sI169
+S'def compile2(code,layer):'
+p149
+sI170
+S'    """'
+p150
+sI171
+S"    The +'\\n' is necessary else compile fails when code ends in a comment."
+p151
+sI172
+S'    """'
+p152
+sI173
+S"    return compile(code.rstrip().replace('\\r\\n','\\n')+'\\n', layer, 'exec')"
+p153
+sI174
+S''
+sI175
+S"def restricted(code, environment={}, layer='Unknown'):"
+p154
+sI176
+S'    """'
+p155
+sI177
+S'    runs code in environment and returns the output. if an exception occurs'
+p156
+ssg132
+S"(code='# -*- coding: utf-8 -*- \\n\\n######################...ents)\\n\\nresponse._vars=response._caller(viewpost)\\n', layer='/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py')"
+p157
+sg134
+S'compile2'
+p158
+sasS'pyver'
+p159
+S'Python 2.6.6: /usr/bin/python'
+p160
+sS'session'
+p161
+(dp162
+S'_formkey[comentarios_create]'
+p163
+S"'666413a8-e4db-4899-b993-8041963d302a'"
+p164
+sS'auth'
+p165
+S'None'
+p166
+ssS'etype'
+p167
+S"<type 'exceptions.IndentationError'>"
+p168
+sS'date'
+p169
+S'Mon Oct 25 21:52:23 2010'
+p170
+sS'response'
+p171
+(dp172
+S'status'
+p173
+S'200'
+p174
+sg71
+S'<cStringIO.StringO object>'
+p175
+sg86
+S"<SimpleCookie: session_id_blog='127-0-0-1-fe3dd1f3-580c-48f7-bd9d-954d65cf1cf1'>"
+p176
+sS'_vars'
+p177
+S'None'
+p178
+sS'title'
+p179
+S'"It\'s me"'
+p180
+sS'session_file'
+p181
+S"<open file '/home/j3nnn1/git/pyj3nnn1/web2py/app...e3dd1f3-580c-48f7-bd9d-954d65cf1cf1', mode 'rb+'>"
+p182
+sS'flash'
+p183
+S"''"
+p184
+sS'_custom_rollback'
+p185
+S'None'
+p186
+sS'session_id'
+p187
+S"'127-0-0-1-fe3dd1f3-580c-48f7-bd9d-954d65cf1cf1'"
+p188
+sS'headers'
+p189
+S"<Storage {'Expires': 'mar, 26 oct 2010 02:22:21 ...he, must-revalidate, post-check=0, pre-check=0'}>"
+p190
+sS'meta'
+p191
+S"<Storage {'keywords': 'j3nnn1 web2py python', 'd...con web2py... ', 'author': 'Jennifer Maldonado'}>"
+p192
+sS'session_filename'
+p193
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/bl...ns/127-0-0-1-fe3dd1f3-580c-48f7-bd9d-954d65cf1cf1'"
+p194
+sS'postprocessing'
+p195
+S'[]'
+p196
+sS'menu'
+p197
+S"[(<lazyT 'Index'>, False, <gluon.html.XML object>, []), (<lazyT 'About'>, False, <gluon.html.XML object>, []), (<lazyT 'Admin'>, False, <gluon.html.XML object>, [])]"
+p198
+sS'_view_environment'
+p199
+S"{'A': <class 'gluon.html.A'>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'CENTER': <class 'gluon.html.CENTER'>, 'CLEANUP': <class 'gluon.validators.CLEANUP'>, 'CODE': <class 'gluon.html.CODE'>, 'CRYPT': <class 'gluon.validators.CRYPT'>, ...}"
+p200
+sS'subtitle'
+p201
+S'<lazyT "it\'s me j3nnn1">'
+p202
+sS'session_id_name'
+p203
+S"'session_id_blog'"
+p204
+sS'_custom_commit'
+p205
+S'None'
+p206
+sS'_caller'
+p207
+S'<function <lambda>>'
+p208
+sS'files'
+p209
+S'[]'
+p210
+sS'view'
+p211
+S"'default/viewpost.html'"
+p212
+ssS'locals'
+p213
+(dp214
+g3
+S"'/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py'"
+p215
+sg5
+S"'# -*- coding: utf-8 -*- \\n\\n######################...ents)\\n\\nresponse._vars=response._caller(viewpost)\\n'"
+p216
+sssS'traceback'
+p217
+S'Traceback (most recent call last):\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py", line 186, in restricted\n    ccode = compile2(code,layer)\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/gluon/restricted.py", line 173, in compile2\n    return compile(code.rstrip().replace(\'\\r\\n\',\'\\n\')+\'\\n\', layer, \'exec\')\n  File "/home/j3nnn1/git/pyj3nnn1/web2py/applications/blog/controllers/default.py", line 155\n    db(filtro).update(visible=1)\n                               ^\nIndentationError: unindent does not match any outer indentation level\n'
+p218
+s.

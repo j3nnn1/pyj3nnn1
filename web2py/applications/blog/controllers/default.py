@@ -25,7 +25,7 @@ def index():
 
     filtro = (db.articulos.id_usuario==db.usuarios.id)
     post = db(filtro).select(db.articulos.ALL, db.usuarios.usuario, limitby=(limit,page*perpage),orderby=~db.articulos.fecha)
-    comments  = [db(db.comentarios.id_articulo == i.articulos.id).count() for i in post]
+    comments  = [db((db.comentarios.id_articulo == i.articulos.id)&(db.comentarios.visible == '1')).count() for i in post]
     return dict(post=post,totalpages=totalpages,postpage=page,comments=comments)
 
 def about():
@@ -147,22 +147,17 @@ def call():
     return service()
 
 def grantcomment():
-    comments=''
-
-    if request.args(0):     #id comentario.
-        if request.args(1): #visible o no
-	    filtro = ((db.comentarios.visible=='0')&(db.comentarios.id==request.args(0))) 
-            db(filtro).update(visible=1)
-	    #db(filtro).select(db.comentarios.ALL)
-	    #print db._lastsql
-        else:
-	    filtro = ((db.comentarios.visible=='1')&(db.comentarios.id==request.args(0)))
-            db(filtro).update(visible=0)
-            #db(filtro).select(db.comentarios.ALL)
-	    #print db._lastsql
-	if form.accepts(request.vars, session):
-            response.flash='El Comentario estará visible'
-    else:
-        comments = db().select(db.comentarios.ALL).records
     
+    if request.args(0):             #id comentario.
+        if request.args(1)=='True':   #visible o no
+            filtro = (db.comentarios.id==request.args(0)) 
+            db(filtro).update(visible=0)
+        else:
+            filtro = (db.comentarios.id==request.args(0))
+            db(filtro).update(visible=1)
+
+        response.flash='El Comentario estará visible'
+
+    filtro = (db.comentarios.id_articulo==db.articulos.id)
+    comments = db(filtro).select(db.comentarios.ALL, db.articulos.titulo).records
     return dict(comments=comments)
