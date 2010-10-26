@@ -45,4 +45,25 @@
 	{{pass}}
     </table>
 </div>
+
+<!-- Paginador -->
+
+<div class="pages">
+{{if totalpages > 1:}}
+	Paginas:
+	{{for i in range(1, totalpages+1): }}
+        <span class="page">
+        	{{if postpage == i and i>1:}}
+			{{=A('Atras',  _href=URL('admin', args=(i -1)))}}
+                {{pass}} 
+		{{else:}}
+			{{if (i < totalpages+1 and postpage != i):}}
+				{{=A('Adelante',  _href=URL('admin', args=(postpage +1)))}} 
+			{{pass}}
+		{{pass}}
+		
+	{{pass}}
+        </span>
+{{pass}}
+</div>
 </div>
