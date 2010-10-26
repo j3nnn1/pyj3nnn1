@@ -13,7 +13,6 @@ def index():
     Esta vista va a obtener 3 post
     """
     # filter to join.
-    filtro = (db.articulos.id_usuario==db.usuarios.id)
     perpage = 3                                  # Numero de articulos por pagina
     totalposts = db(db.articulos.id > 0).count() # contamos cuantos posts hay en la bd
     totalpages = totalposts / perpage            # division para sacar el numero de paginas
@@ -23,10 +22,11 @@ def index():
                          
     if totalposts > perpage and totalpages == 1 and totalpages * perpage != totalposts:
         totalpages = 2
-                                                        
-    post = db(filtro).select(db.articulos.ALL, db.usuarios.usuario,limitby=(limit,page*perpage),orderby=~db.articulos.fecha)
 
-    return dict(post=post,totalpages=totalpages,postpage=page)
+    filtro = (db.articulos.id_usuario==db.usuarios.id)
+    post = db(filtro).select(db.articulos.ALL, db.usuarios.usuario, limitby=(limit,page*perpage),orderby=~db.articulos.fecha)
+    comments  = [db(db.comentarios.id_articulo == i.articulos.id).count() for i in post]
+    return dict(post=post,totalpages=totalpages,postpage=page,comments=comments)
 
 def about():
     """ Información sobre mi persona"""
@@ -40,8 +40,9 @@ def viewpost():
         if post:
             form        = SQLFORM(db.comentarios)
             form.vars.id_articulo = post.articulos.id
-            filtro          = (db.comentarios.id_articulo==post.articulos.id)
+            filtro          = ((db.comentarios.id_articulo==post.articulos.id)&(db.comentarios.visible=='1'))
             comments        = (db(filtro).select(db.comentarios.ALL, orderby=~db.comentarios.fecha)).records 
+	    #print db._lastsql
         else:
             redirect(URL('index'))
 
@@ -144,3 +145,24 @@ def call():
     """
     session.forget()
     return service()
+
+def grantcomment():
+    comments=''
+
+    if request.args(0):     #id comentario.
+        if request.args(1): #visible o no
+	    filtro = ((db.comentarios.visible=='0')&(db.comentarios.id==request.args(0))) 
+            db(filtro).update(visible=1)
+	    #db(filtro).select(db.comentarios.ALL)
+	    #print db._lastsql
+        else:
+	    filtro = ((db.comentarios.visible=='1')&(db.comentarios.id==request.args(0)))
+            db(filtro).update(visible=0)
+            #db(filtro).select(db.comentarios.ALL)
+	    #print db._lastsql
+	if form.accepts(request.vars, session):
+            response.flash='El Comentario estará visible'
+    else:
+        comments = db().select(db.comentarios.ALL).records
+    
+    return dict(comments=comments)

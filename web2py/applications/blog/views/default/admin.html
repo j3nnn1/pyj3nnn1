@@ -1,12 +1,13 @@
 {{extend 'layout.html'}} 
-<div class='content'>
+<div class='content' align='center'>
 {{=DIV(H2(T("Organizando Peroles."), _class='title'), _align='center')}}
     <ul>
-        <li> {{=H3(A(T("Crear nueva artículo"), _class='link', _href='createpost'), _class='title')}} </li>
+        <li> {{=H3(A(T("Crear nuevo artículo"), _class='link', _href='createpost'), _class='title')}} </li>
+        <li> {{=H3(A(T("Gestionar Comentarios"), _class='link', _href='grantcomment'), _class='title')}} </li>
 	<li> {{=H3(A(T("Modificar o Eliminar artículo"), _class='link'), _class='title')}}</li>
     </ul>
-{{#=tableart}}
-<table class='adminpost' border='1' align='center'>
+<div id='adminpost'>
+<table>
 <tr>
     <th>
 	{{=T("Título")}}
@@ -14,7 +15,7 @@
     <th>
 	{{=T("Fecha de Creación")}}
     </th>
-    <th colspan=2>
+    <th colspan=2 align='center'>
 	{{=T("Acciones")}}
     </th>
 </tr>
@@ -35,5 +36,6 @@
 {{pass}}
     </tr>
 </table>
+</div>
 </div>
 

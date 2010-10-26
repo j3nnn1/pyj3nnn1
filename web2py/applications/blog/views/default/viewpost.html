@@ -2,8 +2,13 @@
 
 <div class='post'>
 {{=H2(post.articulos.titulo, _class='title')}}
+    {{if post.articulos.image:}}
+	<div align='center'>
+	<img width="200px" src="{{=URL('download', args=post.articulos.image)}}"/>
+	</div>
+    {{pass}}
     <div class='entry'>
-	<p> {{=post.articulos.articulo}} </p>
+	<p>{{=post.articulos.articulo}} </p>
     </div>
     {{=A(T("Escrito por: %s  el %s" % (post.usuarios.usuario, post.articulos.fecha)), _class='meta')}}
     <div class='entry'>

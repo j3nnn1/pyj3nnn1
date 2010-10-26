@@ -1,12 +1,14 @@
 {{extend 'layout.html'}}
-<div class='content'>
-{{for post in post:}}
-    <div class='post'>
-        {{=H3(A(post.articulos.titulo, _href=URL("viewpost", args=post.articulos.id)), _class='title')}} 
-        <div class="entry"> {{=post.articulos.articulo}}</div>
-            {{=A(T("Escrito por %s el: %s" % (post.usuarios.usuario,post.articulos.fecha)), _class='meta')}}
+<div class="content">
+{{x=0}}
+{{for p in post:}}
+    <div class="post">
+        {{=H3(A(p.articulos.titulo, _href=URL("viewpost", args=p.articulos.id)), _class='title')}} 
+        <div class="entry"> {{=p.articulos.articulo}}</div>
+            {{=A(T("Escrito por %s el: %s Comentarios(%s)" % (p.usuarios.usuario,p.articulos.fecha,comments[x])), _class='meta')}}
     </div>
 <hr />
+{{x=x+1}}
 {{pass}}
 <br />
 <!-- Paginador -->

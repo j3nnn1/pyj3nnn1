@@ -13,8 +13,8 @@ if request.env.web2py_runtime_gae:            # if running on Google App Engine
     # session.connect(request, response, db = MEMDB(Client()))
 else:                                         # else use a normal relational database
     #db = DAL('sqlite://storage.sqlite')       # if not, use SQLite or other DB
-    #db = DAL('mysql://j3nnn1:j3nnn1@angvp.com/j3nnn1_blog') 
-    db = DAL('sqlite://storage.sqlite')
+    db = DAL('mysql://j3nnn1:j3nnn1@angvp.com/j3nnn1_blog') 
+    
 ## if no need for session
 # session.forget()
 
@@ -104,7 +104,7 @@ db.define_table('comentarios',
         Field('correo',      'string',requires = [IS_EMAIL(), IS_NOT_EMPTY()],     required=True),
         Field('url',         'string',required=False),
         Field('fecha',       'datetime', default=now),
-        Field('visible',     'boolean', readable=False, writable=False))
+        Field('visible',     'boolean', readable=False, writable=False, default='0'))
 
 db.comentarios.id.readable=db.comentarios.id.writable=False
 

@@ -1,0 +1,40 @@
+{{extend 'layout.html'}} 
+<div class='content' align='center'>
+{{=DIV(H2(T("Aprobar comentarios."), _class='title'), _align='center')}}
+<div id='adminpost'>
+<table>
+<tr>
+    <th>
+	{{=T("Comentarios")}}
+    </th>
+    <th>
+	{{=T("Artículo")}}
+    </th>
+    <th>
+	{{=T("Fecha del comentario")}}
+    </th>
+    <th>
+	{{=T("Visible")}}
+    </th>
+</tr>
+<form action='grantcomment' method=post>
+{{for registro in comments:}}
+    <tr>
+	<td>
+	    {{=T(registro.comentarios.comentario)}}
+	</td>
+	<td>
+	    {{=registro.articulos.titulo}}
+	</td>
+	<td>
+	    {{=registro.comentarios.fecha}}
+	</td>
+	<td>
+	    {{=INPUT(_type='checkbox', _name='visible', _value='False')}}
+	</td>
+{{pass}}
+    </tr>
+</form>
+</table>
+</div>
+</div>

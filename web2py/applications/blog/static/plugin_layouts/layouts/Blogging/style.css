@@ -385,3 +385,54 @@ padding-top: 70px; }
 #footer a {
 	color: #F1B566;
 }
+
+/*  
+Theme Name: chives-tables
+Theme URI: http://chives.de/css/style.css
+Author: stefan eitel * chives - Buero fuer Webdesign Plus Darmstadt
+Author URI: http://www.chives.de
+*/
+
+#adminpost table {
+	background-color: #FFFFFF;
+	border: none;
+	color: #495E49;
+	font-family: arial, helvetica, sans-serif;
+	font-size: 12px;
+	text-align: left;
+}
+
+#adminpost table a:link, table a:visited, table a:active {
+	background-color: transparent;
+	color: #0096BD;
+	text-decoration: none;
+}
+
+#adminpost table a:hover {
+	background: transparent;
+	color: #000000;
+	text-decoration: underline;
+}
+
+#adminpost table caption {
+	background-color: transparent;
+	color: #67BD2A;
+	font-family: Georgia, serif;
+	font-size: 24px;
+	padding-bottom: 12px;
+	padding-left: 8px;
+	text-align: left;
+}
+
+#adminpost table, td, th {
+	margin: 0;
+	padding: 0;
+}
+
+#adminpost tbody td, tbody th {
+	background-color: #D6F2C3;
+	border-bottom: 2px solid #B3DE94;
+	border-top: 3px solid #FFFFFF;
+	padding: 9px;
+}
+
