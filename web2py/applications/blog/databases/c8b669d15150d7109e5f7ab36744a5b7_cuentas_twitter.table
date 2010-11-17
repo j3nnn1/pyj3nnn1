@@ -1,0 +1,30 @@
+(dp1
+S'consumer_secret'
+p2
+S'CHAR(512)'
+p3
+sS'secret'
+p4
+S'CHAR(512)'
+p5
+sS'auth_user_id'
+p6
+S'INTEGER REFERENCES auth_user(id) ON DELETE CASCADE'
+p7
+sS'key'
+p8
+S'CHAR(512)'
+p9
+sS'consumer_key'
+p10
+S'CHAR(512)'
+p11
+sS'nickname'
+p12
+S'CHAR(512)'
+p13
+sS'id'
+p14
+S'INTEGER PRIMARY KEY AUTOINCREMENT'
+p15
+s.

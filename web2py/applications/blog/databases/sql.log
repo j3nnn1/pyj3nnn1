@@ -94,3 +94,35 @@ CREATE TABLE etiquetas_articulos(
 success!
 timestamp: 2010-10-26T02:05:04.183043
 ALTER TABLE articulos ADD id_usuario__tmp INT, ADD INDEX id_usuario__idx (id_usuario), ADD FOREIGN KEY (id_usuario) REFERENCES auth_user(id) ON DELETE CASCADE;
+timestamp: 2010-11-16T15:56:01.803973
+CREATE TABLE cuentas_twitter(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nickname CHAR(512),
+    consumer_key CHAR(512),
+    consumer_secret CHAR(512),
+    key CHAR(512),
+    secret CHAR(512)
+);
+success!
+timestamp: 2010-11-16T17:44:22.032893
+CREATE TABLE tweets(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nickname CHAR(512),
+    status CHAR(512),
+    updatedate TIMESTAMP,
+    updatedateregister TIMESTAMP
+);
+success!
+timestamp: 2010-11-17T00:13:31.564547
+ALTER TABLE cuentas_twitter ADD auth_user_id INTEGER REFERENCES auth_user(id) ON DELETE CASCADE;
+timestamp: 2010-11-17T00:25:34.553245
+ALTER TABLE tweets ADD id_cuentas_twitter INTEGER REFERENCES cuentas_twitter(id) ON DELETE CASCADE;
+timestamp: 2010-11-17T01:28:37.666867
+CREATE TABLE tokens_twitter(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_cuentas_twitter INTEGER REFERENCES cuentas_twitter(id) ON DELETE CASCADE,
+    token_key CHAR(512),
+    token_secret CHAR(512),
+    creationdate TIMESTAMP
+);
+success!

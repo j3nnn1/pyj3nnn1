@@ -28,11 +28,11 @@
     {{ for i in range(1, totalpages+1): }}
         <span class="page">
             {{ if postpage == i and i>1: }} 
-                <a href="/blog/?page={{=i-1}}">Atras</a>
+                {{=A('Atras', _href=URL('index', args=i-1))}}
                 {{ pass }} 
             {{ else: }}
                 {{ if i < totalpages+1 and postpage != i: }}
-                    <a href="/blog/?page={{=postpage+1}}">Adelante</a>
+                    {{=A('Adelante', _href=URL('index', args=postpage+1))}}
                     {{ pass }}
                 {{ pass }}
         </span>

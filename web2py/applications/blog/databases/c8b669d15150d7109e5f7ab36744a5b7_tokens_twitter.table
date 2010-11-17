@@ -1,0 +1,22 @@
+(dp1
+S'token_secret'
+p2
+S'CHAR(512)'
+p3
+sS'creationdate'
+p4
+S'TIMESTAMP'
+p5
+sS'id'
+p6
+S'INTEGER PRIMARY KEY AUTOINCREMENT'
+p7
+sS'token_key'
+p8
+S'CHAR(512)'
+p9
+sS'id_cuentas_twitter'
+p10
+S'INTEGER REFERENCES cuentas_twitter(id) ON DELETE CASCADE'
+p11
+s.

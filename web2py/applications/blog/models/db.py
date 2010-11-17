@@ -12,9 +12,8 @@ if request.env.web2py_runtime_gae:            # if running on Google App Engine
     # from google.appengine.api.memcache import Client
     # session.connect(request, response, db = MEMDB(Client()))
 else:                                         # else use a normal relational database
-    #db = DAL('sqlite://storage.sqlite')       # if not, use SQLite or other DB
-    #db = DAL('mysql://j3nnn1:j3nnn1@angvp.com/j3nnn1_blog')
-    db = DAL('mysql://j3nnn1:j3nnn1@localhost/blogweb2py') 
+    db = DAL('sqlite://storage.sqlite')       # if not, use SQLite or other DB
+    #db = DAL('mysql://j3nnn1:j3nnn1@localhost/blogweb2py') 
     
 ## if no need for session
 # session.forget()
@@ -36,20 +35,20 @@ crud = Crud(globals(),db)                      # for CRUD helpers using auth
 service = Service(globals())                   # for json, xml, jsonrpc, xmlrpc, amfrpc
 plugins = PluginManager()
 
-mail.settings.server = 'logging' or 'smtp.gmail.com:587'  # your SMTP server
-mail.settings.sender = 'you@gmail.com'         # your email
-mail.settings.login = 'username:password'      # your credentials or None
+mail.settings.server = 'logging' or 'smtp.gmail.com:587'    # your SMTP server
+mail.settings.sender = 'you@gmail.com'                      # your email
+mail.settings.login = 'username:password'                   # your credentials or None
 
 auth.settings.hmac_key = 'sha512:f3d5ade2-9740-497b-92a8-a0d5169de496'   # before define_tables()
-auth.define_tables()                           # creates all needed tables
-auth.settings.mailer = mail                    # for user email verification
+auth.define_tables()                                        # creates all needed tables
+auth.settings.mailer = mail                                 # for user email verification
 auth.settings.registration_requires_verification = False
-auth.settings.registration_requires_approval = True #el usuario a registrarse requiere aprobacion
+auth.settings.registration_requires_approval = True         #el usuario a registrarse requiere aprobacion
+#auth.settings.actions_disabled.append('register')          #bloqueando el acceso al registro
 auth.messages.verify_email = 'Click on the link http://'+request.env.http_host+URL(r=request,c='default',f='user',args=['verify_email'])+'/%(key)s to verify your email'
 auth.settings.reset_password_requires_verification = True
 auth.messages.reset_password = 'Click on the link http://'+request.env.http_host+URL(r=request,c='default',f='user',args=['reset_password'])+'/%(key)s to reset your password'
 
-#auth.settings.actions_disabled.append('register') #bloqueando el acceso al registro
 #########################################################################
 ## If you need to use OpenID, Facebook, MySpace, Twitter, Linkedin, etc.
 ## register with janrain.com, uncomment and customize following
@@ -111,3 +110,22 @@ db.define_table('etiquetas',
 db.define_table('etiquetas_articulos', 
         Field('id_etiqueta',db.etiquetas, readable=False, writable=False),      
         Field('id_articulo',db.articulos, readable=False, writable=False))
+
+db.define_table('cuentas_twitter',
+                Field('auth_user_id', db.auth_user, readable=False, writable=False),
+                Field('nickname', 'string', readable=False, writable=True),
+                Field('consumer_key', 'string', readable=False, writable=True),
+                Field('consumer_secret', 'string', readable=False, writable=True))
+
+db.define_table('tokens_twitter',
+                Field('id_cuentas_twitter',db.cuentas_twitter, readable=False, writable=False, required=True),
+                Field('token_key', 'password',readable=False, writable=True, required=True),
+                Field('token_secret', 'password', readable=False, writable=True, required=True),
+                Field('creationdate', 'datetime', readable=False, writable=True, default=now))
+
+db.define_table('tweets', 
+                Field('id_cuentas_twitter', db.cuentas_twitter, readable=False, writable=False),
+                Field('nickname', 'string', readable=True, writable=True, default='nada'),
+                Field('status', 'string', readable=True, writable=True, default='nada'),
+                Field('updatedate', 'datetime', readable=True, writable=True, default=now),
+                Field('updatedateregister', 'datetime', readable=True, writable=True, default=now))

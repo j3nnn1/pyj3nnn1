@@ -17,7 +17,7 @@ def index():
     totalposts = db(db.articulos.id > 0).count() # contamos cuantos posts hay en la bd
     totalpages = totalposts / perpage            # division para sacar el numero de paginas
                   
-    page = int(request.vars.page) if request.vars.page else 1
+    page = int(request.args(0)) if request.args(0) else 1
     limit = int(page - 1) * perpage
                          
     if totalposts > perpage and totalpages == 1 and totalpages * perpage != totalposts:
@@ -100,8 +100,8 @@ def admin():
 def modifypost():
 
     if request.args(0):  #modificando un post
-
         post   = db.articulos(request.args(0)) or redirect(URL('index'))
+
 	form = SQLFORM(db.articulos, post)
 
 	if form.accepts(request.vars, session):
@@ -117,21 +117,30 @@ def modifypost():
 
 @auth.requires_login()
 def createpost():
-
-    import tweepy
     form        = SQLFORM(db.articulos)
     form.vars.id_usuario = auth.user.id
 
     if form.accepts(request.vars, session):
-        consumer_key    ='thClbkKdFy4QhXrOtlJaHg'
-        consumer_secret ='0zLHboJRauF6LnsQWpeGY4XD4KpWU4uCDdv8evE8nE'
-        key             ='64244883-Orq6ABYBjwjuEei06PmDeJqGUPiB2iWFB87DPmdlv'
-        secret          ='ACBw2GaQ7LdcfbFJQGUJOvXJoNxi1wYCWHmHMzRWl3I'
-        authen  =  tweepy.OAuthHandler(consumer_key, consumer_secret)
-        authen.set_access_token(key, secret)        
-        response.flash ='Tu articulo ha sido publicado'
-        api = tweepy.API(authen) 
-        #api.update_status('Tweets de prueba: #cursoweb2py #proyectoblog chequea mi nuevo post en mi blog')
+        tweepyexist=1
+        try:
+            import tweepy
+        except ImportError:
+            tweepyexist=0
+
+        if tweepyexist: 
+            #obteniendo los valores de la bd
+            consumer_key    = db(db.cuentas_twitter.nickname=='j3nnn1').select(db.cuentas_twitter.consumer_key).first()['consumer_key']
+            consumer_secret = db(db.cuentas_twitter.nickname=='j3nnn1').select(db.cuentas_twitter.consumer_secret).first()['consumer_secret']
+            #obteniendo request token
+            filtro          = ((db.cuentas_twitter.nickname=='j3nnn1')& (db.cuentas_twitter.id==db.tokens_twitter.id_cuentas_twitter))
+            key             = db(filtro).select(db.tokens_twitter.token_key).first()['token_key']
+            secret          = db(filtro).select(db.tokens_twitter.token_secret).first()['token_secret']
+
+            authen  =  tweepy.OAuthHandler(consumer_key, consumer_secret)
+            authen.set_access_token(key, secret)        
+            response.flash ='Tu articulo ha sido publicado'
+            api = tweepy.API(authen) 
+            api.update_status('hey @jei_nu Feliz tarde!')
 
     return dict(form=form)
 
@@ -195,3 +204,7 @@ def grantcomment():
     comments = db(filtro).select(db.comentarios.ALL, db.articulos.titulo).records
 
     return dict(comments=comments)
+
+def twitterauth():
+
+    return dict()
