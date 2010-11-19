@@ -116,6 +116,49 @@ def modifypost():
     
     return dict(form=form)
 
+
+def create_tweet(titulo):
+    tweepyexist = 0
+    try:
+        import tweepy
+    except ImportError:
+        tweepyexist = 0
+
+    if tweepyexist: 
+        filtro = ((db.cuentas_twitter.nickname=='j3nnn1')& (db.cuentas_twitter.id==db.tokens_twitter.id_cuentas_twitter))
+	#obteniendo los valores de la bd
+        consumer_key = db(filtro).select(db.tokens_twitter.consumer_key).first()['consumer_key']
+	consumer_secret = db(filtro).select(db.tokens_twitter.consumer_secret).first()['consumer_secret']
+	#obteniendo request token
+	key = db(filtro).select(db.tokens_twitter.token_key).first()['token_key']
+	secret = db(filtro).select(db.tokens_twitter.token_secret).first()['token_secret']
+        if consumer_key and consumer_secret:
+            authen = tweepy.OAuthHandler(consumer_key, consumer_secret)
+            authen.set_access_token(key, secret)        
+            if authen:
+                api = tweepy.API(authen) 
+                try:
+                    #api.update_status("En mi blog: %s" % titulo)
+                    msg='algo publicado'
+                except:
+                    msg='Tu articulo ha sido publicado en el blog y en twitter'
+
+def create_tags(tags):
+    etiquetas = map(lambda x: x.strip().lower() , tags.split(','))
+    #filtro las etiquetas que ya existen en bd e inserto las nuevas
+    existinbd=0
+    # ids de etiquetas a asociar
+    ids=[]
+    for etiqueta in etiquetas:
+        tag = db(db.etiquetas.nombre==etiqueta).select(db.etiquetas.id).first() or None 
+        if tag == None:
+            id_etiqueta = db.etiquetas.insert(nombre=etiqueta)
+	else:
+            id_etiqueta = db(db.etiquetas.nombre==etiqueta).select(db.etiquetas.id).first()['id']
+        ids.append(id_etiqueta)
+    return ids
+         
+
 @auth.requires_login()
 def createpost():
 
@@ -128,60 +171,22 @@ def createpost():
 
     if form.accepts(request.vars, session):
         #extrayendo etiquetas (@etiquetas), quitando espacios extremos, e insertando etiquetas en bd almacenado sus @ids.
-        etiquetas = map(lambda x: x.strip().lower() , form.vars['etiquetas'].split(','))
-        #filtro las etiquetas que ya existen en bd e inserto las nuevas
-        existinbd=0
-        # ids de etiquetas a asociar
-        ids=[]
-        #se asume que tweepy se encuentra instalada
-        tweepyexist=1
-        for etiqueta in etiquetas:
-            try:
-                ID = db(db.etiquetas.nombre==etiqueta).select(db.etiquetas.id).first()['id']
-                existinbd=1
-            except:
-                existinbd=0
-
-            if existinbd:
-                ids.append(ID)
-                existinbd=0
-            else:
-                ids.append(db.etiquetas.insert(nombre=etiqueta))
-                
+        ids = create_tags(form.vars['etiquetas'])       
         #insertando articulo
         try:
             id_articulo = db.articulos.insert(titulo=form.vars['titulo'], articulo=form.vars['articulo'], id_usuario=auth.user.id, image=form.vars['image'])
-        except: print 'database not available'
-        else: print 'insert article successful'
+        except: 
+            print 'database not available'
+        else: 
+            print 'insert article successful'
 
         #insertando registro en etiquetas_articulos
+        """
         for id_etiqueta in ids:
             db.etiquetas_articulos.insert(id_etiqueta=id_etiqueta, id_articulo=id_articulo)
-
-        try:
-            import tweepy
-        except ImportError:
-            tweepyexist=0
-
-        if tweepyexist: 
-
-            filtro          = ((db.cuentas_twitter.nickname=='j3nnn1')& (db.cuentas_twitter.id==db.tokens_twitter.id_cuentas_twitter))
-            #obteniendo los valores de la bd
-            consumer_key    = db(filtro).select(db.tokens_twitter.consumer_key).first()['consumer_key']
-            consumer_secret = db(filtro).select(db.tokens_twitter.consumer_secret).first()['consumer_secret']
-            #obteniendo request token
-            key             = db(filtro).select(db.tokens_twitter.token_key).first()['token_key']
-            secret          = db(filtro).select(db.tokens_twitter.token_secret).first()['token_secret']
-            if consumer_key and consumer_secret:
-                authen  =  tweepy.OAuthHandler(consumer_key, consumer_secret)
-                authen.set_access_token(key, secret)        
-                if authen:
-                    api = tweepy.API(authen) 
-                    try:
-                        #api.update_status('hey @jei_nu Feliz Noche!')
-                        msg='algo publicado'
-                    except:
-                        msg='Tu articulo ha sido publicado en el blog y en twitter'                
+        """ 
+        [db.etiquetas_articulos.insert(id_etiqueta,id_articulo) for i in ids] # List comprehensions rocks 
+	#create_tweet(form.vars['titulo']) # Comentado pq necesita algun trabajo adicional
         msg='Tu articulo ha sido publicado'
         response.flash = msg
     return dict(form=form)
