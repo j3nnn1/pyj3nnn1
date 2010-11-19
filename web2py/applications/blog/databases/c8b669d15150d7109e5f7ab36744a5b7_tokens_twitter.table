@@ -1,22 +1,30 @@
 (dp1
-S'token_secret'
+S'token_key'
 p2
 S'CHAR(512)'
 p3
-sS'creationdate'
+sS'consumer_secret'
 p4
-S'TIMESTAMP'
-p5
-sS'id'
-p6
-S'INTEGER PRIMARY KEY AUTOINCREMENT'
-p7
-sS'token_key'
-p8
 S'CHAR(512)'
-p9
+p5
 sS'id_cuentas_twitter'
-p10
+p6
 S'INTEGER REFERENCES cuentas_twitter(id) ON DELETE CASCADE'
+p7
+sS'creationdate'
+p8
+S'TIMESTAMP'
+p9
+sS'consumer_key'
+p10
+S'CHAR(512)'
 p11
+sS'id'
+p12
+S'INTEGER PRIMARY KEY AUTOINCREMENT'
+p13
+sS'token_secret'
+p14
+S'CHAR(512)'
+p15
 s.

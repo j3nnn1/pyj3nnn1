@@ -1,5 +1,5 @@
+{{import tweepy}}
 {{usertl = tweepy.api.user_timeline('j3nnn1')}}
-
 <ul>
 {{for tweet in usertl[0:4]:}}
    <li>
@@ -7,6 +7,4 @@
     </li>
 {{pass}}
 </ul>
-
-    
-
+</body>

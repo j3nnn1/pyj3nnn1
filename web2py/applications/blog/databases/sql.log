@@ -126,3 +126,19 @@ CREATE TABLE tokens_twitter(
     creationdate TIMESTAMP
 );
 success!
+timestamp: 2010-11-17T16:58:48.688876
+ALTER TABLE tokens_twitter ADD consumer_secret CHAR(512);
+timestamp: 2010-11-17T16:58:48.789085
+ALTER TABLE tokens_twitter ADD consumer_key CHAR(512);
+DELETE FROM etiquetas;
+DELETE FROM sqlite_sequence WHERE name='etiquetas';
+success!
+DELETE FROM etiquetas;
+DELETE FROM sqlite_sequence WHERE name='etiquetas';
+success!
+DELETE FROM etiquetas;
+DELETE FROM sqlite_sequence WHERE name='etiquetas';
+success!
+DELETE FROM etiquetas;
+DELETE FROM sqlite_sequence WHERE name='etiquetas';
+success!

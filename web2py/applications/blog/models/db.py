@@ -104,8 +104,9 @@ db.define_table('comentarios',
 db.comentarios.id.readable=db.comentarios.id.writable=False
 
 db.define_table('etiquetas',
-        Field('nombre', 'string', requires=IS_NOT_EMPTY(), required=True))
+        Field('nombre', 'string', requires=[IS_NOT_EMPTY(), IS_NOT_IN_DB(db,'etiquetas')], required=True))
         
+#db.etiquetas.truncate()
 
 db.define_table('etiquetas_articulos', 
         Field('id_etiqueta',db.etiquetas, readable=False, writable=False),      
@@ -113,12 +114,12 @@ db.define_table('etiquetas_articulos',
 
 db.define_table('cuentas_twitter',
                 Field('auth_user_id', db.auth_user, readable=False, writable=False),
-                Field('nickname', 'string', readable=False, writable=True),
-                Field('consumer_key', 'string', readable=False, writable=True),
-                Field('consumer_secret', 'string', readable=False, writable=True))
+                Field('nickname', 'string', readable=False, writable=True))
 
 db.define_table('tokens_twitter',
                 Field('id_cuentas_twitter',db.cuentas_twitter, readable=False, writable=False, required=True),
+                Field('consumer_key', 'string', readable=False, writable=True, required=True),
+                Field('consumer_secret', 'string', readable=False, writable=True, required=True),
                 Field('token_key', 'password',readable=False, writable=True, required=True),
                 Field('token_secret', 'password', readable=False, writable=True, required=True),
                 Field('creationdate', 'datetime', readable=False, writable=True, default=now))
