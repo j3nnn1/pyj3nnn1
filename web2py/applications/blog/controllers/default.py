@@ -101,6 +101,7 @@ def modifypost():
 
     if request.args(0):  #modificando un post
         post   = db.articulos(request.args(0)) or redirect(URL('index'))
+        print post
 
 	form = SQLFORM(db.articulos, post)
 
@@ -122,11 +123,12 @@ def createpost():
     form = SQLFORM.factory(Field('titulo',    'string',  requires=IS_NOT_EMPTY(), required=True),
                     Field('articulo',  'text',    requires=IS_NOT_EMPTY(),required=True),
                     Field('image', 'upload'),
-                    Field('etiquetas', 'string')) #las etiquetas serán separadas por coma
+                    Field('etiquetas', 'string'), 
+                    table_name='articulos') #las etiquetas serán separadas por coma
 
     if form.accepts(request.vars, session):
         #extrayendo etiquetas (@etiquetas), quitando espacios extremos, e insertando etiquetas en bd almacenado sus @ids.
-        etiquetas = map(lambda x: x.strip(), form.vars['etiquetas'].split(','))
+        etiquetas = map(lambda x: x.strip().lower() , form.vars['etiquetas'].split(','))
         #filtro las etiquetas que ya existen en bd e inserto las nuevas
         existinbd=0
         # ids de etiquetas a asociar
@@ -136,10 +138,9 @@ def createpost():
         for etiqueta in etiquetas:
             try:
                 ID = db(db.etiquetas.nombre==etiqueta).select(db.etiquetas.id).first()['id']
+                existinbd=1
             except:
                 existinbd=0
-            else:
-                existinbd=1
 
             if existinbd:
                 ids.append(ID)
