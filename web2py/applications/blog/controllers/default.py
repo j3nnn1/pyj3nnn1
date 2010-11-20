@@ -126,12 +126,12 @@ def create_tweet(titulo):
 
     if tweepyexist: 
         filtro = ((db.cuentas_twitter.nickname=='j3nnn1')& (db.cuentas_twitter.id==db.tokens_twitter.id_cuentas_twitter))
-	#obteniendo los valores de la bd
+        #obteniendo los valores de la bd
         consumer_key = db(filtro).select(db.tokens_twitter.consumer_key).first()['consumer_key']
-	consumer_secret = db(filtro).select(db.tokens_twitter.consumer_secret).first()['consumer_secret']
-	#obteniendo request token
-	key = db(filtro).select(db.tokens_twitter.token_key).first()['token_key']
-	secret = db(filtro).select(db.tokens_twitter.token_secret).first()['token_secret']
+        consumer_secret = db(filtro).select(db.tokens_twitter.consumer_secret).first()['consumer_secret']
+        #obteniendo request token
+        key = db(filtro).select(db.tokens_twitter.token_key).first()['token_key']
+        secret = db(filtro).select(db.tokens_twitter.token_secret).first()['token_secret']
         if consumer_key and consumer_secret:
             authen = tweepy.OAuthHandler(consumer_key, consumer_secret)
             authen.set_access_token(key, secret)        
@@ -153,7 +153,7 @@ def create_tags(tags):
         tag = db(db.etiquetas.nombre==etiqueta).select(db.etiquetas.id).first() or None 
         if tag == None:
             id_etiqueta = db.etiquetas.insert(nombre=etiqueta)
-	else:
+        else:
             id_etiqueta = db(db.etiquetas.nombre==etiqueta).select(db.etiquetas.id).first()['id']
         ids.append(id_etiqueta)
     return ids
@@ -186,7 +186,7 @@ def createpost():
             db.etiquetas_articulos.insert(id_etiqueta=id_etiqueta, id_articulo=id_articulo)
         """ 
         [db.etiquetas_articulos.insert(id_etiqueta,id_articulo) for i in ids] # List comprehensions rocks 
-	#create_tweet(form.vars['titulo']) # Comentado pq necesita algun trabajo adicional
+        #create_tweet(form.vars['titulo']) # Comentado pq necesita algun trabajo adicional
         msg='Tu articulo ha sido publicado'
         response.flash = msg
     return dict(form=form)
