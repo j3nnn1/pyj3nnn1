@@ -145,9 +145,7 @@ def create_tweet(titulo):
 
 def create_tags(tags):
     etiquetas = map(lambda x: x.strip().lower() , tags.split(','))
-    #filtro las etiquetas que ya existen en bd e inserto las nuevas
-    existinbd=0
-    # ids de etiquetas a asociar
+    #filtro las etiquetas que ya existen en bd e inserto las nuevas, ids de etiquetas a asociar
     ids=[]
     for etiqueta in etiquetas:
         tag = db(db.etiquetas.nombre==etiqueta).select(db.etiquetas.id).first() or None 
@@ -186,7 +184,7 @@ def createpost():
             db.etiquetas_articulos.insert(id_etiqueta=id_etiqueta, id_articulo=id_articulo)
         """ 
         [db.etiquetas_articulos.insert(id_etiqueta,id_articulo) for i in ids] # List comprehensions rocks 
-	#create_tweet(form.vars['titulo']) # Comentado pq necesita algun trabajo adicional
+	    #create_tweet(form.vars['titulo']) # Comentado pq necesita algun trabajo adicional
         msg='Tu articulo ha sido publicado'
         response.flash = msg
     return dict(form=form)
