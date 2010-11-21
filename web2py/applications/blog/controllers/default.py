@@ -99,23 +99,47 @@ def admin():
 @auth.requires_login()
 def modifypost():
 
-    if request.args(0):  #modificando un post
-        post   = db.articulos(request.args(0)) or redirect(URL('index'))
-        print post
+    if request.args(0):  
+        #obteniendo articulo
+        id_articulo=request.args(0)
+        post = db.articulos(id_articulo) or redirect(URL('index'))
+        #obteniendo etiquetas asociadas al articulo
+        filtro = (db.etiquetas_articulos.id_articulo==id_articulo) & (db.etiquetas_articulos.id_etiqueta==db.etiquetas.id)
+        etiquetas=[]
+        [etiquetas.append(row.nombre) for row in db(filtro).select(db.etiquetas.nombre)]
+        etiquetas =  ", ".join(etiquetas)
+        #armando formulario
+        form = SQLFORM.factory(Field('titulo',    'string',  requires=IS_NOT_EMPTY(), required=True),
+                         Field('articulo',  'text',    requires=IS_NOT_EMPTY(),required=True),
+                         Field('image', 'upload'),
+                         Field('etiquetas', 'string'), 
+                         Field('id_articulo', readable=False, writable=False),
+                         table_name='articulos') #las etiquetas serán separadas por coma
 
-	form = SQLFORM(db.articulos, post)
+        form.vars['id_articulo']= id_articulo
+        form.vars['titulo']     = post['titulo']	
+        form.vars['articulo']   = post['articulo']	
+        form.vars['image']      = post['image']	
+        form.vars['etiquetas']  = etiquetas
 
-	if form.accepts(request.vars, session):
-            response.flash ='Tu articulo ha sido actualizado'
-	elif form.errors:
-	    response.flash ='No se actualizó el artículo'
+    if form.accepts(request.vars, session, keepvalues=True):
+            #chequeando si las etiquetas fueron modificadas
+            id_etiquetas = create_tags(form.vars['etiquetas'])
+            #verificar not in en tabla etiquetas_articulos
+            for etiqueta in id_etiquetas:
+                filtro = (db.etiquetas_articulos.id_articulo==form.vars['id_articulo']) & (db.etiquetas_articulos.id_etiqueta==etiqueta)
+                etiquetaexist = db(filtro).select() or None
+                if etiquetaexist == None:
+                    db.etiquetas_articulos.insert(id_etiqueta=etiqueta, id_articulo=form.vars['id_articulo'])
+            #update db
+            filtro= db.articulos.id==form.vars['id_articulo']
+            ok = db(filtro).update(titulo=form.vars['titulo'], articulo=form.vars['articulo'], image=form.vars['image']) or None
+            if ok: response.flash ='Tu articulo ha sido actualizado'
+            
+    elif form.errors:
+        response.flash ='No se actualizó el artículo'
 
-    else:
-	 form=none
-	 response.flash ='No seleccionó el articulo'
-    
     return dict(form=form)
-
 
 def create_tweet(titulo):
     tweepyexist = 0
