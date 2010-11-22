@@ -123,18 +123,19 @@ def modifypost():
         form.vars['etiquetas']  = etiquetas
 
     if form.accepts(request.vars, session, keepvalues=True):
-            #chequeando si las etiquetas fueron modificadas
-            id_etiquetas = create_tags(form.vars['etiquetas'])
-            #verificar not in en tabla etiquetas_articulos
-            for etiqueta in id_etiquetas:
-                filtro = (db.etiquetas_articulos.id_articulo==form.vars['id_articulo']) & (db.etiquetas_articulos.id_etiqueta==etiqueta)
-                etiquetaexist = db(filtro).select() or None
-                if etiquetaexist == None:
-                    db.etiquetas_articulos.insert(id_etiqueta=etiqueta, id_articulo=form.vars['id_articulo'])
-            #update db
-            filtro= db.articulos.id==form.vars['id_articulo']
-            ok = db(filtro).update(titulo=form.vars['titulo'], articulo=form.vars['articulo'], image=form.vars['image']) or None
-            if ok: response.flash ='Tu articulo ha sido actualizado'
+        #chequeando si las etiquetas fueron modificadas
+        id_etiquetas = create_tags(form.vars['etiquetas'])
+        #verificar not in en tabla etiquetas_articulos
+        for etiqueta in id_etiquetas:
+            filtro = (db.etiquetas_articulos.id_articulo==form.vars['id_articulo']) & (db.etiquetas_articulos.id_etiqueta==etiqueta)
+            etiquetaexist = db(filtro).select()
+            if not etiquetaexist:
+                db.etiquetas_articulos.insert(id_etiqueta=etiqueta, id_articulo=form.vars['id_articulo'])
+        #update db
+        filtro= db.articulos.id==form.vars['id_articulo']
+        ok = db(filtro).update(titulo=form.vars['titulo'], articulo=form.vars['articulo'], image=form.vars['image'])
+        if ok:
+            response.flash ='Tu articulo ha sido actualizado'
             
     elif form.errors:
         response.flash ='No se actualizó el artículo'
@@ -174,14 +175,11 @@ def create_tweet(titulo):
 
 def create_tags(tags):
     etiquetas = map(lambda x: x.strip().lower() , tags.split(','))
-    #filtro las etiquetas que ya existen en bd e inserto las nuevas
-    existinbd=0
     # ids de etiquetas a asociar
     ids=[]
-    id_etiqueta=""
     for etiqueta in etiquetas:
-        tag = db(db.etiquetas.nombre==etiqueta).select(db.etiquetas.id).first() or None 
-        if tag == None:
+        tag = db(db.etiquetas.nombre==etiqueta).select(db.etiquetas.id).first() 
+        if not tag:
             id_etiqueta = db.etiquetas.insert(nombre=etiqueta)
         else:
             id_etiqueta = db(db.etiquetas.nombre==etiqueta).select(db.etiquetas.id).first()['id']
