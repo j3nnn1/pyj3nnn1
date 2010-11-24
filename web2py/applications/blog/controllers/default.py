@@ -25,9 +25,12 @@ def index():
 
     filtro = (db.articulos.id_usuario==db.auth_user.id)
     post = db(filtro).select(db.articulos.ALL, db.auth_user.first_name, limitby=(limit,page*perpage),orderby=~db.articulos.fecha)
-    comments  = [db((db.comentarios.id_articulo == i.articulos.id)&(db.comentarios.visible == '1')).count() for i in post]
-
-    return dict(post=post,totalpages=totalpages,postpage=page,comments=comments)
+    comments = [db((db.comentarios.id_articulo == i.articulos.id)&(db.comentarios.visible == '1')).count() for i in post]
+    filtro_tags = (db.etiquetas_articulos.id_etiqueta == db.etiquetas.id)
+    tags = [db((filtro_tags)&(db.etiquetas_articulos.id_articulo == i.articulos.id)).select(db.etiquetas.nombre) for i in post]
+    return dict(post=post, totalpages=totalpages, postpage=page,
+            comments=comments,
+            etiquetas=tags)
 
 def about():
     """ Información sobre mi persona"""
