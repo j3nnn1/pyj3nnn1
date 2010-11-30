@@ -13,6 +13,8 @@ def index():
     """
     Esta vista va a obtener 3 post
     """
+    # Counting tags
+    tags = db().select(db.etiquetas.nombre,distinct=True).records
     # filter to join.
     perpage = 3  # Numero de articulos por pagina
     # contamos cuantos posts hay en la bd
@@ -27,10 +29,11 @@ def index():
     post = db(filtro).select(db.articulos.ALL, db.auth_user.first_name, limitby=(limit, page * perpage), orderby=~db.articulos.fecha)
     comments = [db((db.comentarios.id_articulo == i.articulos.id)&(db.comentarios.visible == '1')).count() for i in post]
     filtro_tags = (db.etiquetas_articulos.id_etiqueta == db.etiquetas.id)
-    tags = [db((filtro_tags)&(db.etiquetas_articulos.id_articulo == i.articulos.id)).select(db.etiquetas.nombre) for i in post]
+    tags_post = [db((filtro_tags)&(db.etiquetas_articulos.id_articulo == i.articulos.id)).select(db.etiquetas.nombre) for i in post]
     return dict(post=post, totalpages=totalpages, postpage=page,
             comments=comments,
-            etiquetas=tags)
+            etiquetas=tags_post,
+            tags=tags)
 
 
 def about():
