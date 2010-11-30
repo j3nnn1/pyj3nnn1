@@ -126,11 +126,17 @@ def modifypost():
             #chequeando si las etiquetas fueron modificadas
             id_etiquetas = create_tags(form.vars['etiquetas'])
             #verificar not in en tabla etiquetas_articulos
+            #dentro = ", ".join(id_etiquetas) 
+            #map(lambda x: )
             for etiqueta in id_etiquetas:
                 filtro = (db.etiquetas_articulos.id_articulo==form.vars['id_articulo']) & (db.etiquetas_articulos.id_etiqueta==etiqueta)
                 etiquetaexist = db(filtro).select() or None
                 if etiquetaexist == None:
                     db.etiquetas_articulos.insert(id_etiqueta=etiqueta, id_articulo=form.vars['id_articulo'])
+            #borrando etiquetas que se eliminaron
+            #not in (etiquetas)
+            print dentro
+            #db(db.etiquetas_articulos.id_etiqueta.belongs((dentro))).delete()
             #update db
             filtro= db.articulos.id==form.vars['id_articulo']
             ok = db(filtro).update(titulo=form.vars['titulo'], articulo=form.vars['articulo'], image=form.vars['image']) or None
