@@ -1,5 +1,9 @@
 {{extend 'layout.html'}}
 
+{{block sidebartags}}
+        Not Default block
+{{end}}
+
 <div class='post'>
 {{=H2(post.articulos.titulo, _class='title')}}
     {{if post.articulos.image:}}

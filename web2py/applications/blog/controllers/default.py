@@ -14,7 +14,7 @@ def index():
     Esta vista va a obtener 3 post
     """
     # Counting tags
-    tags = db().select(db.etiquetas.nombre,distinct=True).records
+    tags = db().select(db.etiquetas.nombre).records
     # filter to join.
     perpage = 3  # Numero de articulos por pagina
     # contamos cuantos posts hay en la bd
@@ -131,8 +131,8 @@ def modifypost():
                     db.etiquetas_articulos.insert(id_etiqueta=etiqueta, id_articulo=form.vars['id_articulo'])
             #borrando etiquetas que se eliminaron
             #not in (etiquetas)
-            db((~(db.etiquetas_articulos.id_etiqueta.belongs(id_etiquetas))) & (db.etiquetas_articulos.id_etiqueta==etiqueta)).delete()
-
+            filtro = ((~(db.etiquetas_articulos.id_etiqueta.belongs(id_etiquetas))) & (db.etiquetas_articulos.id_articulo==form.vars['id_articulo']))
+            db(filtro).delete()
             #update db post
             filtro= db.articulos.id==form.vars['id_articulo']
             ok = db(filtro).update(titulo=form.vars['titulo'], articulo=form.vars['articulo'], image=form.vars['image']) or None

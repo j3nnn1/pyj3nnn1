@@ -1,10 +1,23 @@
-{{import tweepy}}
-{{usertl = tweepy.api.user_timeline('j3nnn1')}}
+{{
+try:
+	import tweepy
+	tweepyexist =1
+except ImportError:
+	print 'API NO Disponible'
+	tweepyexist =0
+pass
+}}
 <ul>
-{{for tweet in usertl[0:4]:}}
-   <li>
-   <strong>@{{=tweet.user.screen_name}}:</strong> {{=tweet.text}}
-    </li>
+{{
+if tweepyexist:
+	usertl = tweepy.api.user_timeline('j3nnn1')}}
+	{{for tweet in usertl[0:4]:}}
+   	<li>
+   	<strong>@{{=tweet.user.screen_name}}:</strong> {{=tweet.text}}
+    	</li>
+	{{pass}}
+{{else:}}
+	<li>{{=T('API de twitter No Disponible')}}</li>
 {{pass}}
 </ul>
 </body>

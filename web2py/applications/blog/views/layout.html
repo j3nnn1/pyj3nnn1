@@ -76,7 +76,11 @@ div.error { background-color: red; color: white; padding: 3px; }
          </li>
          <li>
             <h2> Etiquetas </h2>
-            <p> {{include './default/tags.html'}} </p>
+            <p> 
+		{{block sidebartags}}
+            		{{include './default/tags.html'}} 
+		{{end}}
+	    </p>
          </li>
      </ul>
     </div>
