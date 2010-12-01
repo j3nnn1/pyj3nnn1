@@ -1,7 +1,6 @@
 <div class="tags">
     <ul>
-{{print tags;}}
-    {{for tag in tags:}}
+    {{for tag in tagnames:}}
         <li>{{=tag['nombre']}}</li>
     {{pass}}
     </ul>
