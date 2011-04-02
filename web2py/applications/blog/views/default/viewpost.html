@@ -1,34 +1,35 @@
 {{extend 'layout.html'}}
 
-{{block sidebartags}}
-        Not Default block
-{{end}}
-
-<div class='post'>
-{{=H2(post.articulos.titulo, _class='title')}}
-    {{if post.articulos.image:}}
-	<div align='center'>
-	<img width="200px" src="{{=URL('download', args=post.articulos.image)}}"/>
+{{#block sidebartags}}
+   {{#     Not Default block}}
+{{#end}}
+<div class='content'>
+	<div class='post'>
+	{{=H3(post.articulos.titulo, _class='title')}}
+	    {{if post.articulos.image:}}
+		<div align='center'>
+		<img width="200px" src="{{=URL('download', args=post.articulos.image)}}"/>
+		</div>
+	    {{pass}}
+	    <div class='entry'>
+		<p>{{=XML(post.articulos.articulo)}} </p>
+	    </div>
+	    {{=A(T("Escrito por: %s  el %s" % (post.auth_user.first_name, post.articulos.fecha.strftime('%d de %B del %Y'))), _class='comments')}}
+	    <div class='entry'>
+	    {{if comments:}}
+		{{ for comment in comments: }}
+		    {{=B(T("Titulo: "))}} {{=comment.comentarios.titulo}}<br/>
+		    {{=B(T("Nombre: "))}} {{=comment.comentarios.nombre}} <br />
+		    {{=B(T("Web: "))}} {{=(comment.comentarios.url or "No tiene Url")}} <br />
+		    {{=B(T("Comentario: "))}}<br />
+		    {{=comment.comentarios.comentario}} <br />
+		    {{=B(T("Escrito el:"))}} {{=comment.comentarios.fecha.strftime('%d de %B del %Y')}} <br /><br />
+	    {{pass}}
+	    {{else:}}
+		{{=H3(T("Este post no tiene comentarios aun, sé el primero en dejar uno"))}}
+	    {{pass}}
+	    </div>
+	<br/>
+	{{=form}}
 	</div>
-    {{pass}}
-    <div class='entry'>
-	<p>{{=XML(post.articulos.articulo)}} </p>
-    </div>
-    {{=A(T("Escrito por: %s  el %s" % (post.auth_user.first_name, post.articulos.fecha.strftime('%d de %B del %Y'))), _class='meta')}}
-    <div class='entry'>
-    {{if comments:}}
-	{{ for comment in comments: }}
-            {{=B(T("Titulo: "))}} {{=comment.comentarios.titulo}}<br/>
-            {{=B(T("Nombre: "))}} {{=comment.comentarios.nombre}} <br />
-            {{=B(T("Web: "))}} {{=(comment.comentarios.url or "No tiene Url")}} <br />
-            {{=B(T("Comentario: "))}}<br />
-            {{=comment.comentarios.comentario}} <br />
-            {{=B(T("Escrito el:"))}} {{=comment.comentarios.fecha.strftime('%d de %B del %Y')}} <br /><br />
-    {{pass}}
-    {{else:}}
-        {{=H3(T("Este post no tiene comentarios aun, sé el primero en dejar uno"))}}
-    {{pass}}
-    </div>
-<br/>
-{{=form}}
 </div>

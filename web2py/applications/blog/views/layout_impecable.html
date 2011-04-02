@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+
+Title      : Subordinate
+Version    : 1.0
+Released   : 20080412 Description: A two-column, fixed-width and lightweight template ideal for 1024x768 resolutions. Suitable for blogs and small websites.
+
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title> {{=response.title or request.application}} </title>
+  			{{response.files.append(URL(request.application,'static','plugin_layouts/layouts/impecable/style.css'))}}
+  			{{#include 'plugin_layouts/layouts/impecable.html'}}
+  			{{response.files.append(URL('static','plugin_layouts/superfish.js'))}}
+  			{{include 'web2py_ajax.html'}}
+  			</style>
+ 	</head>
+	<body>
+  	<!-- start page -->
+  		<div id="page">
+   		<!-- start content -->
+			<!--<div id="page-bgtop">-->
+				<!--<div id="page-bgbtm">-->
+   					<div id="content">
+    						<div class="flash">{{=response.flash or ''}}</div>
+    						{{include}}
+   					<!-- end content -->
+   					<div style="clear: both;">
+   					&nbsp; 
+   					</div>
+   					<!-- start sidebar -->
+					<!--<div id="sidebar">
+						<!-- start header -->
+						<div id="header">
+   							<div id="menu">
+    							{{=MENU(response.menu,_class='web2py-menu')}}
+    							<script>
+       								jQuery(document).ready(function(){jQuery('ul.web2py-menu').superfish({delay:400});});
+    								</script>
+							</div>
+						</div>
+  						<!-- end header -->
+						<div id="logo">
+							<h1> {{#=response.title or request.application}} </h1>
+   							<h2> {{#=response.subtitle or '=response.subtitle'}} </h2>
+				  		</div>
+ 					</div>
+   					<!-- end sidebar -->
+-->
+		</div> <!-- end page -->
+		<!-- start sidebar -->
+					<div id="sidebar">
+						<!-- start header -->
+						<div id="logo">
+							<h2> {{=response.title or request.application}} </h2>
+   							&nbsp; 
+   							<h2> {{=response.subtitle or '=response.subtitle'}} </h2>
+				  		</div>
+						<!--<div id="header">-->
+   						<div id="menu">
+    							{{=MENU(response.menu,_class='web2py-menu')}}
+    							<script>
+       							jQuery(document).ready(function(){jQuery('ul.web2py-menu').superfish({delay:400});});
+    							</script>
+						</div>
+						<!--</div>-->
+  						<!-- end header -->
+ 					</div>
+   					<!-- end sidebar -->
+  					<div id="footer">
+   						<div id="footer-wrap">
+    							<p id="legal">
+     								<a href="http://www.freecsstemplates.org/">
+									Template expropiada.
+     								</a>
+    							</p>
+   						</div>
+  					</div>
+  					<!-- end footer -->
+		<!--		</div>
+			</div>-->
+ </body>
+</html>

@@ -23,18 +23,22 @@ def index():
     totalpages = totalposts / perpage
     page = int(request.args(0)) if request.args(0) else 1
     limit = int(page - 1) * perpage
+
     if totalposts > perpage and totalpages == 1 and totalpages * perpage != totalposts:
         totalpages = 2
-    filtro = (db.articulos.id_usuario == db.auth_user.id)
-    post = db(filtro).select(db.articulos.ALL, db.auth_user.first_name, limitby=(limit, page * perpage), orderby=~db.articulos.fecha)
+
+    filtro = (db.articulos.id_usuario==db.auth_user.id)
+    post = db(filtro).select(db.articulos.ALL, db.auth_user.first_name, limitby=(limit,page*perpage),orderby=~db.articulos.fecha)
     comments = [db((db.comentarios.id_articulo == i.articulos.id)&(db.comentarios.visible == '1')).count() for i in post]
     filtro_tags = (db.etiquetas_articulos.id_etiqueta == db.etiquetas.id)
     tags_post = [db((filtro_tags)&(db.etiquetas_articulos.id_articulo == i.articulos.id)).select(db.etiquetas.nombre) for i in post]
 
-    return dict(post=post, totalpages=totalpages, postpage=page,
-            comments=comments,
-            etiquetas=tags_post,
-            tagnames=tagnames)
+    return dict(post=post,
+		totalpages=totalpages,
+		postpage=page,
+            	comments=comments,
+            	etiquetas=tags_post,
+            	tagnames=tagnames)
 
 
 def about():
@@ -93,7 +97,7 @@ def admin():
     if totalposts > perpage and totalpages == 1 and totalpages * perpage != totalposts:
         totalpages = 2
     filtro = (db.articulos.id_usuario==db.auth_user.id)
-    tableart = db(filtro).select(db.articulos.ALL, limitby=(limit, page * perpage), orderby=~db.articulos.fecha).records
+    tableart = db(filtro).select(db.articulos.ALL, limitby=(limit,page*perpage),orderby=~db.articulos.fecha).records
     #tableart = db().select(db.articulos.ALL, orderby=~db.articulos.fecha).records
     return dict(tableart=tableart, totalpages=totalpages, postpage=page)
 
@@ -106,7 +110,7 @@ def modifypost():
         post = db.articulos(id_articulo) or redirect(URL('index'))
         #obteniendo etiquetas asociadas al articulo
         filtro = (db.etiquetas_articulos.id_articulo==id_articulo) & (db.etiquetas_articulos.id_etiqueta==db.etiquetas.id)
-        etiquetas = []
+        etiquetas=[]
         [etiquetas.append(row.nombre) for row in db(filtro).select(db.etiquetas.nombre)]
         etiquetas = ", ".join(etiquetas)
         #armando formulario
@@ -115,7 +119,8 @@ def modifypost():
                          Field('image', 'upload'),
                          Field('etiquetas', 'string'),
                          Field('id_articulo', readable=False, writable=False),
-                         table_name='articulos')  # las etiquetas serán separadas por coma
+                         table_name='articulos') #las etiquetas serán separadas por coma
+
         form.vars['id_articulo']= id_articulo
         form.vars['titulo'] = post['titulo']
         form.vars['articulo'] = post['articulo']
@@ -146,6 +151,7 @@ def modifypost():
 
 def create_tweet(titulo):
     tweepyexist = 0
+    msg =''
     try:
         import tweepy
         tweepyexist = 1
@@ -177,8 +183,11 @@ def create_tweet(titulo):
 
 def create_tags(tags):
     etiquetas = map(lambda x: x.strip().lower(), tags.split(','))
+    #filtro las etiquetas que ya existen en bd e inserto las nuevas
+    existinbd=0
     # ids de etiquetas a asociar
     ids=[]
+    id_etiqueta=""
     for etiqueta in etiquetas:
         tag = db(db.etiquetas.nombre==etiqueta).select(db.etiquetas.id).first()
         if not tag:
@@ -193,10 +202,11 @@ def create_tags(tags):
 def createpost():
     #form        = SQLFORM(db.articulos) forma easy
     form = SQLFORM.factory(Field('titulo',    'string',  requires=IS_NOT_EMPTY(), required=True),
-                    Field('articulo',  'text',    requires=IS_NOT_EMPTY(), required=True),
+					Field('articulo',  'text', requires=IS_NOT_EMPTY(), required=True),
                     Field('image', 'upload'),
-                    Field('etiquetas', 'string'),
-                    table_name='articulos')  # las etiquetas serán separadas por coma
+                    Field('etiquetas', 'string'), 
+                    table_name='articulos') #las etiquetas serán separadas por coma
+
     if form.accepts(request.vars, session):
         #extrayendo etiquetas (@etiquetas), quitando espacios extremos, e insertando etiquetas en bd almacenado sus @ids.
         ids = create_tags(form.vars['etiquetas'])
@@ -208,10 +218,10 @@ def createpost():
         else:
             print 'insert article successful'
         #insertando registro en etiquetas_articulos
-        [db.etiquetas_articulos.insert(id_etiqueta=i, id_articulo=id_articulo) for i in ids]
-        response.flash = msg = create_tweet(form.vars['titulo'])  # Comentado pq necesita algun trabajo adicional
-    return dict(form=form)
+        [db.etiquetas_articulos.insert(id_etiqueta=i, id_articulo=id_articulo) for i in ids] # List comprehensions rocks 
+        response.flash = msg = create_tweet(form.vars['titulo']) # Comentado pq necesita algun trabajo adicional
 
+    return dict(form=form)
 
 @auth.requires_login()
 def deletepost():
@@ -233,7 +243,7 @@ def download():
     allows downloading of uploaded files
     http://..../[app]/default/download/[filename]
     """
-    return response.download(request, db)
+    return response.download(request,db)
 
 
 def call():
@@ -248,8 +258,9 @@ def call():
 
 
 def grantcomment():
-    if request.args(0):  # id comentario.
-        if request.args(1)=='True':  # visible o no
+
+    if request.args(0):  #id comentario.
+        if request.args(1)=='True':  #visible o no
             filtro = (db.comentarios.id==request.args(0))
             db(filtro).update(visible=0)
             response.flash='visibilidad del Comentario cambiada'
@@ -263,8 +274,8 @@ def grantcomment():
             response.flash='Comentario Eliminado'
     filtro = (db.comentarios.id_articulo==db.articulos.id)
     comments = db(filtro).select(db.comentarios.ALL, db.articulos.titulo).records
-    return dict(comments=comments)
 
+    return dict(comments=comments)
 
 @auth.requires_login()
 def twitterauth():
@@ -287,7 +298,6 @@ def twitterauth():
         response.flash = 'revise los errores en formulario'
     return dict(form=form)
 
-
 def twitterme():
     try:
         import tweepy
@@ -302,3 +312,94 @@ def twitterme():
         HTML='</ul>'
         print HTML
     return dict(HTML=HTML)
+
+def getcloudtag():
+	result = {} 
+	count	  = db.etiquetas_articulos.id_etiqueta.count()
+	group	  = db.etiquetas.nombre
+	filtro	  = (db.etiquetas.id==db.etiquetas_articulos.id_etiqueta)
+	etiquetas = db(filtro).select(db.etiquetas.nombre, count ,  groupby=group);
+	
+	for etiqueta in etiquetas:
+		result[etiqueta.etiquetas.nombre] = etiqueta[count]
+
+	return result
+
+def showcloudtag():
+	etiquetas = getcloudtag()
+	cadena	  = ''
+	size = 0
+	for etiqueta in etiquetas.keys():
+		size = getsizefont(etiquetas[etiqueta])
+		cadena = "<a href='listarticlesbytag?args="+ etiqueta +"'><span style='font-size:"+str(size)+"em;'> "+ etiqueta +'</span></a>' + cadena
+		
+		
+ 	html = DIV(XML(cadena), _id='etiquetas', _class='etiquetas', _width='80', _high='100')
+	return dict(html=html)
+
+def gethighertag():
+	etiquetas=getcloudtag()
+	higher = 0	
+	for etiqueta in etiquetas.keys():
+		if etiquetas[etiqueta]>higher: 
+			higher=etiquetas[etiqueta]
+	return higher
+
+def countalltags():
+	etiquetas=getcloudtag()
+	suma = 0	
+	for etiqueta in etiquetas.keys():
+		suma= suma + etiquetas[etiqueta]
+	return suma
+
+def getsizefont(s):
+	higher = gethighertag()
+	num    = getcountarticle()
+	size   = 0
+	size   = s * int(num) / int(higher)
+	numtag = countalltags()
+	algo = float(size)/numtag
+	if (algo<1):
+		size = float(size)/numtag +1
+	elif(algo>=1 and algo<=2):
+		size = float(size)/numtag
+	else:
+		size=2
+	return size
+
+def countalltag():
+	etiquetas=getcloudtag()
+	suma = 0	
+	for etiqueta in etiquetas.keys():
+		suma = suma + etiquetas[etiqueta]
+			
+	return suma
+
+def getcountarticle():
+	num=0
+	num = int(db(db.articulos.id).count())
+	return num
+
+
+def listarticlesbytag():
+	etiqueta =''
+	result={}
+	if request.get_vars['args']:
+		etiqueta = request.get_vars['args']
+		filtro=(db.etiquetas.nombre==etiqueta) & (db.etiquetas.id==db.etiquetas_articulos.id_etiqueta) & (db.etiquetas_articulos.id_articulo==db.articulos.id)
+		arti= db(filtro).select(db.articulos.id, db.articulos.titulo, orderby=~db.articulos.fecha)
+		print arti
+		for art in arti:
+			result[art['id']]=art['titulo']
+	else:
+		 redirect(URL('index'))
+	return dict(result=result)
+
+def showarchivesold():
+	etiquetas = db(filtro).select(db.articulos.nombre, count ,  groupby=db.articulos.fecha.year());
+	print  db().select()
+	return dict(html=html)
+
+
+
+

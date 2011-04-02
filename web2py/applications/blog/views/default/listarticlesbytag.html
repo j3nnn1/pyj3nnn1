@@ -1,0 +1,6 @@
+{{extend 'layout.html'}} 
+<div id=content>
+{{for key in result.keys():}}
+	{{=H4(A(result[key], _href=URL("viewpost", args=key)))}}
+{{pass}}
+</div>

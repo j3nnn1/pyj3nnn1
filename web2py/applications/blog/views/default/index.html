@@ -1,15 +1,16 @@
 {{extend 'layout.html'}}
 <div class="content">
+{{x=0}}
 {{if not post:}}
    {{=DIV(H2(T(" No existen Artículos"), _class='title'), _class='post')}}
 {{pass}}
 {{for x,p in enumerate(post):}}
     <div class="post">
-        {{=H3(A(p.articulos.titulo, _href=URL("viewpost", args=p.articulos.id)), _class='title')}} 
+        {{=H2(A(p.articulos.titulo, _href=URL("viewpost", args=p.articulos.id)), _class='title')}} 
         <div class="entry"> 
             {{articulos_palabras = p.articulos.articulo.split()}}
             {{if len(articulos_palabras) > 30:}}
-                {{=XML(' '.join(articulos_palabras[:30]))}} {{=A('Leer más...',_href=URL('viewpost',args=p.articulos.id))}}
+                {{=XML(' '.join(articulos_palabras[:30]))}} {{=A('Leer más...',_href=URL('viewpost',args=p.articulos.id), _class='more')}}
             {{else:}}
                 {{=XML(p.articulos.articulo)}}
             {{pass}}
@@ -17,7 +18,7 @@
         {{tags = etiquetas[x].as_list()}}
         {{eti = [tag['nombre'] for tag in tags]}}
         <p>Etiquetas: {{=' '.join(eti)}}</p> 
-        {{=A(T("Escrito por %s el: %s Comentarios(%s)" % (p.auth_user.first_name,p.articulos.fecha.strftime('%d de %B del %Y'),comments[x])), _class='meta')}}
+        {{=A(T("Escrito por %s el: %s Comentarios(%s)" % (p.auth_user.first_name,p.articulos.fecha.strftime('%d de %B del %Y'),comments[x])), _class='comments')}}
     </div>
 <hr />
 {{pass}}

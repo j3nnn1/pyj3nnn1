@@ -6,7 +6,7 @@
 
 #response.title = request.application
 response.title = "It's me" #request.application
-response.subtitle = T("it's me j3nnn1")
+response.subtitle = T("J3nnn1")
 response.meta.author = 'Jennifer Maldonado'
 response.meta.description = 'blog para contar, experiencias con web2py... '
 response.meta.keywords = 'j3nnn1 web2py python'

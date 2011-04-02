@@ -1,18 +1,16 @@
 {{extend 'layout.html'}} 
+<div class='content'>
 
-{{block sidebartags}}
-	Not Default block
-{{end}}
-
-<div class='content' align='center'>
-{{=DIV(H2(T("Administrando Artículos."), _class='title'), _align='center')}}
+    <div id='post' class='post'>
+	{{=DIV(H3(T("Administrando Artículos."), _class='title'), _align='center', _class='title')}}
     <ul>
-        <li> {{=H3(A(T("Crear nuevo artículo"), _class='link', _href='createpost'), _class='title')}} </li>
-        <li> {{=H3(A(T("Gestionar Comentarios"), _class='link', _href='grantcomment'), _class='title')}} </li>
-	<li> {{=H3(A(T("Administrar Base de Dato"), _class='link', _href=URL(a='blog', c='appadmin', f='index')), _class='title')}}</li>
-	<li> {{=H3(A(T("Modificar o Eliminar artículo"), _class='link'), _class='title')}}</li>
-	<li> {{=H3(A(T("Activar Cuenta de Twitter"), _class='link', _href=URL(a='blog', c='default', f='twitterauth')), _class='title')}}</li>
+        <li> {{=H5(A(T("Crear nuevo artículo"), _class='link', _href='createpost'))}} </li>
+        <li> {{=H5(A(T("Gestionar Comentarios"), _class='link', _href='grantcomment'))}} </li>
+	<li> {{=H5(A(T("Administrar Base de Dato"), _class='link', _href=URL(a='blog', c='appadmin', f='index')))}}</li>
+	<li> {{=H5(A(T("Modificar o Eliminar artículo"), _class='link'))}}</li>
+	<li> {{=H5(A(T("Activar Cuenta de Twitter"), _class='link', _href=URL(a='blog', c='default', f='twitterauth')))}}</li>
     </ul>
+   </div>
 
 {{if not tableart:}}
     {{=DIV(H2(T("No existen artículos"), _class='title'), _class='post')}}
@@ -21,7 +19,8 @@
 <div id='adminpost'>
 {{if tableart:}}
     <table>
-        <tr>
+	<thead>        
+	<tr>
             <th>
 	    {{=T("Título")}}
             </th>
@@ -32,23 +31,28 @@
 	    {{=T("Acciones")}}
             </th>
         </tr>
+	</thead>
+	<tbody>
+	    {{i=0}}
 	    {{for registro in tableart:}}
-    	<tr>
+		{{i= i +1}}
+    	<tr {{if ((i % 2)==0): response.write("class=odd") }}>
 	    <td>
 	        {{=T(registro.articulos.titulo)}}
 	    </td>
 	    <td>
 	        {{=registro.articulos.fecha}}
 	    </td>
-	    <td>
+	    <th scope='row'>
 	        {{=A(T("Modificar artículo"), _href=URL('modifypost', args=registro.articulos.id), _class='link')}}
-	    </td>
-	    <td>
+	    </th>
+	    <th scope='row'>
 	        {{=A(T("Eliminar artículo"), _href=URL('deletepost', args=registro.articulos.id), _class='link')}}
-	    </td>
+	    </th>
         </tr>
             {{pass}}
 	{{pass}}
+	</tbody>
     </table>
 </div>
 
