@@ -23,7 +23,7 @@ class ViewScale :
 
 class ViewZoomKind :
     """An integer (0 to 2) that represents the zoom kind of the document."""
-    
+
     NONE     = 0
     FullPage = 1
     BestFit  = 2
@@ -33,7 +33,7 @@ class ViewZoomKind :
     IsValid = classmethod( _IsValid )
 
 
-class Languages : 
+class Languages :
     NoLanguage            = 1024
     Albanian              = 1052
     Arabic                = 1025
@@ -145,13 +145,14 @@ class Languages :
               1074,
               1073,
               1065 ]
-    
+
     #  make it Australian as that is what I use most of the time
     DEFAULT = EnglishAustralian
-    
+
     def _IsValid( cls, value ) :
         return value in cls.Codes
     IsValid = classmethod( _IsValid )
 
 if __name__ == '__main__' :
     PrintHexTable()
+

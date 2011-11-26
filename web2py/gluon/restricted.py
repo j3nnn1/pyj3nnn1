@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-This file is part of web2py Web Framework (Copyrighted, 2007-2010).
-Developed by Massimo Di Pierro <mdipierro@cs.depaul.edu>.
-License: GPL v2
+This file is part of the web2py Web Framework
+Copyrighted by Massimo Di Pierro <mdipierro@cs.depaul.edu>
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
 """
 
 import sys
@@ -18,11 +18,11 @@ import logging
 from utils import web2py_uuid
 from storage import Storage
 from http import HTTP
+from html import BEAUTIFY
 
 logger = logging.getLogger("web2py")
 
 __all__ = ['RestrictedError', 'restricted', 'TicketStorage', 'compile2']
-
 
 class TicketStorage(Storage):
 
@@ -55,13 +55,17 @@ class TicketStorage(Storage):
         logger.error('In FILE: %(layer)s\n\n%(traceback)s\n' % ticket_data)
 
     def _store_on_disk(self, request, ticket_id, ticket_data):
-        cPickle.dump(ticket_data, self._error_file(request, ticket_id, 'wb'))
+        ef = self._error_file(request, ticket_id, 'wb')
+        try:
+            cPickle.dump(ticket_data, ef)
+        finally:
+            ef.close()
 
     def _error_file(self, request, ticket_id, mode, app=None):
         root = request.folder
         if app:
             root = os.path.join(os.path.join(root, '..'), app)
-        errors_folder = os.path.join(root, 'errors') #.replace('\\', '/')
+        errors_folder = os.path.abspath(os.path.join(root, 'errors'))#.replace('\\', '/')
         return open(os.path.join(errors_folder, ticket_id), mode)
 
     def _get_table(self, db, tablename, app):
@@ -85,15 +89,19 @@ class TicketStorage(Storage):
         ticket_id,
         ):
         if not self.db:
-            return cPickle.load(self._error_file(request, ticket_id, 'rb', app))
-        table=self._get_table(self.db, self.tablename, app)
+            ef = self._error_file(request, ticket_id, 'rb', app)
+            try:
+                return cPickle.load(ef)
+            finally:
+                ef.close()
+        table = self._get_table(self.db, self.tablename, app)
         rows = self.db(table.ticket_id == ticket_id).select()
         if rows:
             return cPickle.loads(rows[0].ticket_data)
         return None
 
 
-class RestrictedError:
+class RestrictedError(Exception):
     """
     class used to wrap an exception that occurs in the restricted environment
     below. the traceback is used to log the exception and generate a ticket.
@@ -104,26 +112,30 @@ class RestrictedError:
         layer='',
         code='',
         output='',
-        environment={},
+        environment=None,
         ):
         """
         layer here is some description of where in the system the exception
         occurred.
         """
-
+        if environment is None: environment = {}
         self.layer = layer
         self.code = code
         self.output = output
+        self.environment = environment
         if layer:
-            self.traceback = traceback.format_exc()
             try:
-                self.snapshot = snapshot(context=10,code=code,environment=environment)
+                self.traceback = traceback.format_exc()
+            except:
+                self.traceback = 'no traceback because template parting error'
+            try:
+                self.snapshot = snapshot(context=10,code=code,
+                                         environment=self.environment)
             except:
                 self.snapshot = {}
         else:
             self.traceback = '(no error)'
             self.snapshot = {}
-        self.environment = environment
 
     def log(self, request):
         """
@@ -131,7 +143,6 @@ class RestrictedError:
         """
 
         try:
-            a = request.application
             d = {
                 'layer': str(self.layer),
                 'code': str(self.code),
@@ -139,14 +150,9 @@ class RestrictedError:
                 'traceback': str(self.traceback),
                 'snapshot': self.snapshot,
                 }
-            fmt = '%Y-%m-%d.%H-%M-%S'
-            f = '%s.%s.%s' % (request.client.replace(':', '_'),
-                              datetime.datetime.now().strftime(fmt),
-                              web2py_uuid())
-
             ticket_storage = TicketStorage(db=request.tickets_db)
-            ticket_storage.store(request, f, d)
-            return '%s/%s' % (a, f)
+            ticket_storage.store(request, request.uuid.split('/',1)[1], d)
+            return request.uuid
         except:
             logger.error(self.traceback)
             return None
@@ -172,23 +178,23 @@ def compile2(code,layer):
     """
     return compile(code.rstrip().replace('\r\n','\n')+'\n', layer, 'exec')
 
-def restricted(code, environment={}, layer='Unknown'):
+def restricted(code, environment=None, layer='Unknown'):
     """
     runs code in environment and returns the output. if an exception occurs
     in code it raises a RestrictedError containing the traceback. layer is
     passed to RestrictedError to identify where the error occurred.
     """
-
+    if environment is None: environment = {}
+    environment['__file__'] = layer
     try:
         if type(code) == types.CodeType:
             ccode = code
         else:
             ccode = compile2(code,layer)
-
         exec ccode in environment
     except HTTP:
         raise
-    except Exception:
+    except Exception, error:
         # XXX Show exception in Wing IDE if running in debugger
         if __debug__ and 'WINGDB_ACTIVE' in os.environ:
             etype, evalue, tb = sys.exc_info()
@@ -198,18 +204,18 @@ def restricted(code, environment={}, layer='Unknown'):
 def snapshot(info=None, context=5, code=None, environment=None):
     """Return a dict describing a given traceback (based on cgitb.text)."""
     import os, types, time, traceback, linecache, inspect, pydoc, cgitb
-    
+
     # if no exception info given, get current:
     etype, evalue, etb = info or sys.exc_info()
 
     if type(etype) is types.ClassType:
         etype = etype.__name__
-    
+
     # create a snapshot dict with some basic information
-    s = {}    
+    s = {}
     s['pyver'] = 'Python ' + sys.version.split()[0] + ': ' + sys.executable
     s['date'] = time.ctime(time.time())
-    
+
     # start to process frames
     records = inspect.getinnerframes(etb, context)
     s['frames'] = []
@@ -230,7 +236,7 @@ def snapshot(info=None, context=5, code=None, environment=None):
             try: return linecache.getline(file, lnum[0])
             finally: lnum[0] += 1
         vars = cgitb.scanvars(reader, frame, locals)
-        
+
         # if it is a view, replace with generated code
         if file.endswith('html'):
             lmin = lnum>context and (lnum-context) or 0
@@ -254,7 +260,7 @@ def snapshot(info=None, context=5, code=None, environment=None):
                 f['dump'][name] = pydoc.text.repr(value)
             else:
                 f['dump'][name] = 'undefined'
-        
+
         s['frames'].append(f)
 
     # add exception type, value and attributes
@@ -264,11 +270,11 @@ def snapshot(info=None, context=5, code=None, environment=None):
     if isinstance(evalue, BaseException):
         for name in dir(evalue):
             # prevent py26 DeprecatedWarning:
-            if name!='message' or sys.version_info<(2.6): 
+            if name!='message' or sys.version_info<(2.6):
                 value = pydoc.text.repr(getattr(evalue, name))
                 s['exception'][name] = value
 
-    # add all local values (of last frame) to the snapshot 
+    # add all local values (of last frame) to the snapshot
     s['locals'] = {}
     for name, value in locals.items():
         s['locals'][name] = pydoc.text.repr(value)
@@ -276,8 +282,9 @@ def snapshot(info=None, context=5, code=None, environment=None):
     # add web2py environment variables
     for k,v in environment.items():
         if k in ('request', 'response', 'session'):
-            s[k] = {}
-            for name, value in v.items():
-                s[k][name] = pydoc.text.repr(value)
+            s[k] = BEAUTIFY(v)
 
     return s
+
+
+

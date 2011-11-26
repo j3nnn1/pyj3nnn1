@@ -9,13 +9,13 @@
 */
 .acw-chap .wrapped-row
 {
-	background-image:url('/admin/static/eamy/chap-wrapped-row.gif');
+	background-image:url('chap-wrapped-row.gif');
 	background-repeat:no-repeat;
 	background-position:25px 4px;
 }
 .acw-chap .sidebar
 {
-	background-image:url('/admin/static/eamy/chap-bg-sidebar.gif');
+	background-image:url('chap-bg-sidebar.gif');
 	line-height:11px;	
 }
 /*.acw-chap .sidebar .row-number
@@ -32,25 +32,25 @@
 	height:10px;
 	margin-left:2px;
 	display:inline;
-	background-image:url('/admin/static/eamy/chap-folding-expand-inner.gif');
+	background-image:url('chap-folding-expand-inner.gif');
 }
 .acw-chap .folding-expand
 {
-	background-image:url('/admin/static/eamy/chap-folding-expand.gif');
+	background-image:url('chap-folding-expand.gif');
 }
 .acw-chap .folding-start
 {
-	background-image:url('/admin/static/eamy/chap-folding-start.gif');
+	background-image:url('chap-folding-start.gif');
 }
 .acw-chap .folding-stop
 {
-	background-image:url('/admin/static/eamy/chap-folding-stop.gif');
+	background-image:url('chap-folding-stop.gif');
 }
 .acw-chap .bookmark-default
 {
-	background-image:url('/admin/static/eamy/chap-bookmark-default.gif');
+	background-image:url('chap-bookmark-default.gif');
 }
 .acw-chap .void
 {
-	background-image:url('/admin/static/eamy/void.gif');	
+	background-image:url('void.gif');	
 }

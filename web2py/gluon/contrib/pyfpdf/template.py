@@ -13,15 +13,15 @@ def rgb(col):
     return (col // 65536), (col // 256 % 256), (col% 256)
 
 class Template:
-    def __init__(self, infile=None, elements=None, format='A4', 
+    def __init__(self, infile=None, elements=None, format='A4', orientation='portrait',
                  title='', author='', subject='', creator='', keywords=''):
         if elements:
             self.elements = dict([(v['name'].lower(),v) for v in elements])
-        self.handlers = {'T': self.text, 'L': self.line, 'I': self.image, 
-                         'B': self.rect, 'BC': self.barcode}
+        self.handlers = {'T': self.text, 'L': self.line, 'I': self.image,
+                         'B': self.rect, 'BC': self.barcode, }
         self.pg_no = 0
         self.texts = {}
-        pdf = self.pdf = FPDF(format=format,unit="mm")
+        pdf = self.pdf = FPDF(format=format,orientation=orientation, unit="mm")
         pdf.set_title(title)
         pdf.set_author(author)
         pdf.set_creator(creator)
@@ -34,25 +34,28 @@ class Template:
             'bold','italic','underline','foreground','background',
             'align','text','priority')
         self.elements = {}
-        for row in csv.reader(open(infile, 'rb'), delimiter=delimiter):
-            kargs = {}
-            for i,v in enumerate(row):
-                if not v.startswith("'") and decimal_sep!=".": 
-                    v = v.replace(decimal_sep,".")
-                else:
-                    v = v
-                if v=='':
-                    v = None
-                else:
-                    v = eval(v.strip())
-                kargs[keys[i]] = v
-            self.elements[kargs['name'].lower()] = kargs
-
+        f = open(infile, 'rb')
+        try:
+            for row in csv.reader(f, delimiter=delimiter):
+                kargs = {}
+                for i,v in enumerate(row):
+                    if not v.startswith("'") and decimal_sep!=".":
+                        v = v.replace(decimal_sep,".")
+                    else:
+                        v = v
+                    if v=='':
+                        v = None
+                    else:
+                        v = eval(v.strip())
+                    kargs[keys[i]] = v
+                self.elements[kargs['name'].lower()] = kargs
+        finally:
+            f.close()
 
     def add_page(self):
         self.pg_no += 1
         self.texts[self.pg_no] = {}
-        
+
     def __setitem__(self, name, value):
         if name.lower() in self.elements:
             if isinstance(value,unicode):
@@ -60,6 +63,13 @@ class Template:
             else:
                 value = str(value)
             self.texts[self.pg_no][name.lower()] = value
+
+    # setitem shortcut (may be further extended)
+    set = __setitem__
+
+    def __getitem__(self, name):
+        if name.lower() in self.elements:
+            return self.texts[self.pg_no].get(name.lower(), self.elements[name.lower()]['text'])
 
     def split_multicell(self, text, element_name):
         "Divide (\n) a string using a given element width"
@@ -71,10 +81,14 @@ class Template:
         if element['underline']: style += "U"
         pdf.set_font(element['font'],style,element['size'])
         align = {'L':'L','R':'R','I':'L','D':'R','C':'C','':''}.get(element['align']) # D/I in spanish
+        if isinstance(text, unicode):
+            text = text.encode("latin1","ignore")
+        else:
+            text = str(text)
         return pdf.multi_cell(w=element['x2']-element['x1'],
                              h=element['y2']-element['y1'],
                              txt=text,align=align,split_only=True)
-        
+
     def render(self, outfile, dest="F"):
         pdf = self.pdf
         for pg in range(1, self.pg_no+1):
@@ -86,12 +100,16 @@ class Template:
                 #print "dib",element['type'], element['name'], element['x1'], element['y1'], element['x2'], element['y2']
                 element = element.copy()
                 element['text'] = self.texts[pg].get(element['name'].lower(), element['text'])
+                if 'rotate' in element:
+                    pdf.rotate(element['rotate'], element['x1'], element['y1'])
                 self.handlers[element['type'].upper()](pdf, **element)
+                if 'rotate' in element:
+                    pdf.rotate(0)
 
         return pdf.output(outfile, dest)
-        
-    def text(self, pdf, x1=0, y1=0, x2=0, y2=0, text='', font="arial", size=10, 
-             bold=False, italic=False, underline=False, align="", 
+
+    def text(self, pdf, x1=0, y1=0, x2=0, y2=0, text='', font="arial", size=10,
+             bold=False, italic=False, underline=False, align="",
              foreground=0, backgroud=65535,
              *args, **kwargs):
         if text:
@@ -158,7 +176,7 @@ if __name__ == "__main__":
              title="Sample Invoice", author="Sample Company",
              subject="Sample Customer", keywords="Electronic TAX Invoice")
     f.parse_csv(infile="invoice.csv", delimiter=";", decimal_sep=",")
-    
+
     detail = "Lorem ipsum dolor sit amet, consectetur. " * 30
     items = []
     for i in range(1, 30):
@@ -167,7 +185,7 @@ if __name__ == "__main__":
         price = round(random.random()*100,3)
         code = "%s%s%02d" % (chr(random.randint(65,90)), chr(random.randint(65,90)),i)
         items.append(dict(code=code, unit='u',
-                          qty=qty, price=price, 
+                          qty=qty, price=price,
                           amount=qty*price,
                           ds="%s: %s" % (i,ds)))
 
@@ -210,7 +228,7 @@ if __name__ == "__main__":
         f["company_name"] = "Sample Company"
         f["company_logo"] = "tutorial/logo.png"
         f["company_header1"] = "Some Address - somewhere -"
-        f["company_header2"] = "http://www.example.com"        
+        f["company_header2"] = "http://www.example.com"
         f["company_footer1"] = "Tax Code ..."
         f["company_footer2"] = "Tax/VAT ID ..."
         f['number'] = '0001-00001234'
@@ -218,9 +236,9 @@ if __name__ == "__main__":
         f['due_date'] = '2099-09-10'
         f['customer_name'] = "Sample Client"
         f['customer_address'] = "Siempreviva 1234"
-       
+
         # print line item...
-        li = 0 
+        li = 0
         k = 0
         total = Decimal("0.00")
         for it in li_items:
@@ -250,9 +268,11 @@ if __name__ == "__main__":
         else:
             f['total_label'] = 'SubTotal:'
         f['total'] = "%0.2f" % total
-            
+
     f.render("./invoice.pdf")
     if sys.platform.startswith("linux"):
         os.system("evince ./invoice.pdf")
     else:
         os.system("./invoice.pdf")
+
+

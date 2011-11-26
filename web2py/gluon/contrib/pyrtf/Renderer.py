@@ -377,8 +377,8 @@ class Renderer :
     def _WriteSection( self, section, is_first, add_header ) :
 
         def WriteHF( hf, rtfword ) :
-            #if not hf : return 
-            
+            #if not hf : return
+
             #  if we don't have anything in the header/footer then include
             #  a blank paragraph, this stops it from picking up the header/footer
             #  from the previous section
@@ -587,7 +587,7 @@ class Renderer :
                 #  I think it might have an affect in some versions of some WPs.
                 #self._RendMarginsPropertySet( cell.Margins, settings, 'cl' )
 
-                #  if we are starting to merge or if this one is the first in what is 
+                #  if we are starting to merge or if this one is the first in what is
                 #  probably a series of merges then start the vertical merging
                 if cell.StartVerticalMerge or (cell.VerticalMerge and not vmerge[ idx ]) :
                     settings.append( 'clvmgf' )
@@ -599,7 +599,7 @@ class Renderer :
 
                 else :
                     #..no merging going on so make sure that it is off
-                    vmerge[ idx ] = False                   
+                    vmerge[ idx ] = False
 
                 #  for any cell in the next row that is covered by this span we
                 #  need to run off the vertical merging as we don't want them
@@ -616,7 +616,7 @@ class Renderer :
             self._write( repr( settings ) )
 
             for cell in cells :
-                if len( cell ) :                
+                if len( cell ) :
                     last_idx = len( cell ) - 1
                     for element_idx, element in enumerate( cell ) :
                         #   wrap plain strings in paragraph tags
@@ -636,3 +636,4 @@ class Renderer :
                     self._write( r'\pard\intbl\cell' )
 
             self._write( '\\row}\n' )
+

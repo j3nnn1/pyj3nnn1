@@ -283,7 +283,7 @@ def _get_jpg_dimensions( fin ):
     M_SOF15  = chr( 0xCF )  #
     M_SOI    = chr( 0xD8 )  #   /* Start Of Image (beginning of datastream) */
     M_EOI    = chr( 0xD9 )  #   /* End Of Image (end of datastream) */
-    
+
     M_FF = chr( 0xFF )
 
     MARKERS = [ M_SOF0, M_SOF1,  M_SOF2,  M_SOF3,
@@ -301,7 +301,7 @@ def _get_jpg_dimensions( fin ):
         #  up to the first 0xFF that we find
         while fin.read(1) != M_FF :
             pass
-    
+
         #  there can be more than one 0xFF as they can be used
         #  for padding so we are now looking for the first byte
         #  that isn't an 0xFF, this will be the marker
@@ -309,7 +309,7 @@ def _get_jpg_dimensions( fin ):
             result = fin.read(1)
             if result != M_FF :
                 return result
-    
+
         raise Exception( 'Invalid JPEG' )
 
     #  BODY OF THE FUNCTION
@@ -391,18 +391,18 @@ def _get_emf_dimensions( fin ):
 
     dw = header.FrameRight-header.FrameLeft
     dh = header.FrameBottom-header.FrameTop
-        
+
     # convert from 0.01mm units to 1/72in units
     return int(dw * 72.0/2540.0), int(dh * 72.0/2540.0)
 
 class Image( RawCode ) :
-    
+
     #  Need to add in the width and height in twips as it crashes
     #  word xp with these values.  Still working out the most
     #  efficient way of getting these values.
     # \picscalex100\picscaley100\piccropl0\piccropr0\piccropt0\piccropb0
     # picwgoal900\pichgoal281
-    
+
     PNG_LIB = 'pngblip'
     JPG_LIB = 'jpegblip'
     EMF_LIB = 'emfblip'
@@ -429,11 +429,11 @@ class Image( RawCode ) :
             width, height = _get_jpg_dimensions( fin )
         elif pict_type == self.EMF_LIB :
             width, height = _get_emf_dimensions( fin )
-                        
-                        
+
+
         # if user specified height or width but not both, then
         # scale unspecified dimension to maintain aspect ratio
-        
+
         if ('width' in kwargs) and ('height' not in kwargs):
             height = int(height * float(kwargs['width'])/width)
         elif ('height' in kwargs) and ('width' not in kwargs):
@@ -441,7 +441,7 @@ class Image( RawCode ) :
 
         width  = kwargs.pop('width',width)
         height = kwargs.pop('height', height)
-            
+
         codes = [ pict_type,
                   'picwgoal%s' % (width  * 20),
                   'pichgoal%s' % (height * 20) ]
@@ -453,7 +453,7 @@ class Image( RawCode ) :
                                       ( 'crop_left',   'cropl',    '0' ),
                                       ( 'crop_right',  'cropr',    '0' ),
                                       ( 'crop_top',    'cropt',    '0' ),
-                                      ( 'crop_bottom', 'cropb',    '0' ) ] :            
+                                      ( 'crop_bottom', 'cropb',    '0' ) ] :
             codes.append( 'pic%s%s' % ( code, kwargs.pop( kwarg, default ) ) )
 
 
@@ -754,3 +754,4 @@ def U( *params ) :
     result = Inline( text_props )
     apply( result.append, params )
     return result
+

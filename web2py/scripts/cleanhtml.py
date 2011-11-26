@@ -46,8 +46,16 @@ def cleanhtml(text):
         text=text.replace('<style />', cleancss(style), 1)
     return text
 
+def read_file(filename):
+    f = open(filename, 'r')
+    try:
+        return f.read()
+    finally:
+        f.close()
+
 file=sys.argv[1]
 if file[-4:]=='.css':
-    print cleancss(open(file, 'r').read())
+    print cleancss(read_file(file))
 if file[-5:]=='.html':
-    print cleanhtml(open(file, 'r').read())
+    print cleanhtml(read_file(file))
+

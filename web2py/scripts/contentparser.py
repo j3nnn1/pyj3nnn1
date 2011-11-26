@@ -59,7 +59,11 @@ if __name__ == '__main__':
     sys.stdout.write('Checking contenttype.py database version:')
     sys.stdout.flush()
     try:
-        current = open(path).read()
+        pathfile = open(path)
+        try:
+            current = pathfile.read()
+        finally:
+            pathfile.close()
         cversion = re.search(vregex, current).group('version')
         sys.stdout.write('\t[OK] version %s\n' % cversion)
     except Exception, e:
@@ -101,10 +105,13 @@ if __name__ == '__main__':
     sys.stdout.flush()
     try:
         tar = tarfile.TarFile.open(fileobj=io, mode='r:%s' % ftype)
-        for content in tar.getnames():
-            if fregex.match(content):
-                xml = tar.extractfile(content)
-                break
+        try:
+            for content in tar.getnames():
+                if fregex.match(content):
+                    xml = tar.extractfile(content)
+                    break
+        finally:
+            tar.close()
         data = MIMEParser(xml)
         io = cStringIO.StringIO()
         io.write('CONTENT_TYPE = {\n')
@@ -112,7 +119,14 @@ if __name__ == '__main__':
             io.write('    \'%s\': \'%s\',\n' % (key, data[key]))
         io.write('    }')
         io.seek(0)
-        open('contenttype.py', 'w').write(re.sub(vregex, 'database version %s.\n' % nversion, re.sub('CONTENT_TYPE = \{(.|\n)+?\}', io.getvalue(), current)))
+        contenttype = open('contenttype.py', 'w')
+        try:
+            contenttype.write(re.sub(vregex, 'database version %s.\n' % nversion, re.sub('CONTENT_TYPE = \{(.|\n)+?\}', io.getvalue(), current)))
+        finally:
+            contenttype.close()
+        if not current.closed:
+            current.close()
         sys.stdout.write('\t\t\t[OK] done\n')
     except Exception, e:
         sys.stdout.write('\t\t\t[ERROR] %s\n' % e)
+

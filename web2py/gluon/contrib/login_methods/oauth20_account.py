@@ -42,7 +42,7 @@ class OAuthAccount(object):
         .
         .
         .
-    
+
         CLIENT_ID=\"<put your fb application id here>\"
         CLIENT_SECRET=\"<put your fb application secret here>\"
         AUTH_URL="http://..."
@@ -90,7 +90,7 @@ class OAuthAccount(object):
 
         If token is already in the session that one will be used.
         Otherwise the token is fetched from the auth server.
-        
+
         """
         if self.session.token and self.session.token.has_key('expires'):
             expires = self.session.token['expires']
@@ -116,20 +116,21 @@ class OAuthAccount(object):
                 del self.session.code # throw it away
 
             if open_url:
-                tokendata = cgi.parse_qs(open_url.read())
-                self.session.token = dict([(k,v[-1]) for k,v in tokendata.items()])
-                # set expiration absolute time try to avoid broken
-                # implementations where "expires_in" becomes "expires"
-                if self.session.token.has_key('expires_in'):
-                    exps = 'expires_in'
-                else:
-                    exps = 'expires'
-                self.session.token['expires'] == int(self.session.token[exps]) + time.time()
-
+                try:
+                    tokendata = cgi.parse_qs(open_url.read())
+                    self.session.token = dict([(k,v[-1]) for k,v in tokendata.items()])
+                    # set expiration absolute time try to avoid broken
+                    # implementations where "expires_in" becomes "expires"
+                    if self.session.token.has_key('expires_in'):
+                        exps = 'expires_in'
+                    else:
+                        exps = 'expires'
+                    self.session.token['expires'] = int(self.session.token[exps]) + \
+                        time.time()
+                finally:
+                    opener.close()
                 return self.session.token['access_token']
 
-        
-                
         self.session.token = None
         return None
 
@@ -142,7 +143,7 @@ class OAuthAccount(object):
         self.auth_url = auth_url
         self.token_url = token_url
         self.args = args
-        
+
     def login_url(self, next="/"):
         self.__oauth_login(next)
         return next
@@ -157,7 +158,7 @@ class OAuthAccount(object):
         raise NotImplementedError, "Must override get_user()"
         if not self.accessToken():
             return None
-        
+
         if not self.graph:
             self.graph = GraphAPI((self.accessToken()))
 
@@ -203,3 +204,4 @@ class OAuthAccount(object):
                 self.accessToken()
                 return self.session.code
         return None
+

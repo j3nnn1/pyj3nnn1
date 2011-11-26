@@ -18,25 +18,30 @@ d = {}
 for app in apps:
     path = 'applications/%s/' % app
     findT(path, file)
-    data = eval(open(os.path.join(path, 'languages', '%s.py' % file)).read())
+    langfile = open(os.path.join(path, 'languages', '%s.py' % file))
+    try:
+        data = eval(langfile.read())
+    finally:
+        langfile.close()
     d.update(data)
 
 path = 'applications/%s/' % apps[-1]
 file1 = os.path.join(path, 'languages', '%s.py' % file)
 
 f = open(file1, 'w')
-f.write('{\n')
-
-keys = d.keys()
-keys.sort()
-for key in keys:
-    f.write('%s:%s,\n' % (repr(key), repr(str(d[key]))))
-
-f.write('}\n')
-f.close()
+try:
+    f.write('{\n')
+    keys = d.keys()
+    keys.sort()
+    for key in keys:
+        f.write('%s:%s,\n' % (repr(key), repr(str(d[key]))))
+    f.write('}\n')
+finally:
+    f.close()
 
 oapps = reversed(apps[:-1])
 for app in oapps:
     path2 = 'applications/%s/' % app
     file2 = os.path.join(path2, 'languages', '%s.py' % file)
     shutil.copyfile(file1, file2)
+

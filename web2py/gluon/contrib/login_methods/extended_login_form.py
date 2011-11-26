@@ -1,5 +1,5 @@
-#!/usr/bin/env python 
-# coding: utf8 
+#!/usr/bin/env python
+# coding: utf8
 
 """
 ExtendedLoginForm is used to extend normal login form in web2py with one more login method.
@@ -22,7 +22,7 @@ class ExtendedLoginForm(object):
                                 api_key="...",
                                 domain="...",
                                 url = "http://localhost:8000/%s/default/user/login" % request.application)
-    extended_login_form = ExtendedLoginForm(request, auth, alt_login_form, signals=['token'])
+    extended_login_form = ExtendedLoginForm(auth, alt_login_form, signals=['token'])
 
     auth.settings.login_form = extended_login_form
 
@@ -100,3 +100,4 @@ class ExtendedLoginForm(object):
 
         form.components.append(self.alt_login_form.login_form())
         return form
+

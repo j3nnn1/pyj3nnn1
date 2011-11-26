@@ -1,44 +1,44 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-  <title>{{=response.title or URL()}}</title>
-  {{response.files.append(URL('static','styles.css'))}}
-  {{include 'web2py_ajax.html'}}
-  <script>jQuery.noConflict();</script>
-</head>
-<body{{if T('direction: ltr') == 'direction: rtl':}} class="RTLbody"{{pass}}>
-<div id="header">
- <div id="header_inner" class="fixed">
-   <div id="logo">
-     <h1><a href="http://www.web2py.com">[web2py<sup style="font-size:0.5em;">TM</sup>]</a></h1>
-     <h2>{{=response.subtitle}}</h2>
-   </div>
-   {{if response.menu is not None:}}
-   <div id="menu">
-   <ul>
-    {{for _name,_active,_link in response.menu:}}
-     <li><a href="{{=_link}}" onmouseover="this.ccc=this.style.backgroundColor;this.style.backgroundColor='white';" onmouseout="this.style.backgroundColor=this.ccc;" {{if not _active:}}class="inactive"{{pass}}>{{=_name}}</a></li>
-     {{pass}}
-   </ul>
-   </div>
-   {{pass}}
-  </div>
-</div>
-<div id="main">
-  <div id="main_inner" class="fixed">
-    <div id="primaryContent_columnless">
-      <div id="columnA_columnless">
-        {{if response.flash:}}
-        <div class="flash">{{=response.flash}}</div>
-        {{pass}}
-        {{include}}
-      </div>
-    </div>
-  </div>
-</div>
-<div id="footer" class="fixed">
-   {{=T('Powered by')}} <a href="http://www.web2py.com">web2py</a> ({{=T('TM')}}) {{=T('created by')}} Massimo Di Pierro &copy; 2007
-</div>
-</body>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <meta http-equiv="P3P" content="CP=\"IDC DSP COR CURa ADMa OUR IND PHY ONL COM STA\"" />
+        <title>{{=response.title or URL()}}</title>
+        {{response.files.append(URL('static','css/styles.css'))}}
+        {{include 'web2py_ajax.html'}}
+        <script>jQuery.noConflict();</script>
+    </head>
+    <body class="{{=T('direction: ltr') == 'direction: rtl' and 'RTLbody' or ''}} {{block sectionclass}}home{{end}}">
+        <div id="header">
+          <h1 id="start">
+            <a href="{{=URL('default', 'index')}}" class="button"><span>web2py&trade; {{=T('administrative interface')}}</span></a>
+          </h1>
+          {{if response.menu is not None:}}
+          <ul id="menu">
+              {{for _name,_active,_link in response.menu:}}
+              <li>{{=A(SPAN(_name), _href=_link, _class=_active and 'button select' or 'button')}}</li>
+              {{pass}}
+          </ul>
+          {{pass}}
+        </div>
+        <div id="main">
+            <div id="main_inner">
+                <div class="flash">{{=response.flash or ''}}</div>
+                {{include}}
+            </div>
+        </div>
+        <div id="footer" class="fixed">
+            {{=T('Powered by')}} {{=A('web2py', _href='http://www.web2py.com')}}&trade; {{=T('created by')}} Massimo Di Pierro &copy;2007-2011 -
+	    {{if hasattr(T,'get_possible_languages'):}}
+	    <span>
+	      {{=T('Admin language')}}
+	      <select name="adminlanguage" onchange="var date = new Date();cookieDate=date.setTime(date.getTime()+(100*24*60*60*1000));document.cookie='adminLanguage='+this.options[this.selectedIndex].value+'; expires='+cookieDate+'; path=/';window.location.reload()">
+		{{for language in T.get_possible_languages():}}
+		<option {{=T.accepted_language==language and 'selected' or ''}} >{{=language}}</option>
+		{{pass}}
+	      </select>
+	    </span>
+	    {{pass}}
+        </div>
+    </body>
 </html>

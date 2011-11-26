@@ -53,7 +53,7 @@ data_type_map = dict(
 
 def mysql(database_name, username, password):
     p = subprocess.Popen(['mysql',
-                          '--user=%s' % username, 
+                          '--user=%s' % username,
                           '--password=%s'% password,
                           '--execute=show tables;',
                           database_name],
@@ -70,12 +70,12 @@ def mysql(database_name, username, password):
                               '--user=%s' % username,
                               '--password=%s' % password,
                               '--skip-add-drop-table',
-                              '--no-data', database_name, 
+                              '--no-data', database_name,
                               table_name], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         sql_create_stmnt,stderr = p.communicate()
         if 'CREATE' in sql_create_stmnt:#check if the table exists
             #remove garbage lines from sql statement
-            sql_lines = sql_create_stmnt.split('\n') 
+            sql_lines = sql_create_stmnt.split('\n')
             sql_lines = [x for x in sql_lines if not(x.startswith('--') or x.startswith('/*') or x =='')]
             #generate the web2py code from the create statement
             web2py_table_code = ''
@@ -90,7 +90,7 @@ def mysql(database_name, username, password):
                     d_type = re.sub(r'(\w+)\(.*',r'\1',d_type)
                     name = re.sub('`','',name)
                     web2py_table_code += "\n    Field('%s','%s'),"%(name,data_type_map[d_type])
-            web2py_table_code = "legacy_db.define_table('%s',%s\n    migrate=False)"%(table_name,web2py_table_code)            
+            web2py_table_code = "legacy_db.define_table('%s',%s\n    migrate=False)"%(table_name,web2py_table_code)
             legacy_db_table_web2py_code.append(web2py_table_code)
     #----------------------------------------
     #write the legacy db to file
@@ -104,3 +104,4 @@ if len(sys.argv)<2 or not regex.match(sys.argv[1]):
 else:
     m = regex.match(sys.argv[1])
     print mysql(m.group(3),m.group(1),m.group(2))
+

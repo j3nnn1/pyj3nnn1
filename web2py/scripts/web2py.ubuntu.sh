@@ -20,7 +20,7 @@
 # Author: Mark Moore <mark.moore@fonjax.com>
 
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
-DESC="Enterprise Web Framework"
+DESC="Web Framework"
 NAME=web2py
 PIDDIR=/var/run/$NAME
 PIDFILE=$PIDDIR/$NAME.pid
@@ -62,11 +62,11 @@ do_start()
 	start-stop-daemon --stop --test --quiet --pidfile $PIDFILE \
 		&& return 1
 
-	start-stop-daemon --start --quiet \
+	start-stop-daemon --start --quiet --pidfile $PIDFILE \
 		${DAEMON_USER:+--chuid $DAEMON_USER} --chdir $DAEMON_DIR \
 		--background --exec $DAEMON -- $DAEMON_ARGS \
 		|| return 2
-		
+
 	return 0;
 }
 
@@ -80,7 +80,7 @@ do_stop()
 	#   1 if daemon was already stopped
 	#   2 if daemon could not be stopped
 	#   other if a failure occurred
-	
+
 	start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE
 	RETVAL=$?
 	# Many daemons don't delete their pidfiles when they exit.
@@ -96,7 +96,7 @@ do_restart()
 	# Return
 	#   0 if daemon was (re-)started
 	#   1 if daemon was not strated or re-started
-	
+
 	do_stop
 	case "$?" in
 		0|1)
@@ -109,7 +109,7 @@ do_restart()
 			;;
 		*) RETVAL=1 ;; # Failed to stop
 	esac
-	
+
 	return "$RETVAL"
 }
 
@@ -220,3 +220,4 @@ esac
 # http://refspecs.linux-foundation.org/LSB_3.2.0/LSB-Core-generic/LSB-Core-generic.pdf
 # Debian Policy SysV init: http://www.debian.org/doc/debian-policy/ch-opersys.html#s-sysvinit
 # Examine files in /usr/share/doc/sysv-rc/
+

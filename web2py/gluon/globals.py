@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-This file is part of web2py Web Framework (Copyrighted, 2007-2010).
-Developed by Massimo Di Pierro <mdipierro@cs.depaul.edu>.
-License: GPL v2
+This file is part of the web2py Web Framework
+Copyrighted by Massimo Di Pierro <mdipierro@cs.depaul.edu>
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
 
 Contains the classes for the global used variables:
 
@@ -15,30 +15,34 @@ Contains the classes for the global used variables:
 """
 
 from storage import Storage, List
-from compileapp import run_view_in
 from streamer import streamer, stream_file_or_304_or_206, DEFAULT_CHUNK_SIZE
 from xmlrpc import handler
 from contenttype import contenttype
-from html import xmlescape
+from html import xmlescape, TABLE, TR, PRE
 from http import HTTP
 from fileutils import up
-from serializers import json
-from settings import settings
+from serializers import json, custom_json
+import settings
 from utils import web2py_uuid
+from settings import global_settings
 
+import hashlib
 import portalocker
 import cPickle
 import cStringIO
-import stat
 import datetime
 import re
 import Cookie
 import os
+import sys
+import traceback
+import threading
 
-regex_session_id = re.compile('^[\w\-]+$')
+regex_session_id = re.compile('^([\w\-]+/)?[\w\-\.]+$')
 
 __all__ = ['Request', 'Response', 'Session']
 
+current = threading.local()  # thread-local storage for request-scope globals
 
 class Request(Storage):
 
@@ -56,7 +60,7 @@ class Request(Storage):
     - args
     - extension
     - now: datetime.datetime.today()
-
+    - restful()
     """
 
     def __init__(self):
@@ -70,8 +74,55 @@ class Request(Storage):
         self.application = None
         self.function = None
         self.args = List()
-        self.extension = None
-        self.now = datetime.datetime.today()
+        self.extension = 'html'
+        self.now = datetime.datetime.now()
+        self.utcnow = datetime.datetime.utcnow()
+        self.is_restful = False
+        self.is_https = False
+        self.is_local = False
+        self.global_settings = settings.global_settings
+
+    def compute_uuid(self):
+        self.uuid = '%s/%s.%s.%s' % (
+            self.application,
+            self.client.replace(':', '_'),
+            self.now.strftime('%Y-%m-%d.%H-%M-%S'),
+            web2py_uuid())
+        return self.uuid
+
+    def user_agent(self):
+        from gluon.contrib import user_agent_parser
+        session = current.session
+        session._user_agent = session._user_agent or \
+            user_agent_parser.detect(self.env.http_user_agent)
+        return session._user_agent
+
+    def restful(self):
+        def wrapper(action,self=self):
+            def f(_action=action,_self=self,*a,**b):
+                self.is_restful = True
+                method = _self.env.request_method
+                if len(_self.args) and '.' in _self.args[-1]:
+                    _self.args[-1],_self.extension = _self.args[-1].rsplit('.',1)
+                    current.response.headers['Content-Type'] = \
+                        contenttype(_self.extension.lower())
+                if not method in ['GET','POST','DELETE','PUT']:
+                    raise HTTP(400,"invalid method")
+                rest_action = _action().get(method,None)
+                if not rest_action:
+                    raise HTTP(400,"method not supported")
+                try:
+                    return rest_action(*_self.args,**_self.vars)
+                except TypeError, e:
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    if len(traceback.extract_tb(exc_traceback))==1:
+                        raise HTTP(400,"invalid arguments")
+                    else:
+                        raise e
+            f.__doc__ = action.__doc__
+            f.__name__ = action.__name__
+            return f
+        return wrapper
 
 
 class Response(Storage):
@@ -84,14 +135,16 @@ class Response(Storage):
     def __init__(self):
         self.status = 200
         self.headers = Storage()
+        self.headers['X-Powered-By'] = 'web2py'
         self.body = cStringIO.StringIO()
         self.session_id = None
         self.cookies = Cookie.SimpleCookie()
         self.postprocessing = []
-        self.flash = ''           # used by the default view layout
-        self.meta = Storage()     # used by web2py_ajax.html
-        self.menu = []            # used by the default view layout
-        self.files = []           # used by web2py_ajax.html
+        self.flash = ''            # used by the default view layout
+        self.meta = Storage()      # used by web2py_ajax.html
+        self.menu = []             # used by the default view layout
+        self.files = []            # used by web2py_ajax.html
+        self.generic_patterns = [] # patterns to allow generic views
         self._vars = None
         self._caller = lambda f: f()
         self._view_environment = None
@@ -105,6 +158,7 @@ class Response(Storage):
             self.body.write(xmlescape(data))
 
     def render(self, *a, **b):
+        from compileapp import run_view_in
         if len(a) > 2:
             raise SyntaxError, 'Response.render can be called with two arguments, at most'
         elif len(a) == 2:
@@ -132,6 +186,23 @@ class Response(Storage):
             page = self.body.getvalue()
         return page
 
+    def include_meta(self):
+        s = ''
+        for key,value in (self.meta or {}).items():
+            s += '<meta name="%s" content="%s" />' % (key,xmlescape(value))
+        self.write(s,escape=False)
+
+    def include_files(self):
+        s = ''
+        for k,f in enumerate(self.files or []):
+            if not f in self.files[:k]:
+                filename = f.lower().split('?')[0]
+                if filename.endswith('.css'):
+                    s += '<link href="%s" rel="stylesheet" type="text/css" />' % f
+                elif filename.endswith('.js'):
+                    s += '<script src="%s" type="text/javascript"></script>' % f
+        self.write(s,escape=False)
+    
     def stream(
         self,
         stream,
@@ -147,7 +218,9 @@ class Response(Storage):
         """
 
         if isinstance(stream, (str, unicode)):
-            stream_file_or_304_or_206(stream, request=request,
+            stream_file_or_304_or_206(stream,
+                                      chunk_size=chunk_size,
+                                      request=request,
                                       headers=self.headers)
 
         # ## the following is for backward compatibility
@@ -162,7 +235,7 @@ class Response(Storage):
         if filename and not 'content-length' in keys:
             try:
                 self.headers['Content-Length'] = \
-                    os.stat(filename)[stat.ST_SIZE]
+                    os.path.getsize(filename)
             except OSError:
                 pass
         if request and request.env.web2py_use_wsgi_file_wrapper:
@@ -181,7 +254,6 @@ class Response(Storage):
         downloads from http://..../download/filename
         """
 
-        import os
         import contenttype as c
         if not request.args:
             raise HTTP(404)
@@ -202,8 +274,8 @@ class Response(Storage):
                 "attachment; filename=%s" % filename
         return self.stream(stream, chunk_size = chunk_size, request=request)
 
-    def json(self, data):
-        return json(data)
+    def json(self, data, default=None):
+        return json(data, default = default or custom_json)
 
     def xmlrpc(self, request, methods):
         """
@@ -227,6 +299,29 @@ class Response(Storage):
 
         return handler(request, self, methods)
 
+    def toolbar(self):
+        from html import DIV, SCRIPT, BEAUTIFY, TAG, URL
+        BUTTON = TAG.button
+        admin = URL("admin","default","design",
+                    args=current.request.application)
+        from gluon.dal import thread
+        dbstats = [TABLE(*[TR(PRE(row[0]),'%.2fms' % (row[1]*1000)) \
+                               for row in i.db._timings]) \
+                       for i in thread.instances]        
+        u = web2py_uuid() 
+        return DIV(
+            BUTTON('design',_onclick="document.location='%s'" % admin),
+            BUTTON('request',_onclick="jQuery('#request-%s').slideToggle()"%u),
+            DIV(BEAUTIFY(current.request),_class="hidden",_id="request-%s"%u),
+            BUTTON('session',_onclick="jQuery('#session-%s').slideToggle()"%u),
+            DIV(BEAUTIFY(current.session),_class="hidden",_id="session-%s"%u),
+            BUTTON('response',_onclick="jQuery('#response-%s').slideToggle()"%u),
+            DIV(BEAUTIFY(current.response),_class="hidden",_id="response-%s"%u),
+            BUTTON('db stats',_onclick="jQuery('#db-stats-%s').slideToggle()"%u),
+            DIV(BEAUTIFY(dbstats),_class="hidden",_id="db-stats-%s"%u),
+            SCRIPT("jQuery('.hidden').hide()")
+            )
+
 class Session(Storage):
 
     """
@@ -241,12 +336,26 @@ class Session(Storage):
         tablename='web2py_session',
         masterapp=None,
         migrate=True,
+        separate = None,
+        check_client=False,
         ):
+        """
+        separate can be separate=lambda(session_name): session_name[-2:]
+        and it is used to determine a session prefix.
+        separate can be True and it is set to session_name[-2:]
+        """
+        if separate == True:
+            separate = lambda session_name: session_name[-2:]
         self._unlock(response)
         if not masterapp:
             masterapp = request.application
-        response.session_id_name = 'session_id_%s' % masterapp
+        response.session_id_name = 'session_id_%s' % masterapp.lower()
+
         if not db:
+            if global_settings.db_sessions is True or masterapp in global_settings.db_sessions:
+                return
+            response.session_new = False
+            client = request.client.replace(':', '.')
             if response.session_id_name in request.cookies:
                 response.session_id = \
                     request.cookies[response.session_id_name].value
@@ -260,23 +369,38 @@ class Session(Storage):
                 try:
                     response.session_file = \
                         open(response.session_filename, 'rb+')
-                    portalocker.lock(response.session_file,
-                            portalocker.LOCK_EX)
-                    self.update(cPickle.load(response.session_file))
-                    response.session_file.seek(0)
+                    try:
+                        portalocker.lock(response.session_file,
+                                portalocker.LOCK_EX)
+                        response.session_locked = True
+                        self.update(cPickle.load(response.session_file))
+                        response.session_file.seek(0)
+                        oc = response.session_filename.split('/')[-1].split('-')[0]
+                        if check_client and client!=oc:
+                            raise Exception, "cookie attack"
+                    finally:
+                        pass
+                        #This causes admin login to break. Must find out why.
+                        #self._close(response)
                 except:
-                    self._unlock(response)
                     response.session_id = None
             if not response.session_id:
-                response.session_id = '%s-%s'\
-                     % (request.client.replace(':', '-').replace('.',
-                        '-'), web2py_uuid())
+                uuid = web2py_uuid()
+                response.session_id = '%s-%s' % (client, uuid)
+                if separate:
+                    prefix = separate(response.session_id)
+                    response.session_id = '%s/%s' % (prefix,response.session_id)
                 response.session_filename = \
                     os.path.join(up(request.folder), masterapp,
                                  'sessions', response.session_id)
                 response.session_new = True
         else:
-            if settings.web2py_runtime_gae:
+            if global_settings.db_sessions is not True:
+                global_settings.db_sessions.add(masterapp)
+            response.session_db = True
+            if response.session_file:
+                self._close(response)
+            if settings.global_settings.web2py_runtime_gae:
                 # in principle this could work without GAE
                 request.tickets_db = db
             if masterapp == request.application:
@@ -319,6 +443,7 @@ class Session(Storage):
             response.session_id = '%s:%s' % (record_id, unique_key)
         response.cookies[response.session_id_name] = response.session_id
         response.cookies[response.session_id_name]['path'] = '/'
+        self.__hash = hashlib.md5(str(self)).digest()
         if self.flash:
             (response.flash, self.flash) = (self.flash, None)
 
@@ -342,13 +467,22 @@ class Session(Storage):
         self._secure = True
 
     def forget(self, response=None):
-        self._unlock(response)
+        self._close(response)
         self._forget = True
 
     def _try_store_in_db(self, request, response):
-        if not response._dbtable_and_field or not response.session_id\
-             or self._forget:
+
+        # don't save if file-based sessions, no session id, or session being forgotten
+        if not response.session_db or not response.session_id or self._forget:
             return
+
+        # don't save if no change to session
+        __hash = self.__hash
+        if __hash is not None:
+            del self.__hash
+            if __hash == hashlib.md5(str(self)).digest():
+                return
+
         (record_id_name, table, record_id, unique_key) = \
             response._dbtable_and_field
         dd = dict(locked=False, client_ip=request.env.remote_addr,
@@ -364,28 +498,52 @@ class Session(Storage):
         response.cookies[response.session_id_name]['path'] = '/'
 
     def _try_store_on_disk(self, request, response):
-        if response._dbtable_and_field \
-                or not response.session_id \
-                or self._forget:
-            self._unlock(response)
+
+        # don't save if sessions not not file-based
+        if response.session_db:
             return
+
+        # don't save if no change to session
+        __hash = self.__hash
+        if __hash is not None:
+            del self.__hash
+            if __hash == hashlib.md5(str(self)).digest():
+                self._close(response)
+                return
+
+        if not response.session_id or self._forget:
+            self._close(response)
+            return
+
         if response.session_new:
-            # Tests if the session folder exists, if not, create it
+            # Tests if the session sub-folder exists, if not, create it
             session_folder = os.path.dirname(response.session_filename)
+            if not os.path.exists(session_folder):
+                os.mkdir(session_folder)
             response.session_file = open(response.session_filename, 'wb')
             portalocker.lock(response.session_file, portalocker.LOCK_EX)
+            response.session_locked = True
+
         if response.session_file:
-            cPickle.dump(dict(self), response.session_file)        
+            cPickle.dump(dict(self), response.session_file)
+            response.session_file.truncate()
+            self._close(response)
+
+    def _unlock(self, response):
+        if response and response.session_file and response.session_locked:
             try:
                 portalocker.unlock(response.session_file)
-                response.session_file.close()
-                del response.session_file
+                response.session_locked = False
             except: ### this should never happen but happens in Windows
                 pass
 
-    def _unlock(self, response):
+    def _close(self, response):
         if response and response.session_file:
+            self._unlock(response)
             try:
-                portalocker.unlock(response.session_file)
-            except: ### this should never happen but happens in Windows
+                response.session_file.close()
+                del response.session_file
+            except:
                 pass
+
+

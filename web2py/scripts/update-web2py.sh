@@ -3,7 +3,7 @@
 #  update-web2py.sh
 #  2009-12-16
 #
-#  install in web2py/.. or web2py/ or web2py/scripts as update-web2py.sh 
+#  install in web2py/.. or web2py/ or web2py/scripts as update-web2py.sh
 #  make executable: chmod +x web2py.sh
 #
 #  save a snapshot of current web2py/ as web2py/../web2py-version.zip
@@ -56,3 +56,4 @@ cat $TARGET/VERSION >&2
 if [ "$SAVED" != "" ]; then
 	echo ">>Old version saved as $SAVED"
 fi
+

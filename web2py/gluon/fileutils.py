@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-This file is part of web2py Web Framework (Copyrighted, 2007-2010).
-Developed by Massimo Di Pierro <mdipierro@cs.depaul.edu>.
-License: GPL v2
+This file is part of the web2py Web Framework
+Copyrighted by Massimo Di Pierro <mdipierro@cs.depaul.edu>
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
 """
 
 import storage
@@ -12,13 +12,23 @@ import os
 import re
 import tarfile
 import glob
+import time
+import datetime
 from http import HTTP
 from gzip import open as gzopen
+from settings import global_settings
 
 
 __all__ = [
+    'parse_version',
+    'read_file',
+    'write_file',
+    'readlines_file',
     'up',
+    'abspath',
+    'mktree',
     'listdir',
+    'recursive_unlink',
     'cleanpath',
     'tar',
     'untar',
@@ -30,22 +40,68 @@ __all__ = [
     'w2p_pack_plugin',
     'w2p_unpack_plugin',
     'fix_newlines',
+    'make_fake_file_like_object',
     ]
 
+def parse_version(version = "Version 1.99.0 (2011-09-19 08:23:26)"):
+    re_version = re.compile('[^\d]+ (\d+)\.(\d+)\.(\d+)\s*\((?P<datetime>.+?)\)\s*(?P<type>[a-z]+)?')
+    m = re_version.match(version)
+    a,b,c = int(m.group(1)),int(m.group(2)),int(m.group(3)),
+    s = m.group('type') or 'dev'
+    d = datetime.datetime.strptime(m.group('datetime'),'%Y-%m-%d %H:%M:%S')
+    return (a,b,c,d,s)
+
+def read_file(filename, mode='r'):
+    "returns content from filename, making sure to close the file explicitly on exit."
+    f = open(filename, mode)
+    try:
+        return f.read()
+    finally:
+        f.close()
+
+def write_file(filename, value, mode='w'):
+    "writes <value> to filename, making sure to close the file explicitly on exit."
+    f = open(filename, mode)
+    try:
+        return f.write(value)
+    finally:
+        f.close()
+
+def readlines_file(filename, mode='r'):
+    "applies .split('\n') to the output of read_file()"
+    return read_file(filename, mode).split('\n')
+
+def abspath(*relpath, **base):
+    "convert relative path to absolute path based (by default) on applications_parent"
+    path = os.path.join(*relpath)
+    gluon = base.get('gluon', False)
+    if os.path.isabs(path):
+        return path
+    if gluon:
+        return os.path.join(global_settings.gluon_parent, path)
+    return os.path.join(global_settings.applications_parent, path)
+
+
+def mktree(path):
+    head,tail =os.path.split(path)
+    if head:
+        if tail: mktree(head)
+        if not os.path.exists(head):
+            os.mkdir(head)
 
 def listdir(
     path,
     expression='^.+$',
     drop=True,
     add_dirs=False,
+    sort=True,
     ):
     """
-    like os.listdir() but you can specify a regex patter to filter filed.
-    if add_dirs==True the returned items will have the full path.
+    like os.listdir() but you can specify a regex pattern to filter files.
+    if add_dirs is True, the returned items will have the full path.
     """
-
-    if path[-1:] != '/':
-        path = path + '/'
+    if path[-1:] != os.path.sep:
+        path = path + os.path.sep
     if drop:
         n = len(path)
     else:
@@ -58,10 +114,22 @@ def listdir(
                 dirs.remove(dir)
         if add_dirs:
             items.append(root[n:])
-        for file in files:
+        for file in sorted(files):
             if regex.match(file) and not file.startswith('.'):
                 items.append(os.path.join(root, file)[n:])
-    return sorted(items)
+    if sort:
+        return sorted(items)
+    else:
+        return items
+
+
+def recursive_unlink(f):
+    if os.path.isdir(f):
+        for s in os.listdir(f):
+            recursive_unlink(os.path.join(f,s))
+        os.rmdir(f)
+    elif os.path.isfile(f):
+        os.unlink(f)
 
 
 def cleanpath(path):
@@ -146,9 +214,11 @@ def tar(file, dir, expression='^.+$'):
     """
 
     tar = tarfile.TarFile(file, 'w')
-    for file in listdir(dir, expression, add_dirs=True):
-        tar.add(os.path.join(dir, file), file, False)
-    tar.close()
+    try:
+        for file in listdir(dir, expression, add_dirs=True):
+            tar.add(os.path.join(dir, file), file, False)
+    finally:
+        tar.close()
 
 def untar(file, dir):
     """
@@ -159,6 +229,8 @@ def untar(file, dir):
 
 
 def w2p_pack(filename, path, compiled=False):
+    filename = abspath(filename)
+    path = abspath(path)
     tarname = filename + '.tar'
     if compiled:
         tar_compiled(tarname, path, '^[\w\.\-]+$')
@@ -171,8 +243,9 @@ def w2p_pack(filename, path, compiled=False):
     tarfp.close()
     os.unlink(tarname)
 
-
 def w2p_unpack(filename, path, delete_tar=True):
+    filename = abspath(filename)
+    path = abspath(path)
     if filename[-4:] == '.w2p' or filename[-3:] == '.gz':
         if filename[-4:] == '.w2p':
             tarname = filename[:-4] + '.tar'
@@ -196,20 +269,26 @@ def w2p_pack_plugin(filename, path, plugin_name):
         <path>/*/plugin_[name].*
         <path>/*/plugin_[name]/*
     """
+    filename = abspath(filename)
+    path = abspath(path)
     if not filename.endswith('web2py.plugin.%s.w2p' % plugin_name):
         raise Exception, "Not a web2py plugin name"
     plugin_tarball = tarfile.open(filename, 'w:gz')
-    app_dir = path
-    while app_dir[-1]=='/':
-        app_dir = app_dir[:-1]
-    files1=glob.glob(os.path.join(app_dir,'*/plugin_%s.*' % plugin_name))
-    files2=glob.glob(os.path.join(app_dir,'*/plugin_%s/*' % plugin_name))
-    for file in files1+files2:
-        plugin_tarball.add(file, arcname=file[len(app_dir)+1:])
-    plugin_tarball.close()
+    try:
+        app_dir = path
+        while app_dir[-1]=='/':
+            app_dir = app_dir[:-1]
+        files1=glob.glob(os.path.join(app_dir,'*/plugin_%s.*' % plugin_name))
+        files2=glob.glob(os.path.join(app_dir,'*/plugin_%s/*' % plugin_name))
+        for file in files1+files2:
+            plugin_tarball.add(file, arcname=file[len(app_dir)+1:])
+    finally:
+        plugin_tarball.close()
 
 
 def w2p_unpack_plugin(filename, path, delete_tar=True):
+    filename = abspath(filename)
+    path = abspath(path)
     if not os.path.basename(filename).startswith('web2py.plugin.'):
         raise Exception, "Not a web2py plugin"
     w2p_unpack(filename,path,delete_tar)
@@ -244,24 +323,19 @@ def up(path):
 
 def get_session(request, other_application='admin'):
     """ checks that user is authorized to access other_application"""
-
     if request.application == other_application:
         raise KeyError
     try:
-        session_id = request.cookies['session_id_'
-                 + other_application].value
-        osession = \
-            storage.load_storage(os.path.join(up(request.folder),
-                                 other_application, 'sessions',
-                                 session_id))
+        session_id = request.cookies['session_id_' + other_application].value
+        osession = storage.load_storage(os.path.join(
+                up(request.folder), other_application, 'sessions', session_id))
     except:
         osession = storage.Storage()
     return osession
 
 
-def check_credentials(request, other_application='admin'):
+def check_credentials(request, other_application='admin', expiration = 60*60):
     """ checks that user is authorized to access other_application"""
-
     if request.env.web2py_runtime_gae:
         from google.appengine.api import users
         if users.is_current_user_admin():
@@ -271,7 +345,9 @@ def check_credentials(request, other_application='admin'):
                 % users.create_login_url(request.env.path_info)
             raise HTTP(200, '<html><body>%s</body></html>' % login_html)
     else:
-        return get_session(request, other_application).authorized
+        dt = time.time() - expiration
+        s = get_session(request, other_application)
+        return (s.authorized and s.last_time and s.last_time > dt)
 
 
 def fix_newlines(path):
@@ -279,14 +355,10 @@ def fix_newlines(path):
 |\r|
 )''')
     for filename in listdir(path, '.*\.(py|html)$', drop=False):
-        fp = open(filename, 'rb')
-        rdata = fp.read()
-        fp.close()
+        rdata = read_file(filename, 'rb')
         wdata = regex.sub('\n', rdata)
         if wdata != rdata:
-            fp = open(filename, 'wb')
-            fp.write(wdata)
-            fp.close()
+            write_file(filename, wdata, 'wb')
 
 def copystream(
     src,
@@ -313,5 +385,15 @@ def copystream(
             break
     dest.seek(0)
     return
+
+
+def make_fake_file_like_object():
+    class LogFile(object):
+        def write(self, value):
+            pass
+        def close(self):
+            pass
+    return LogFile()
+
 
 

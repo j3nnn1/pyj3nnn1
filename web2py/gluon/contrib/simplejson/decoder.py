@@ -7,7 +7,7 @@ import struct
 from scanner import make_scanner
 def _import_c_scanstring():
     try:
-        raise ImportError # not not import this because conflict with python 2.6
+        raise ImportError # because assumes simplejson in path
         from simplejson._speedups import scanstring
         return scanstring
     except ImportError:
@@ -32,7 +32,7 @@ NaN, PosInf, NegInf = _floatconstants()
 
 class JSONDecodeError(ValueError):
     """Subclass of ValueError with the following additional properties:
-    
+
     msg: The unformatted error message
     doc: The JSON document being parsed
     pos: The start index of doc where parsing failed
@@ -41,7 +41,7 @@ class JSONDecodeError(ValueError):
     colno: The column corresponding to pos
     endlineno: The line corresponding to end (may be None)
     endcolno: The column corresponding to end (may be None)
-    
+
     """
     def __init__(self, msg, doc, pos, end=None):
         ValueError.__init__(self, errmsg(msg, doc, pos, end=end))
@@ -51,7 +51,7 @@ class JSONDecodeError(ValueError):
         self.end = end
         self.lineno, self.colno = linecol(doc, pos)
         if end is not None:
-            self.endlineno, self.endcolno = linecol(doc, pos)
+            self.endlineno, self.endcolno = linecol(doc, end)
         else:
             self.endlineno, self.endcolno = None, None
 
@@ -198,7 +198,7 @@ def JSONObject((s, end), encoding, strict, scan_once, object_hook,
         if nextchar == '}':
             if object_pairs_hook is not None:
                 result = object_pairs_hook(pairs)
-                return result, end
+                return result, end + 1
             pairs = {}
             if object_hook is not None:
                 pairs = object_hook(pairs)
@@ -420,3 +420,4 @@ class JSONDecoder(object):
         except StopIteration:
             raise JSONDecodeError("No JSON object could be decoded", s, idx)
         return obj, end
+

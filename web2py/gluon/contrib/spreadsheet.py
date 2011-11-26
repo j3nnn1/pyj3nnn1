@@ -260,3 +260,5 @@ if __name__ == '__main__':
     s.cell('b', value="=sin(a)")
     s.cell('c', value="=cos(a)**2+b*b")
     print s['c'].computed_value
+
+

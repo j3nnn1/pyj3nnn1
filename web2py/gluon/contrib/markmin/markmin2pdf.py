@@ -12,7 +12,7 @@ from tempfile import mkstemp, mkdtemp, NamedTemporaryFile
 from markmin2latex import markmin2latex
 
 __all__ = ['markmin2pdf']
-    
+
 def removeall(path):
 
     ERROR_STR= """Error removing %(path)s, %(error)s """
@@ -24,7 +24,7 @@ def removeall(path):
 
     files=[path]
 
-    while files: 
+    while files:
         file=files[0]
         if os.path.isfile(file):
             f=os.remove
@@ -42,17 +42,17 @@ def removeall(path):
 def latex2pdf(latex, pdflatex='pdflatex', passes=3):
     """
     calls pdflatex in a tempfolder
-    
+
     Arguments:
-    
+
     - pdflatex: path to the pdflatex command. Default is just 'pdflatex'.
     - passes:   defines how often pdflates should be run in the texfile.
     """
-    
+
     pdflatex=pdflatex
     passes=passes
     warnings=[]
-    
+
     # setup the envoriment
     tmpdir = mkdtemp()
     texfile = open(tmpdir+'/test.tex','wb')
@@ -65,32 +65,42 @@ def latex2pdf(latex, pdflatex='pdflatex', passes=3):
     for i in range(0, passes):
         logfd,logname = mkstemp()
         outfile=os.fdopen(logfd)
-        ret = subprocess.call([pdflatex,
-                               '-interaction=nonstopmode',
-                               '-output-format', 'pdf',
-                               '-output-directory', tmpdir,
-                               texfile],
-                              cwd=os.path.dirname(texfile), stdout=outfile, 
-                              stderr=subprocess.PIPE)        
-        outfile.close()
+        try:
+            ret = subprocess.call([pdflatex,
+                                   '-interaction=nonstopmode',
+                                   '-output-format', 'pdf',
+                                   '-output-directory', tmpdir,
+                                   texfile],
+                                  cwd=os.path.dirname(texfile), stdout=outfile,
+                                  stderr=subprocess.PIPE)
+        finally:
+            outfile.close()
         re_errors=re.compile('^\!(.*)$',re.M)
         re_warnings=re.compile('^LaTeX Warning\:(.*)$',re.M)
-        loglines=open(logname).read()
+        flog = open(logname)
+        try:
+            loglines = flog.read()
+        finally:
+            flog.close()
         errors=re_errors.findall(loglines)
         warnings=re_warnings.findall(loglines)
         os.unlink(logname)
 
     pdffile=texfile.rsplit('.',1)[0]+'.pdf'
     if os.path.isfile(pdffile):
-        data = open(pdffile,'rb').read()
+        fpdf = open(pdffile, 'rb')
+        try:
+            data = fpdf.read()
+        finally:
+            fpdf.close()
     else:
         data = None
     removeall(tmpdir)
     return data, warnings, errors
-    
 
-def markmin2pdf(text, image_mapper=lambda x: None):
-    return latex2pdf(markmin2latex(text,image_mapper=image_mapper))
+
+def markmin2pdf(text, image_mapper=lambda x: None, extra={}):
+    return latex2pdf(markmin2latex(text,image_mapper=image_mapper, extra=extra))
 
 
 if __name__ == '__main__':
@@ -105,7 +115,11 @@ if __name__ == '__main__':
         else:
             print data
     elif len(sys.argv)>1:
-        data, warnings, errors = markmin2pdf(open(sys.argv[1],'rb').read())
+        fargv = open(sys.argv[1],'rb')
+        try:
+            data, warnings, errors = markmin2pdf(fargv.read())
+        finally:
+            fargv.close()
         if errors:
             print 'ERRORS:'+'\n'.join(errors)
             print 'WARNGINS:'+'\n'.join(warnings)
@@ -113,3 +127,4 @@ if __name__ == '__main__':
             print data
     else:
         doctest.testmod()
+

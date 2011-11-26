@@ -118,8 +118,10 @@ def markdown_path(path, encoding="utf-8",
                   safe_mode=None, extras=None, link_patterns=None,
                   use_file_vars=False):
     fp = codecs.open(path, 'r', encoding)
-    text = fp.read()
-    fp.close()
+    try:
+        text = fp.read()
+    finally:
+        fp.close()
     return Markdown(html4tags=html4tags, tab_width=tab_width,
                     safe_mode=safe_mode, extras=extras,
                     link_patterns=link_patterns,
@@ -1884,4 +1886,5 @@ def main(argv=None):
 
 if __name__ == "__main__":
     sys.exit( main(sys.argv) )
+
 

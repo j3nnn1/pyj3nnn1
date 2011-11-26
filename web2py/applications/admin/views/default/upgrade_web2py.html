@@ -1,14 +1,13 @@
 {{extend 'layout.html'}}
 
-<center>
-<h2>{{=T('Are you sure you want to upgrade web2py now?')}}</h2>
+{{block sectionclass}}upgrade{{end}}
 
-<i>ATTENTION: This is an experimental feature and it needs more testing. If you answer "Yes" you do it at your own risk<br/>
-If you answer "yes", be patient, it may take a while to download</i>
+<h2>{{=T('web2py upgrade')}}</h2>
 
-<table><tr>
-<td>{{=FORM(INPUT(_type='submit',_name='noupgrade',_value=T('NO')))}}</td>
-<td>{{=FORM(INPUT(_type='submit',_name='upgrade',_value=T('YES')))}}</td>
-</tr></table>
+<p class="center"><strong class="att">{{=T('ATTENTION:')}}</strong> {{=T('This is an experimental feature and it needs more testing. If you decide to upgrade you do it at your own risk')}}<br />
+{{=T('If start the upgrade, be patient, it may take a while to download')}}</p>
 
-</center>
+<div class="center">
+{{=FORM(INPUT(_type='submit',_name='noupgrade',_value=T('Cancel')), _class='inline')}}
+{{=FORM(INPUT(_type='submit',_name='upgrade',_value=T('Upgrade')), _class='inline')}}
+</div>

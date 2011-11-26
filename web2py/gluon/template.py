@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 """
-This file is part of the web2py Web Framework (Copyrighted, 2007-2010).
-License: GPL v2
+This file is part of the web2py Web Framework (Copyrighted, 2007-2011).
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
 
 Author: Thadeus Burgess
 
-Contributors: 
+Contributors:
 
 - Thank you to Massimo Di Pierro for creating the original gluon/template.py
 - Thank you to Jonathan Lundell for extensively testing the regex on Jython.
@@ -16,9 +16,15 @@ Contributors:
 
 import os
 import re
+import cgi
 import cStringIO
-import restricted
-
+import logging
+try:
+    from restricted import RestrictedError
+except:
+    def RestrictedError(a,b,c):
+        logging.error(str(a)+':'+str(b)+':'+str(c))
+        return RuntimeError
 
 class Node(object):
     """
@@ -51,11 +57,11 @@ class BlockNode(Node):
     """
     Block Container.
 
-    This Node can contain other Nodes and will render in a heirarchical order
+    This Node can contain other Nodes and will render in a hierarchical order
     of when nodes were added.
 
     ie::
-         
+
         {{ block test }}
             This is default block test
         {{ end }}
@@ -78,7 +84,7 @@ class BlockNode(Node):
 
     def __str__(self):
         """
-        Get this BlockNodes content, not including children Nodes
+        Get this BlockNodes content, not including child Nodes
         """
         lines = []
         for node in self.nodes:
@@ -97,20 +103,20 @@ class BlockNode(Node):
         if isinstance(node, str) or isinstance(node, Node):
             self.nodes.append(node)
         else:
-            raise TypeError("Invalid type, must be instance of ``str`` or ``BlockNode``. %s" % node)
+            raise TypeError("Invalid type; must be instance of ``str`` or ``BlockNode``. %s" % node)
 
     def extend(self, other):
         """
         Extend the list of nodes with another BlockNode class.
 
-        Keyword Arugments
+        Keyword Arguments
 
         - other -- BlockNode or Content object to extend from.
         """
         if isinstance(other, BlockNode):
             self.nodes.extend(other.nodes)
         else:
-            raise TypeError("Invalid type, must be instance of ``BlockNode``. %s" % other)
+            raise TypeError("Invalid type; must be instance of ``BlockNode``. %s" % other)
 
     def output(self, blocks):
         """
@@ -130,7 +136,7 @@ class BlockNode(Node):
                     lines.append(blocks[node.name].output(blocks))
                 # Else we take the default
                 else:
-                    lines.append(node.output(blocks))               
+                    lines.append(node.output(blocks))
             # Else its just a string
             else:
                 lines.append(str(node))
@@ -139,13 +145,13 @@ class BlockNode(Node):
 
 class Content(BlockNode):
     """
-    Parent Container -- Used as the root level BlockNode. 
+    Parent Container -- Used as the root level BlockNode.
 
     Contains functions that operate as such.
     """
     def __init__(self, name = "ContentBlock", pre_extend = False):
         """
-        Keyword Arugments
+        Keyword Arguments
 
         name -- Unique name for this BlockNode
         """
@@ -172,7 +178,7 @@ class Content(BlockNode):
                 lines.append(str(node))
         # Merge our list together.
         return ''.join(lines)
-        
+
     def _insert(self, other, index = 0):
         """
         Inserts object at index.
@@ -180,12 +186,12 @@ class Content(BlockNode):
         if isinstance(other, str) or isinstance(other, Node):
             self.nodes.insert(index, other)
         else:
-            raise TypeError("Invalid type, must be instance of ``str`` or ``Node``.")                
-    
+            raise TypeError("Invalid type, must be instance of ``str`` or ``Node``.")
+
     def insert(self, other, index = 0):
         """
         Inserts object at index.
-        
+
         You may pass a list of objects and have them inserted.
         """
         if isinstance(other, (list, tuple)):
@@ -195,7 +201,7 @@ class Content(BlockNode):
                 self._insert(item, index)
         else:
             self._insert(other, index)
-            
+
     def append(self, node):
         """
         Adds a node to list. If it is a BlockNode then we assign a block for it.
@@ -215,15 +221,15 @@ class Content(BlockNode):
             self.nodes.extend(other.nodes)
             self.blocks.update(other.blocks)
         else:
-            raise TypeError("Invalid type, must be instance of ``BlockNode``. %s" % node)
+            raise TypeError("Invalid type; must be instance of ``BlockNode``. %s" % other)
 
     def clear_content(self):
         self.nodes = []
 
 class TemplateParser(object):
-    
+
     r_tag = re.compile(r'(\{\{.*?\}\})', re.DOTALL)
-    
+
     r_multiline = re.compile(r'(""".*?""")|(\'\'\'.*?\'\'\')', re.DOTALL)
 
     # These are used for re-indentation.
@@ -247,7 +253,7 @@ class TemplateParser(object):
         """
         text -- text to parse
         context -- context to parse in
-        path -- folder path to temlpates
+        path -- folder path to templates
         writer -- string of writer class to use
         lexers -- dict of custom lexers to use.
         delimiters -- for example ('{{','}}')
@@ -255,14 +261,13 @@ class TemplateParser(object):
                         this should only be set by "self.extend"
                         It contains a list of SuperNodes from a child
                         template that need to be handled.
-                       
         """
 
         # Keep a root level name.
         self.name = name
         # Raw text to start parsing.
         self.text = text
-        # Writer to use. (refer to the default for an example.)
+        # Writer to use (refer to the default for an example).
         # This will end up as
         # "%s(%s, escape=False)" % (self.writer, value)
         self.writer = writer
@@ -278,7 +283,7 @@ class TemplateParser(object):
         # Context for templates.
         self.context = context
 
-        # allow optional alterantive delimiters
+        # allow optional alternative delimiters
         self.delimiters = delimiters
         if delimiters!=('{{','}}'):
             escaped_delimiters = (re.escape(delimiters[0]),re.escape(delimiters[1]))
@@ -308,19 +313,19 @@ class TemplateParser(object):
 
         # Begin parsing.
         self.parse(text)
-        
+
     def to_string(self):
         """
-        Returns the parsed template with correct indentation.
-        
+        Return the parsed template with correct indentation.
+
         Used to make it easier to port to python3.
         """
         return self.reindent(str(self.content))
-        
+
     def __str__(self):
         "Make sure str works exactly the same as python 3"
         return self.to_string()
-        
+
     def __unicode__(self):
         "Make sure str works exactly the same as python 3"
         return self.to_string()
@@ -329,20 +334,20 @@ class TemplateParser(object):
         """
         Reindents a string of unindented python code.
         """
-        
+
         # Get each of our lines into an array.
-        lines       = text.split('\n')
-        
+        lines = text.split('\n')
+
         # Our new lines
-        new_lines   = []
-        
+        new_lines = []
+
         # Keeps track of how many indents we have.
-        # Used for when we need to drop a level of indentaiton
-        # only to re-indent on the next line.
-        credit      = 0
-        
+        # Used for when we need to drop a level of indentation
+        # only to reindent on the next line.
+        credit = 0
+
         # Current indentation
-        k           = 0
+        k = 0
 
         #################
         # THINGS TO KNOW
@@ -351,20 +356,20 @@ class TemplateParser(object):
         # k += 1 means indent
         # k -= 1 means unindent
         # credit = 1 means unindent on the next line.
-        
+
         for raw_line in lines:
             line = raw_line.strip()
-            
+
             # ignore empty lines
             if not line:
                 continue
-            
+
             # If we have a line that contains python code that
-            # should be un-indented for this line of code.
-            # and then re-indented for the next line.
+            # should be unindented for this line of code.
+            # and then reindented for the next line.
             if TemplateParser.re_block.match(line):
                 k = k + credit - 1
-                    
+
             # We obviously can't have a negative indentation
             k = max(k,0)
 
@@ -377,17 +382,17 @@ class TemplateParser(object):
             # If we are a pass block, we obviously de-dent.
             if TemplateParser.re_pass.match(line):
                 k -= 1
-                
+
             # If we are any of the following, de-dent.
             # However, we should stay on the same level
             # But the line right after us will be de-dented.
             # So we add one credit to keep us at the level
-            # While moving back one indentation level.
+            # while moving back one indentation level.
             if TemplateParser.re_unblock.match(line):
                 credit = 1
                 k -= 1
-            
-            # If we are an if statement, a try, or a semi-colon we 
+
+            # If we are an if statement, a try, or a semi-colon we
             # probably need to indent the next line.
             if line.endswith(':') and not line.startswith('#'):
                 k += 1
@@ -395,22 +400,19 @@ class TemplateParser(object):
         # This must come before so that we can raise an error with the
         # right content.
         new_text = '\n'.join(new_lines)
-        
+
         if k > 0:
             self._raise_error('missing "pass" in view', new_text)
         elif k < 0:
             self._raise_error('too many "pass" in view', new_text)
-            
+
         return new_text
-        
+
     def _raise_error(self, message='', text=None):
         """
-        Raises an error using itself as the filename and textual content.
+        Raise an error using itself as the filename and textual content.
         """
-        if text:
-            raise restricted.RestrictedError(self.name, text, message)
-        else:
-            raise restricted.RestrictedError(self.name, self.text, message)
+        raise RestrictedError(self.name, text or self.text, message)
 
     def _get_file_text(self, filename):
         """
@@ -423,19 +425,17 @@ class TemplateParser(object):
         if not filename.strip():
             self._raise_error('Invalid template filename')
 
-        # Get the file name, filename looks like ``"template.html"``.
-        # We need to eval to remove the qoutations and get the string type.
+        # Get the filename; filename looks like ``"template.html"``.
+        # We need to eval to remove the quotes and get the string type.
         filename = eval(filename, self.context)
-        
+
         # Get the path of the file on the system.
         filepath = os.path.join(self.path, filename)
 
-        # Lets try to read teh text.
+        # try to read the text.
         try:
             fileobj = open(filepath, 'rb')
-
             text = fileobj.read()
-
             fileobj.close()
         except IOError:
             self._raise_error('Unable to open included view file: ' + filepath)
@@ -447,19 +447,19 @@ class TemplateParser(object):
         Include ``filename`` here.
         """
         text = self._get_file_text(filename)
-            
-        t = TemplateParser(text, 
+
+        t = TemplateParser(text,
                            name    = filename,
-                           context = self.context, 
-                           path    = self.path, 
+                           context = self.context,
+                           path    = self.path,
                            writer  = self.writer,
                            delimiters = self.delimiters)
-        
+
         content.append(t.content)
 
     def extend(self, filename):
         """
-        Extend ``filename``. Anything not declared in a block defined by the 
+        Extend ``filename``. Anything not declared in a block defined by the
         parent will be placed in the parent templates ``{{include}}`` block.
         """
         text = self._get_file_text(filename)
@@ -471,10 +471,10 @@ class TemplateParser(object):
         # And our nodes as well.
         super_nodes.extend(self.super_nodes)
 
-        t = TemplateParser(text, 
+        t = TemplateParser(text,
                     name         = filename,
-                    context      = self.context, 
-                    path         = self.path, 
+                    context      = self.context,
+                    path         = self.path,
                     writer       = self.writer,
                     delimiters   = self.delimiters,
                     _super_nodes = super_nodes)
@@ -492,14 +492,14 @@ class TemplateParser(object):
                 if node.name in t.content.blocks:
                     # Do not include it
                     continue
-                    
+
             if isinstance(node, Node):
                 # Or if the node was before the extension
                 # we should not include it
                 if node.pre_extend:
                     pre.append(node)
                     continue
-                    
+
             # Otherwise, it should go int the
             # Parent templates {{include}} section.
                 buf.append(node)
@@ -512,13 +512,13 @@ class TemplateParser(object):
 
         # Set our include, unique by filename
         t.content.blocks['__include__' + filename] = buf
-        
+
         # Make sure our pre_extended nodes go first
         t.content.insert(pre)
-        
+
         # Then we extend our blocks
         t.content.extend(self.content)
-        
+
         # Work off the parent node.
         self.content = t.content
 
@@ -527,12 +527,12 @@ class TemplateParser(object):
         # Basically, r_tag.split will split the text into
         # an array containing, 'non-tag', 'tag', 'non-tag', 'tag'
         # so if we alternate this variable, we know
-        # what to look for. This is alternate to 
+        # what to look for. This is alternate to
         # line.startswith("{{")
         in_tag = False
         extend = None
         pre_extend = True
-        
+
         # Use a list to store everything in
         # This is because later the code will "look ahead"
         # for missing strings or brackets.
@@ -541,7 +541,7 @@ class TemplateParser(object):
         # i = current item
         for j in range(len(ij)):
             i = ij[j]
-            
+
             if i:
                 if len(self.stack) == 0:
                     self._raise_error('The "end" tag is unmatched, please check if you have a starting "block" tag')
@@ -551,29 +551,29 @@ class TemplateParser(object):
 
                 if in_tag:
                     line = i
-                
+
                     # If we are missing any strings!!!!
                     # This usually happens with the following example
                     # template code
-                    # 
+                    #
                     # {{a = '}}'}}
                     # or
                     # {{a = '}}blahblah{{'}}
-                    # 
+                    #
                     # This will fix these
                     # This is commented out because the current template
                     # system has this same limitation. Since this has a
                     # performance hit on larger templates, I do not recommend
                     # using this code on production systems. This is still here
                     # for "i told you it *can* be fixed" purposes.
-                    # 
-                    # 
+                    #
+                    #
 #                    if line.count("'") % 2 != 0 or line.count('"') % 2 != 0:
-#                        
+#
 #                        # Look ahead
 #                        la = 1
 #                        nextline = ij[j+la]
-#                        
+#
 #                        # As long as we have not found our ending
 #                        # brackets keep going
 #                        while '}}' not in nextline:
@@ -584,31 +584,31 @@ class TemplateParser(object):
 #                            # this is why there is an "if i"
 #                            # around line 530
 #                            ij[j+la] = ''
-#                            
+#
 #                        # retrieve our index.
 #                        index = nextline.index('}}')
-#                        
+#
 #                        # Everything before the new brackets
 #                        before = nextline[:index+2]
-#                        
+#
 #                        # Everything after
 #                        after = nextline[index+2:]
-#                        
+#
 #                        # Make the next line everything after
 #                        # so it parses correctly, this *should* be
 #                        # all html
 #                        ij[j+1] = after
-#                        
+#
 #                        # Add everything before to the current line
 #                        line += before
-                        
+
                     # Get rid of '{{' and '}}'
                     line = line[2:-2].strip()
-                    
-                    # This is bad joo joo, but lets do it anyway
+
+                    # This is bad juju, but let's do it anyway
                     if not line:
                         continue
-                        
+
                     # We do not want to replace the newlines in code,
                     # only in block comments.
                     def remove_newline(re_val):
@@ -645,9 +645,9 @@ class TemplateParser(object):
                     # This will replace newlines in block comments
                     # with the newline character. This is so that they
                     # retain their formatting, but squish down to one
-                    # line in the rendered template. 
-                    
-                    # First lets check if we have any custom lexers
+                    # line in the rendered template.
+
+                    # First check if we have any custom lexers
                     if name in self.lexers:
                         # Pass the information to the lexer
                         # and allow it to inject in the environment
@@ -655,43 +655,43 @@ class TemplateParser(object):
                         # You can define custom names such as
                         # '{{<<variable}}' which could potentially
                         # write unescaped version of the variable.
-                        self.lexers[name](parser    = self, 
-                                          value     = value, 
-                                          top       = top, 
-                                          stack     = stack,)
-                    
+                        self.lexers[name](parser    = self,
+                                          value     = value,
+                                          top       = top,
+                                          stack     = self.stack,)
+
                     elif name == '=':
                         # So we have a variable to insert into
                         # the template
                         buf = "\n%s(%s)" % (self.writer, value)
                         top.append(Node(buf, pre_extend = pre_extend))
-                        
-                    elif name == 'block':
+
+                    elif name == 'block' and not value.startswith('='):
                         # Make a new node with name.
-                        node = BlockNode(name = value.strip(), 
+                        node = BlockNode(name = value.strip(),
                                          pre_extend = pre_extend,
                                          delimiters = self.delimiters)
-                        
+
                         # Append this node to our active node
                         top.append(node)
-                        
+
                         # Make sure to add the node to the stack.
                         # so anything after this gets added
                         # to this node. This allows us to
                         # "nest" nodes.
                         self.stack.append(node)
 
-                    elif name == 'end':
+                    elif name == 'end' and not value.startswith('='):
                         # We are done with this node.
 
                         # Save an instance of it
                         self.blocks[top.name] = top
-                        
+
                         # Pop it.
                         self.stack.pop()
 
-                    elif name == 'super':
-                        # Lets get our correct target name
+                    elif name == 'super' and not value.startswith('='):
+                        # Get our correct target name
                         # If they just called {{super}} without a name
                         # attempt to assume the top blocks name.
                         if value:
@@ -699,7 +699,7 @@ class TemplateParser(object):
                         else:
                             target_node = top.name
 
-                        # Create a SuperNode instance                        
+                        # Create a SuperNode instance
                         node = SuperNode(name = target_node,
                                             pre_extend = pre_extend)
 
@@ -709,11 +709,11 @@ class TemplateParser(object):
                         # And put in in the tree
                         top.append(node)
 
-                    elif name == 'include':
+                    elif name == 'include' and not value.startswith('='):
                         # If we know the target file to include
                         if value:
                             self.include(top, value)
-                            
+
                         # Otherwise, make a temporary include node
                         # That the child node will know to hook into.
                         else:
@@ -722,7 +722,7 @@ class TemplateParser(object):
                                                      delimiters = self.delimiters)
                             top.append(include_node)
 
-                    elif name == 'extend':
+                    elif name == 'extend' and not value.startswith('='):
                         # We need to extend the following
                         # template.
                         extend = value
@@ -732,10 +732,10 @@ class TemplateParser(object):
                         # If we don't know where it belongs
                         # we just add it anyways without formatting.
                         if line and in_tag:
-                        
-                            # Lets go ahead and split on the newlines >.<
+
+                            # Split on the newlines >.<
                             tokens = line.split('\n')
-                            
+
                             # We need to look for any instances of
                             # for i in range(10):
                             #   = i
@@ -744,10 +744,10 @@ class TemplateParser(object):
                             continuation = False
                             len_parsed = 0
                             for k in range(len(tokens)):
-                            
+
                                 tokens[k] = tokens[k].strip()
                                 len_parsed += len(tokens[k])
-                                
+
                                 if tokens[k].startswith('='):
                                     if tokens[k].endswith('\\'):
                                         continuation = True
@@ -757,33 +757,33 @@ class TemplateParser(object):
                                 elif continuation:
                                     tokens[k] += ')'
                                     continuation = False
-                                    
-                        
+
+
                             buf = "\n%s" % '\n'.join(tokens)
                             top.append(Node(buf, pre_extend = pre_extend))
-                        
+
                 else:
                     # It is HTML so just include it.
                     buf = "\n%s(%r, escape=False)" % (self.writer, i)
                     top.append(Node(buf, pre_extend = pre_extend))
-                  
-            # Remeber, tag, not tag, tag, not tag
+
+            # Remember: tag, not tag, tag, not tag
             in_tag = not in_tag
 
-        # Lets make a list of items to remove from child
+        # Make a list of items to remove from child
         to_rm = []
 
         # Go through each of the children nodes
         for node in self.child_super_nodes:
             # If we declared a block that this node wants to include
             if node.name in self.blocks:
-                # Lets go ahead and include it!
+                # Go ahead and include it!
                 node.value = self.blocks[node.name]
                 # Since we processed this child, we don't need to
                 # pass it along to the parent
                 to_rm.append(node)
 
-        # So now lets remove some of the processed nodes
+        # Remove some of the processed nodes
         for node in to_rm:
             # Since this is a pointer, it works beautifully.
             # Sometimes I miss C-Style pointers... I want my asterisk...
@@ -792,7 +792,7 @@ class TemplateParser(object):
         # If we need to extend a template.
         if extend:
             self.extend(extend)
-        
+
 # We need this for integration with gluon
 def parse_template(filename,
                    path    = 'views/',
@@ -813,20 +813,20 @@ def parse_template(filename,
             text = fp.read()
             fp.close()
         except IOError:
-            raise restricted.RestrictedError(filename, '', 'Unable to find the file')
+            raise RestrictedError(filename, '', 'Unable to find the file')
     else:
         text = filename.read()
 
     # Use the file contents to get a parsed template and return it.
     return str(TemplateParser(text, context=context, path=path, lexers=lexers, delimiters=delimiters))
-        
+
 def get_parsed(text):
     """
     Returns the indented python code of text. Useful for unit testing.
-    
+
     """
     return str(TemplateParser(text))
-    
+
 # And this is a generic render function.
 # Here for integration with gluon.
 def render(content = "hello world",
@@ -863,8 +863,36 @@ def render(content = "hello world",
     >>> render(content='{{for i in range(3):\\n=i\\npass}}')
     '012'
     """
-    # Here to avoid circular Imports        
-    import globals
+    # Here to avoid circular Imports
+    try:
+        from globals import Response
+    except:
+        # Working standalone. Build a mock Response object.
+        class Response():
+            def __init__(self):
+                self.body = cStringIO.StringIO()
+            def write(self, data, escape=True):
+                if not escape:
+                    self.body.write(str(data))
+                elif hasattr(data,'xml') and callable(data.xml):
+                    self.body.write(data.xml())
+                else:
+                    # make it a string
+                    if not isinstance(data, (str, unicode)):
+                        data = str(data)
+                    elif isinstance(data, unicode):
+                        data = data.encode('utf8', 'xmlcharrefreplace')
+                    data = cgi.escape(data, True).replace("'","&#x27;")
+                    self.body.write(data)
+
+        # A little helper to avoid escaping.
+        class NOESCAPE():
+            def __init__(self, text):
+                self.text = text
+            def xml(self):
+                return self.text
+        # Add it to the context so we can use it.
+        context['NOESCAPE'] = NOESCAPE
 
     # If we don't have anything to render, why bother?
     if not content and not stream and not filename:
@@ -880,18 +908,26 @@ def render(content = "hello world",
             stream = cStringIO.StringIO(content)
 
     # Get a response class.
-    context['response'] = globals.Response()
+    context['response'] = Response()
 
     # Execute the template.
-    exec(str(TemplateParser(stream.read(), context=context, path=path, lexers=lexers, delimiters=delimiters))) in context
-    
+    code = str(TemplateParser(stream.read(), context=context, path=path, lexers=lexers, delimiters=delimiters))
+    try:
+        exec(code) in context
+    except Exception:
+        # for i,line in enumerate(code.split('\n')): print i,line
+        raise
+
     if close_stream:
         stream.close()
-    
+
     # Returned the rendered content.
     return context['response'].body.getvalue()
-    
+
 
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+
+
+

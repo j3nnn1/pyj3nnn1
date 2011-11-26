@@ -16,7 +16,6 @@ default_function = 'index'      # ordinarily set in app-specific routes.py
 #
 # Example: support welcome, admin, app and myapp, with myapp the default:
 
-routes_logging = False # set to False, 'debug', 'info', 'warning', 'error' or 'critical'
 
 routes_app = ((r'/(?P<app>welcome|admin|app)\b.*', r'\g<app>'),
               (r'(.*)', r'myapp'),
@@ -71,7 +70,7 @@ routes_out = ((r'.*http://otherdomain.com.* /app/ctr(?P<any>.*)', r'\g<any>'),
 # ErrorMessageTicket takes a string format dictionary containing (only) the
 # "ticket" key.
 
-# error_message = '<html><body><h1>Invalid request</h1></body></html>'
+# error_message = '<html><body><h1>%s</h1></body></html>'
 # error_message_ticket = '<html><body><h1>Internal error</h1>Ticket issued: <a href="/admin/default/ticket/%(ticket)s" target="_blank">%(ticket)s</a></body></html>'
 
 # specify a list of apps that bypass args-checking and use request.raw_args
@@ -82,32 +81,56 @@ routes_out = ((r'.*http://otherdomain.com.* /app/ctr(?P<any>.*)', r'\g<any>'),
 def __routes_doctest():
     '''
     Dummy function for doctesting routes.py.
-    
+
     Use filter_url() to test incoming or outgoing routes;
     filter_err() for error redirection.
-    
+
     filter_url() accepts overrides for method and remote host:
         filter_url(url, method='get', remote='0.0.0.0', out=False)
 
     filter_err() accepts overrides for application and ticket:
         filter_err(status, application='app', ticket='tkt')
-    
-    >>> filter_url('http://domain.com/favicon.ico')
-    'http://domain.com/examples/static/favicon.ico'
-    >>> filter_url('https://domain.com/robots.txt')
-    'https://domain.com/examples/static/robots.txt'
+
+    >>> import os
+    >>> import gluon.main
+    >>> from gluon.rewrite import regex_select, load, filter_url, regex_filter_out, filter_err, compile_regex
+    >>> regex_select()
+    >>> load(routes=os.path.basename(__file__))
+
+    >>> os.path.relpath(filter_url('http://domain.com/favicon.ico'))
+    'applications/examples/static/favicon.ico'
+    >>> os.path.relpath(filter_url('http://domain.com/robots.txt'))
+    'applications/examples/static/robots.txt'
+    >>> filter_url('http://domain.com')
+    '/init/default/index'
+    >>> filter_url('http://domain.com/')
+    '/init/default/index'
+    >>> filter_url('http://domain.com/init/default/fcn')
+    '/init/default/fcn'
+    >>> filter_url('http://domain.com/init/default/fcn/')
+    '/init/default/fcn'
     >>> filter_url('http://domain.com/app/ctr/fcn')
-    'http://domain.com/app/ctr/fcn'
+    '/app/ctr/fcn'
+    >>> filter_url('http://domain.com/app/ctr/fcn/arg1')
+    "/app/ctr/fcn ['arg1']"
+    >>> filter_url('http://domain.com/app/ctr/fcn/arg1/')
+    "/app/ctr/fcn ['arg1']"
+    >>> filter_url('http://domain.com/app/ctr/fcn/arg1//')
+    "/app/ctr/fcn ['arg1', '']"
+    >>> filter_url('http://domain.com/app/ctr/fcn//arg1')
+    "/app/ctr/fcn ['', 'arg1']"
     >>> filter_url('HTTP://DOMAIN.COM/app/ctr/fcn')
-    'http://domain.com/app/ctr/fcn'
+    '/app/ctr/fcn'
     >>> filter_url('http://domain.com/app/ctr/fcn?query')
-    'http://domain.com/app/ctr/fcn?query'
+    '/app/ctr/fcn ?query'
     >>> filter_url('http://otherdomain.com/fcn')
-    'http://otherdomain.com/app/ctr/fcn'
-    >>> filter_out('/app/ctr/fcn')
+    '/app/ctr/fcn'
+    >>> regex_filter_out('/app/ctr/fcn')
     '/ctr/fcn'
     >>> filter_url('https://otherdomain.com/app/ctr/fcn', out=True)
     '/ctr/fcn'
+    >>> filter_url('https://otherdomain.com/app/ctr/fcn/arg1//', out=True)
+    '/ctr/fcn/arg1//'
     >>> filter_url('http://otherdomain.com/app/ctr/fcn', out=True)
     '/fcn'
     >>> filter_url('http://otherdomain.com/app/ctr/fcn?query', out=True)
@@ -126,20 +149,18 @@ def __routes_doctest():
     'myapp'
     >>> filter_url('http://domain.com', app=True)
     'myapp'
-    >>> compile_re('.*http://otherdomain.com.* (?P<any>.*)', '/app/ctr\g<any>')[0].pattern
+    >>> compile_regex('.*http://otherdomain.com.* (?P<any>.*)', '/app/ctr\g<any>')[0].pattern
     '^.*http://otherdomain.com.* (?P<any>.*)$'
-    >>> compile_re('.*http://otherdomain.com.* (?P<any>.*)', '/app/ctr\g<any>')[1]
+    >>> compile_regex('.*http://otherdomain.com.* (?P<any>.*)', '/app/ctr\g<any>')[1]
     '/app/ctr\\\\g<any>'
-    >>> compile_re('/$c/$f', '/init/$c/$f')[0].pattern
+    >>> compile_regex('/$c/$f', '/init/$c/$f')[0].pattern
     '^.*?:https?://[^:/]+:[a-z]+ /(?P<c>\\\\w+)/(?P<f>\\\\w+)$'
-    >>> compile_re('/$c/$f', '/init/$c/$f')[1]
+    >>> compile_regex('/$c/$f', '/init/$c/$f')[1]
     '/init/\\\\g<c>/\\\\g<f>'
     '''
     pass
 
 if __name__ == '__main__':
     import doctest
-    from gluon.rewrite import select, load, filter_url, filter_out, filter_err, compile_re
-    select()
-    load(routes=__file__)
     doctest.testmod()
+

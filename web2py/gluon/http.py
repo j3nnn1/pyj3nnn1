@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-This file is part of web2py Web Framework (Copyrighted, 2007-2010).
-Developed by Massimo Di Pierro <mdipierro@cs.depaul.edu>.
-License: GPL v2
+This file is part of the web2py Web Framework
+Copyrighted by Massimo Di Pierro <mdipierro@cs.depaul.edu>
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
 """
 
 __all__ = ['HTTP', 'redirect']
@@ -81,7 +81,7 @@ class HTTP(BaseException):
             if not body:
                 body = status
             if isinstance(body, str):
-                if len(body)<512:
+                if len(body)<512 and self.headers['Content-Type'].startswith('text/html'):
                     body += '<!-- %s //-->' % ('x'*512) ### trick IE
                 self.headers['Content-Length'] = len(body)
         headers = []
@@ -96,9 +96,36 @@ class HTTP(BaseException):
             return body
         return [str(body)]
 
+    @property
+    def message(self):
+        '''
+        compose a message describing this exception
+
+        "status defined_status [web2py_error]"
+
+        message elements that are not defined are omitted
+        '''
+        msg = '%(status)d'
+        if self.status in defined_status:
+            msg = '%(status)d %(defined_status)s'
+        if 'web2py_error' in self.headers:
+            msg += ' [%(web2py_error)s]'
+        return msg % dict(status=self.status,
+                          defined_status=defined_status.get(self.status),
+                          web2py_error=self.headers.get('web2py_error'))
+
+    def __str__(self):
+        "stringify me"
+        return self.message
+
 
 def redirect(location, how=303):
+    if not location:
+        return
     location = location.replace('\r', '%0D').replace('\n', '%0A')
     raise HTTP(how,
                'You are being redirected <a href="%s">here</a>' % location,
                Location=location)
+
+
+

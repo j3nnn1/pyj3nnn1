@@ -14,8 +14,11 @@ def email_auth(server="smtp.gmail.com:587",
                        password,
                        server=server,
                        domain=domain):
-        if not email[-len(domain):]==domain:
-            return False
+        if domain:
+            if not isinstance(domain,(list,tuple)):
+                domain=[str(domain)]
+            if not [d for d in domain if email[-len(d):]==d]:
+                return False
         (host, port) = server.split(':')
         try:
             server = None
@@ -31,3 +34,4 @@ def email_auth(server="smtp.gmail.com:587",
                 server.quit()
             return False
     return email_auth_aux
+

@@ -28,7 +28,11 @@ while 1:
         filename = os.path.join(path, file)
 
         if not ALLOW_DUPLICATES:
-            file_data = open(filename, 'r').read()
+            fileobj = open(filename, 'r')
+            try:
+                file_data = fileobj.read()
+            finally:
+                fileobj.close()
             key = md5_hash(file_data)
 
             if key in hashes:
@@ -53,3 +57,4 @@ while 1:
 
     db.commit()
     time.sleep(SLEEP_MINUTES * 60)
+

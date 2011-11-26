@@ -1,14 +1,38 @@
 (dp1
 S'id_articulo'
 p2
-S'INTEGER REFERENCES articulos(id) ON DELETE CASCADE'
-p3
-sS'id'
+(dp3
+S'type'
 p4
-S'INTEGER PRIMARY KEY AUTOINCREMENT'
+S'reference articulos'
 p5
-sS'id_etiqueta'
+sS'sortable'
 p6
-S'INTEGER REFERENCES etiquetas(id) ON DELETE CASCADE'
+I3
+sS'sql'
 p7
-s.
+S'INTEGER REFERENCES articulos(id) ON DELETE CASCADE'
+p8
+ssS'id'
+p9
+(dp10
+g4
+S'id'
+p11
+sg6
+I1
+sg7
+S'INTEGER PRIMARY KEY AUTOINCREMENT'
+p12
+ssS'id_etiqueta'
+p13
+(dp14
+g4
+S'reference etiquetas'
+p15
+sg6
+I2
+sg7
+S'INTEGER REFERENCES etiquetas(id) ON DELETE CASCADE'
+p16
+ss.

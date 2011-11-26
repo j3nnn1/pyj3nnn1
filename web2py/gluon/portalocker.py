@@ -42,6 +42,7 @@ Version: $Id: portalocker.py,v 1.3 2001/05/29 18:47:55 Administrator Exp $
 
 import os
 import logging
+import platform
 logger = logging.getLogger("web2py")
 
 os_locking = None
@@ -89,7 +90,11 @@ elif os_locking == 'posix':
 
 
 else:
-    logger.debug('no file locking')
+    if platform.system() == 'Windows':
+        logger.error('no file locking, you must install the win32 extensions from: http://sourceforge.net/projects/pywin32/files/')
+    else:
+        logger.debug('no file locking, this will cause problems')
+
     LOCK_EX = None
     LOCK_SH = None
     LOCK_NB = None
@@ -115,3 +120,6 @@ if __name__ == '__main__':
     dummy = sys.stdin.readline()
 
     log.close()
+
+
+

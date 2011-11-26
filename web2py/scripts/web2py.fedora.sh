@@ -20,7 +20,7 @@ NAME=web2pyd
 DESC="Web2py Daemon"
 DAEMON_DIR="/usr/lib/web2py"
 ADMINPASS="admin"
-#ADMINPASS="<recycle>"
+#ADMINPASS="\<recycle\>"
 PIDFILE=/var/run/$NAME.pid
 PORT=8001
 PYTHON=python
@@ -40,14 +40,7 @@ start() {
 
 stop() {
 	echo -n $"Shutting down $DESC ($NAME): "
-	if [ -r "$PIDFILE" ]; then
-		pid=`cat $PIDFILE`
-		kill -TERM $pid
-		RETVAL=$?
-	else
-		RETVAL=1
-	fi
-	[ $RETVAL -eq 0 ] && success || failure
+	killproc -p "$PIDFILE" -d 3 "$NAME"
 	echo
 	if [ $RETVAL -eq 0 ]; then
 		rm -f /var/lock/subsys/$NAME
@@ -86,3 +79,4 @@ case "$1" in
 esac
 
 exit $RETVAL
+

@@ -44,16 +44,19 @@ div.error {
 def content():
     return """<div class="flash">{{=response.flash or ''}}</div>{{include}}"""
 
-
 def process(folder):
-    soup = BS(open(os.path.join(folder,'index.html'),'rb').read())
+    indexfile = open(os.path.join(folder,'index.html'),'rb')
+    try:
+        soup = BS(indexfile.read())
+    finally:
+        indexfile.close()
     styles = [x['href'] for x in soup.findAll('link')]
     soup.find('head').contents=BS(head(styles))
     try:
         soup.find('h1').contents=BS('{{=response.title or request.application}}')
         soup.find('h2').contents=BS("{{=response.subtitle or '=response.subtitle'}}")
     except:
-        pass                
+        pass
     for match in (soup.find('div',id='menu'),
               soup.find('div',{'class':'menu'}),
               soup.find('div',id='nav'),
@@ -71,7 +74,7 @@ def process(folder):
             done=True
             break
     if done:
-        page = soup.prettify()        
+        page = soup.prettify()
         page = re.compile("\s*\{\{=response\.flash or ''\}\}\s*",re.MULTILINE)\
             .sub("{{=response.flash or ''}}",page)
         print page
@@ -82,14 +85,15 @@ if __name__=='__main__':
     if len(sys.argv)<2:
         print """USAGE:
 1) start a new web2py application
-2) Download a sample free layout from the web into the static/ folder of 
+2) Download a sample free layout from the web into the static/ folder of
    your web2py application (make sure a sample index.html is there)
 3) run this script with
 
-   python layout_make.py /path/to/web2py/applications/app/static/  
+   python layout_make.py /path/to/web2py/applications/app/static/
      > /path/to/web2py/applications/app/views/layout.html
 """
     elif not os.path.exists(sys.argv[1]):
         print 'Folder %s does not exist' % sys.argv[1]
     else:
         process(sys.argv[1])
+

@@ -1,21 +1,66 @@
-# coding: utf8 
+# coding: utf8
 
 from gluon.admin import *
+from gluon.fileutils import abspath, read_file, write_file
 from glob import glob
 import shutil
+import platform
+
+if DEMO_MODE and request.function in ['change_password','pack','pack_plugin','upgrade_web2py','uninstall','cleanup','compile_app','remove_compiled_app','delete','delete_plugin','create_file','upload_file','update_languages','reload_routes']:
+    session.flash = T('disabled in demo mode')
+    redirect(URL('site'))
+
+if not is_manager() and request.function in ['change_password','upgrade_web2py']:
+    session.flash = T('disabled in multi user mode')
+    redirect(URL('site'))
+
+if FILTER_APPS and request.args(0) and not request.args(0) in FILTER_APPS:
+    session.flash = T('disabled in demo mode')
+    redirect(URL('site'))
+
+def safe_open(a,b):
+    if DEMO_MODE and 'w' in b:
+        class tmp:
+            def write(self,data): pass
+        return tmp()
+    return open(a,b)
+
+def safe_read(a, b='r'):
+    safe_file = safe_open(a, b)
+    try:
+        return safe_file.read()
+    finally:
+        safe_file.close()
+
+def safe_write(a, value, b='w'):
+    safe_file = safe_open(a, b)
+    try:
+        safe_file.write(value)
+    finally:
+        safe_file.close()
+
+def get_app(name=None):
+    app = name or request.args(0)
+    if app and (not MULTI_USER_MODE or db(db.app.name==app)(db.app.owner==auth.user.id).count()):
+        return app
+    session.flash = 'App does not exist or your are not authorized'
+    redirect(URL('site'))
 
 def index():
     """ Index handler """
 
     send = request.vars.send
+    if DEMO_MODE:
+        session.authorized = True
+        session.last_time = t0
     if not send:
         send = URL('site')
-
     if session.authorized:
         redirect(send)
     elif request.vars.password:
         if verify_password(request.vars.password):
             session.authorized = True
+            login_record(True)
 
             if CHECK_VERSION:
                 session.check_version = True
@@ -28,12 +73,16 @@ def index():
 
             redirect(send)
         else:
-            response.flash = T('invalid password')
-
-    # f == file
-    apps = [f for f in os.listdir(apath(r=request)) if f.find('.') < 0]
-
-    return dict(apps=apps, send=send)
+            times_denied = login_record(False)
+            if times_denied >= allowed_number_of_attempts:
+                response.flash = \
+                    T('admin disabled because too many invalid login attempts')
+            elif times_denied == allowed_number_of_attempts - 1:
+                response.flash = \
+                    T('You have one more login attempt before you are locked out')
+            else:
+                response.flash = T('invalid password.')
+    return dict(send=send)
 
 
 def check_version():
@@ -44,24 +93,28 @@ def check_version():
 
     new_version, version_number = check_new_version(request.env.web2py_version,
                                     WEB2PY_VERSION_URL)
-    
+
     if new_version == -1:
         return A(T('Unable to check for upgrades'), _href=WEB2PY_URL)
-    elif new_version == True:
-        return A(T('A new version of web2py is available: %s'
-                                            % version_number), _href=WEB2PY_URL)
-    else:
+    elif new_version != True:
         return A(T('web2py is up to date'), _href=WEB2PY_URL)
+    elif platform.system().lower() in ('windows','win32','win64') and os.path.exists("web2py.exe"):
+        return SPAN('You should upgrade to version %s' % version_number)
+    else:
+        return sp_button(URL('upgrade_web2py'), T('upgrade now')) \
+          + XML(' <strong class="upgrade_version">%s</strong>' % version_number)
 
 
 def logout():
     """ Logout handler """
-
     session.authorized = None
+    if MULTI_USER_MODE:
+        redirect(URL('user/logout'))
     redirect(URL('index'))
 
 
 def change_password():
+
     if session.pam_user:
         session.flash = T('PAM authenticated user, cannot change password here')
         redirect(URL('site'))
@@ -74,8 +127,8 @@ def change_password():
         elif form.vars.new_admin_password != form.vars.new_admin_password_again:
             form.errors.new_admin_password_again = T('no match')
         else:
-            path = os.path.join(request.env.web2py_path,'parameters_%s.py' % request.env.server_port)
-            open(path,'w').write('password="%s"' % CRYPT()(request.vars.new_admin_password)[0])
+            path = abspath('parameters_%s.py' % request.env.server_port)
+            safe_write(path, 'password="%s"' % CRYPT()(request.vars.new_admin_password)[0])
             session.flash = T('password changed')
             redirect(URL('site'))
     return dict(form=form)
@@ -88,17 +141,22 @@ def site():
     # Shortcut to make the elif statements more legible
     file_or_appurl = 'file' in request.vars or 'appurl' in request.vars
 
-    if request.vars.filename and not 'file' in request.vars:
-        # create a new application        
+    if DEMO_MODE:
+        pass
+
+    elif request.vars.filename and not 'file' in request.vars:
+        # create a new application
         appname = cleanpath(request.vars.filename).replace('.', '_')
-        if app_create(appname, request):            
+        if app_create(appname, request):
+            if MULTI_USER_MODE:
+                db.app.insert(name=appname,owner=auth.user.id)
             session.flash = T('new application "%s" created', appname)
             redirect(URL('design',args=appname))
         else:
             session.flash = \
-                T('unable to create application "%s"', request.vars.filename)
+                T('unable to create application "%s" (it may exist already)', request.vars.filename)
         redirect(URL(r=request))
-        
+
     elif file_or_appurl and not request.vars.filename:
         # can't do anything without an app name
         msg = 'you must specify a name for the uploaded application'
@@ -106,6 +164,7 @@ def site():
 
     elif file_or_appurl and request.vars.filename:
         # fetch an application via URL or file upload
+        f = None
         if request.vars.appurl is not '':
             try:
                 f = urllib.urlopen(request.vars.appurl)
@@ -117,14 +176,15 @@ def site():
             f = request.vars.file.file
             fname = request.vars.file.filename
 
-        appname = cleanpath(request.vars.filename).replace('.', '_')
-        installed = app_install(appname, f, request, fname,
-                                overwrite=request.vars.overwrite_check)
-        if installed:
+        if f:
+            appname = cleanpath(request.vars.filename).replace('.', '_')
+            installed = app_install(appname, f, request, fname,
+                                    overwrite=request.vars.overwrite_check)
+        if f and installed:
             msg = 'application %(appname)s installed with md5sum: %(digest)s'
             session.flash = T(msg, dict(appname=appname,
                                         digest=md5_hash(installed)))
-        elif request.vars.overwrite_check:
+        elif f and request.vars.overwrite_check:
             msg = 'unable to install application "%(appname)s"'
             session.flash = T(msg, dict(appname=request.vars.filename))
 
@@ -135,39 +195,49 @@ def site():
         redirect(URL(r=request))
 
     regex = re.compile('^\w+$')
-    apps = sorted([(f.upper(), f) for f in os.listdir(apath(r=request)) \
-                       if regex.match(f)])
-    apps = [item[1] for item in apps]
+
+    if is_manager():
+        apps = [f for f in os.listdir(apath(r=request)) if regex.match(f)]
+    else:
+        apps = [f.name for f in db(db.app.owner==auth.user_id).select()]
+
+    if FILTER_APPS:
+        apps = [f for f in apps if f in FILTER_APPS]
+
+    apps = sorted(apps,lambda a,b:cmp(a.upper(),b.upper()))
 
     return dict(app=None, apps=apps, myversion=myversion)
 
 
 def pack():
+    app = get_app()
+
     if len(request.args) == 1:
-        fname = 'web2py.app.%s.w2p' % request.args[0]
-        filename = app_pack(request.args[0], request)
+        fname = 'web2py.app.%s.w2p' % app
+        filename = app_pack(app, request)
     else:
-        fname = 'web2py.app.%s.compiled.w2p' % request.args[0]
-        filename = app_pack_compiled(request.args[0], request)
+        fname = 'web2py.app.%s.compiled.w2p' % app
+        filename = app_pack_compiled(app, request)
 
     if filename:
         response.headers['Content-Type'] = 'application/w2p'
         disposition = 'attachment; filename=%s' % fname
         response.headers['Content-Disposition'] = disposition
-        return open(filename, 'rb').read()
+        return safe_read(filename, 'rb')
     else:
         session.flash = T('internal error')
         redirect(URL('site'))
 
 def pack_plugin():
+    app = get_app()
     if len(request.args) == 2:
         fname = 'web2py.plugin.%s.w2p' % request.args[1]
-        filename = plugin_pack(request.args[0], request.args[1], request)
+        filename = plugin_pack(app, request.args[1], request)
     if filename:
         response.headers['Content-Type'] = 'application/w2p'
         disposition = 'attachment; filename=%s' % fname
         response.headers['Content-Disposition'] = disposition
-        return open(filename, 'rb').read()
+        return safe_read(filename, 'rb')
     else:
         session.flash = T('internal error')
         redirect(URL('plugin',args=request.args))
@@ -185,11 +255,17 @@ def upgrade_web2py():
     return dict()
 
 def uninstall():
-    app = request.args[0]
-
+    app = get_app()
     if 'delete' in request.vars:
-        deleted = app_uninstall(app, request)
-        if deleted:
+        if MULTI_USER_MODE:
+            if is_manager() and db(db.app.name==app).delete():
+                pass
+            elif db(db.app.name==app)(db.app.owner==auth.user.id).delete():
+                pass
+            else:
+                session.flash = T('no permission to uninstall "%s"', app)
+                redirect(URL('site'))
+        if app_uninstall(app, request):            
             session.flash = T('application "%s" uninstalled', app)
         else:
             session.flash = T('unable to uninstall "%s"', app)
@@ -200,7 +276,8 @@ def uninstall():
 
 
 def cleanup():
-    clean = app_cleanup(request.args[0], request)
+    app = get_app()
+    clean = app_cleanup(app, request)
     if not clean:
         session.flash = T("some files could not be removed")
     else:
@@ -210,25 +287,26 @@ def cleanup():
 
 
 def compile_app():
-    c = app_compile(request.args[0], request)
+    app = get_app()
+    c = app_compile(app, request)
     if not c:
         session.flash = T('application compiled')
     else:
-        session.flash = DIV(T('Cannot compile: there are errors in your app:',
-                              CODE(c)))    
+        session.flash = DIV(T('Cannot compile: there are errors in your app:'),
+                              CODE(c))
     redirect(URL('site'))
 
 
 def remove_compiled_app():
     """ Remove the compiled application """
-    remove_compiled_application(apath(request.args[0], r=request))
+    app = get_app()
+    remove_compiled_application(apath(app, r=request))
     session.flash = T('compiled application removed')
     redirect(URL('site'))
 
-    
 def delete():
     """ Object delete handler """
-
+    app = get_app()
     filename = '/'.join(request.args)
     sender = request.vars.sender
 
@@ -247,14 +325,13 @@ def delete():
                               dict(filename=filename))
         redirect(URL(sender))
     return dict(filename=filename, sender=sender)
-        
+
 def peek():
     """ Visualize object code """
-
+    app = get_app()
     filename = '/'.join(request.args)
-
     try:
-        data = open(apath(filename, r=request), 'r').read().replace('\r','')
+        data = safe_read(apath(filename, r=request)).replace('\r','')
     except IOError:
         session.flash = T('file does not exist')
         redirect(URL('site'))
@@ -269,9 +346,7 @@ def peek():
 
 def test():
     """ Execute controller tests """
-
-    app = request.args[0]
-
+    app = get_app()
     if len(request.args) > 1:
         file = request.args[1]
     else:
@@ -284,23 +359,39 @@ def test():
 def keepalive():
     return ''
 
+def search():
+    keywords=request.vars.keywords or ''
+    app = get_app()
+    def match(filename,keywords):
+        filename=os.path.join(apath(app, r=request),filename)
+        if keywords in read_file(filename,'rb'):
+            return True
+        return False
+    path = apath(request.args[0], r=request)
+    files1 = glob(os.path.join(path,'*/*.py'))
+    files2 = glob(os.path.join(path,'*/*.html'))
+    files3 = glob(os.path.join(path,'*/*/*.html'))
+    files=[x[len(path)+1:].replace('\\','/') for x in files1+files2+files3 if match(x,keywords)]
+    return response.json({'files':files})
+
 def edit():
     """ File edit handler """
     # Load json only if it is ajax edited...
-
+    app = get_app()
     filename = '/'.join(request.args)
-
     # Try to discover the file type
     if filename[-3:] == '.py':
         filetype = 'python'
     elif filename[-5:] == '.html':
+        filetype = 'html'
+    elif filename[-5:] == '.load':
         filetype = 'html'
     elif filename[-4:] == '.css':
         filetype = 'css'
     elif filename[-3:] == '.js':
         filetype = 'js'
     else:
-        filetype = 'text'
+        filetype = 'html'
 
     # ## check if file is not there
 
@@ -308,8 +399,8 @@ def edit():
 
     if request.vars.revert and os.path.exists(path + '.bak'):
         try:
-            data = open(path + '.bak', 'r').read()
-            data1 = open(path, 'r').read()
+            data = safe_read(path + '.bak')
+            data1 = safe_read(path)
         except IOError:
             session.flash = T('Invalid action')
             if 'from_ajax' in request.vars:
@@ -317,14 +408,14 @@ def edit():
             else:
                 redirect(URL('site'))
 
-        open(path, 'w').write(data)
+        safe_write(path, data)
         file_hash = md5_hash(data)
         saved_on = time.ctime(os.stat(path)[stat.ST_MTIME])
-        open(path + '.bak', 'w').write(data1)
+        safe_write(path + '.bak', data1)
         response.flash = T('file "%s" of %s restored', (filename, saved_on))
     else:
         try:
-            data = open(path, 'r').read()
+            data = safe_read(path)
         except IOError:
             session.flash = T('Invalid action')
             if 'from_ajax' in request.vars:
@@ -338,22 +429,47 @@ def edit():
         if request.vars.file_hash and request.vars.file_hash != file_hash:
             session.flash = T('file changed on disk')
             data = request.vars.data.replace('\r\n', '\n').strip() + '\n'
-            open(path + '.1', 'w').write(data)
+            safe_write(path + '.1', data)
             if 'from_ajax' in request.vars:
-                return response.json({'error': str(T('file changed on disk')), 
+                return response.json({'error': str(T('file changed on disk')),
                                       'redirect': URL('resolve',
                                                       args=request.args)})
             else:
                 redirect(URL('resolve', args=request.args))
         elif request.vars.data:
-            open(path + '.bak', 'w').write(data)
+            safe_write(path + '.bak', data)
             data = request.vars.data.replace('\r\n', '\n').strip() + '\n'
-            open(path, 'w').write(data)
+            safe_write(path, data)
             file_hash = md5_hash(data)
             saved_on = time.ctime(os.stat(path)[stat.ST_MTIME])
             response.flash = T('file saved on %s', saved_on)
 
     data_or_revert = (request.vars.data or request.vars.revert)
+
+    # Check compile errors
+    highlight = None
+    if filetype == 'python' and request.vars.data:
+        import _ast
+        try:
+            code = request.vars.data.rstrip().replace('\r\n','\n')+'\n'
+            compile(code, path, "exec", _ast.PyCF_ONLY_AST)
+        except Exception, e:
+            start = sum([len(line)+1 for l, line
+                            in enumerate(request.vars.data.split("\n"))
+                            if l < e.lineno-1])
+            if e.text and e.offset:
+                offset = e.offset - (len(e.text) - len(e.text.splitlines()[-1]))
+            else:
+                offset = 0
+            highlight = {'start': start, 'end': start + offset + 1}
+            try:
+                ex_name = e.__class__.__name__
+            except:
+                ex_name = 'unknown exception!'
+            response.flash = DIV(T('failed to compile file because:'), BR(),
+                                 B(ex_name), T(' at line %s') % e.lineno,
+                                 offset and T(' at char %s') % offset or '',
+                                 PRE(str(e)))
 
     if data_or_revert and request.args[1] == 'modules':
         # Lets try to reload the modules
@@ -368,17 +484,17 @@ def edit():
     edit_controller = None
     editviewlinks = None
     view_link = None
-    if filetype == 'html' and request.args >= 3:
+    if filetype == 'html' and len(request.args) >= 3:
         cfilename = os.path.join(request.args[0], 'controllers',
                                  request.args[2] + '.py')
         if os.path.exists(apath(cfilename, r=request)):
             edit_controller = URL('edit', args=[cfilename])
             view = request.args[3].replace('.html','')
-            view_link = A(T('view'),_href=URL(request.args[0],request.args[2],view))
+            view_link = URL(request.args[0],request.args[2],view)
     elif filetype == 'python' and request.args[1] == 'controllers':
         ## it's a controller file.
         ## Create links to all of the associated view files.
-        app = request.args[0]
+        app = get_app()
         viewname = os.path.splitext(request.args[2])[0]
         viewpath = os.path.join(app,'views',viewname)
         aviewpath = apath(viewpath, r=request)
@@ -403,7 +519,7 @@ def edit():
         (controller, functions) = (None, None)
 
     if 'from_ajax' in request.vars:
-        return response.json({'file_hash': file_hash, 'saved_on': saved_on, 'functions':functions, 'controller': controller, 'application': request.args[0] })
+        return response.json({'file_hash': file_hash, 'saved_on': saved_on, 'functions':functions, 'controller': controller, 'application': request.args[0], 'highlight': highlight })
     else:
 
         editarea_preferences = {}
@@ -429,31 +545,15 @@ def edit():
                     editviewlinks=editviewlinks)
 
 def resolve():
-    """  """
+    """
+    """
 
     filename = '/'.join(request.args)
-
-    if filename[-3:] == '.py':
-        filetype = 'python'
-
-    elif filename[-5:] == '.html':
-        filetype = 'html'
-
-    elif filename[-4:] == '.css':
-        filetype = 'css'
-
-    elif filename[-3:] == '.js':
-        filetype = 'js'
-    else:
-        filetype = 'text'
-
     # ## check if file is not there
-
     path = apath(filename, r=request)
-    a = open(path, 'r').readlines()
-
+    a = safe_read(path).split('\n')
     try:
-        b = open(path + '.1', 'r').readlines()
+        b = safe_read(path + '.1').split('\n')
     except IOError:
         session.flash = 'Other file, no longer there'
         redirect(URL('edit', args=request.args))
@@ -488,9 +588,9 @@ def resolve():
             return 'minus'
 
     if request.vars:
-        c = ''.join([item[2:] for (i, item) in enumerate(d) if item[0] \
-                     == ' ' or 'line%i' % i in request.vars])
-        open(path, 'w').write(c)
+        c = '\n'.join([item[2:].rstrip() for (i, item) in enumerate(d) if item[0] \
+                           == ' ' or 'line%i' % i in request.vars])
+        safe_write(path, c)
         session.flash = 'files merged'
         redirect(URL('edit', args=request.args))
     else:
@@ -511,9 +611,8 @@ def resolve():
 
 def edit_language():
     """ Edit language file """
-
+    app = get_app()
     filename = '/'.join(request.args)
-
     from gluon.languages import read_dict, write_dict
     strings = read_dict(apath(filename, r=request))
     keys = sorted(strings.keys(),lambda x,y: cmp(x.lower(), y.lower()))
@@ -530,7 +629,7 @@ def edit_language():
             elem = INPUT(_type='text', _name=name,value=strings[key],
                          _size=70,_class=_class)
         else:
-            elem = TEXTAREA(_name=name, value=strings[key], _cols=70, 
+            elem = TEXTAREA(_name=name, value=strings[key], _cols=70,
                             _rows=5, _class=_class)
 
         # Making the short circuit compatible with <= python2.4
@@ -555,26 +654,22 @@ def edit_language():
 
 def about():
     """ Read about info """
-
-    app = request.args[0]
-
+    app = get_app()
     # ## check if file is not there
-    about = open(apath('%s/ABOUT' % app, r=request), 'r').read()
-    license = open(apath('%s/LICENSE' % app, r=request), 'r').read()
-
-    return dict(app=app, about=WIKI(about), license=WIKI(license))
+    about = safe_read(apath('%s/ABOUT' % app, r=request))
+    license = safe_read(apath('%s/LICENSE' % app, r=request))
+    return dict(app=app, about=MARKMIN(about), license=MARKMIN(license))
 
 
 def design():
     """ Application design handler """
-
-    app = request.args[0]
+    app = get_app()
 
     if not response.flash and app == request.application:
         msg = T('ATTENTION: you cannot edit the running application!')
         response.flash = msg
 
-    if request.vars.pluginfile!=None:
+    if request.vars.pluginfile!=None and not isinstance(request.vars.pluginfile,str):
         filename=os.path.basename(request.vars.pluginfile.filename)
         if plugin_install(app, request.vars.pluginfile.file,
                           request, filename):
@@ -584,9 +679,12 @@ def design():
             session.flash = \
                 T('unable to create application "%s"', request.vars.filename)
         redirect(URL(r=request))
+    elif isinstance(request.vars.pluginfile,str):
+        session.flash = T('plugin not specified')
+        redirect(URL(r=request))
 
 
-    # If we have only pyc files it means that 
+    # If we have only pyc files it means that
     # we cannot design
     if os.path.exists(apath('%s/compiled' % app, r=request)):
         session.flash = \
@@ -598,7 +696,7 @@ def design():
     models=[x.replace('\\','/') for x in models]
     defines = {}
     for m in models:
-        data = open(apath('%s/models/%s' % (app, m), r=request), 'r').read()
+        data = safe_read(apath('%s/models/%s' % (app, m), r=request))
         defines[m] = regex_tables.findall(data)
         defines[m].sort()
 
@@ -607,17 +705,17 @@ def design():
     controllers = [x.replace('\\','/') for x in controllers]
     functions = {}
     for c in controllers:
-        data = open(apath('%s/controllers/%s' % (app, c), r=request), 'r').read()
+        data = safe_read(apath('%s/controllers/%s' % (app, c), r=request))
         items = regex_expose.findall(data)
         functions[c] = items
-    
+
     # Get all views
-    views = sorted(listdir(apath('%s/views/' % app, r=request), '[\w/\-]+\.\w+$'))
-    views = [x.replace('\\','/') for x in views]
+    views = sorted(listdir(apath('%s/views/' % app, r=request), '[\w/\-]+(\.\w+)+$'))
+    views = [x.replace('\\','/') for x in views if not x.endswith('.bak')]
     extend = {}
     include = {}
     for c in views:
-        data = open(apath('%s/views/%s' % (app, c), r=request), 'r').read()
+        data = safe_read(apath('%s/views/%s' % (app, c), r=request))
         items = regex_extend.findall(data)
 
         if items:
@@ -625,17 +723,17 @@ def design():
 
         items = regex_include.findall(data)
         include[c] = [i[1] for i in items]
-    
+
     # Get all modules
     modules = listdir(apath('%s/modules/' % app, r=request), '.*\.py$')
     modules = modules=[x.replace('\\','/') for x in modules]
     modules.sort()
-    
+
     # Get all static files
     statics = listdir(apath('%s/static/' % app, r=request), '[^\.#].*')
     statics = [x.replace('\\','/') for x in statics]
     statics.sort()
-    
+
     # Get all languages
     languages = listdir(apath('%s/languages/' % app, r=request), '[\w-]*\.py')
 
@@ -643,7 +741,8 @@ def design():
     cronfolder = apath('%s/cron' % app, r=request)
     if not os.path.exists(cronfolder): os.mkdir(cronfolder)
     crontab = apath('%s/cron/crontab' % app, r=request)
-    if not os.path.exists(crontab): open(crontab,'w').write('#crontab')
+    if not os.path.exists(crontab):
+        safe_write(crontab, '#crontab')
 
     plugins=[]
     def filter_plugins(items,plugins):
@@ -651,7 +750,7 @@ def design():
         plugins[:]=list(set(plugins))
         plugins.sort()
         return [item for item in items if not item.startswith('plugin_')]
-    
+
     return dict(app=app,
                 models=filter_plugins(models,plugins),
                 defines=defines,
@@ -668,7 +767,6 @@ def design():
 
 def delete_plugin():
     """ Object delete handler """
-
     app=request.args(0)
     plugin = request.args(1)
     plugin_name='plugin_'+plugin
@@ -679,11 +777,11 @@ def delete_plugin():
             for folder in ['models','views','controllers','static','modules']:
                 path=os.path.join(apath(app,r=request),folder)
                 for item in os.listdir(path):
-                    if item.startswith(plugin_name): 
+                    if item.startswith(plugin_name):
                         filename=os.path.join(path,item)
                         if os.path.isdir(filename):
                             shutil.rmtree(filename)
-                        else:                            
+                        else:
                             os.unlink(filename)
             session.flash = T('plugin "%(plugin)s" deleted',
                               dict(plugin=plugin))
@@ -695,15 +793,14 @@ def delete_plugin():
 
 def plugin():
     """ Application design handler """
-
-    app = request.args(0)
+    app = get_app()
     plugin = request.args(1)
 
     if not response.flash and app == request.application:
         msg = T('ATTENTION: you cannot edit the running application!')
         response.flash = msg
 
-    # If we have only pyc files it means that 
+    # If we have only pyc files it means that
     # we cannot design
     if os.path.exists(apath('%s/compiled' % app, r=request)):
         session.flash = \
@@ -715,7 +812,7 @@ def plugin():
     models=[x.replace('\\','/') for x in models]
     defines = {}
     for m in models:
-        data = open(apath('%s/models/%s' % (app, m), r=request), 'r').read()
+        data = safe_read(apath('%s/models/%s' % (app, m), r=request))
         defines[m] = regex_tables.findall(data)
         defines[m].sort()
 
@@ -724,47 +821,46 @@ def plugin():
     controllers = [x.replace('\\','/') for x in controllers]
     functions = {}
     for c in controllers:
-        data = open(apath('%s/controllers/%s' % (app, c), r=request), 'r').read()
+        data = safe_read(apath('%s/controllers/%s' % (app, c), r=request))
         items = regex_expose.findall(data)
         functions[c] = items
-    
+
     # Get all views
     views = sorted(listdir(apath('%s/views/' % app, r=request), '[\w/\-]+\.\w+$'))
     views = [x.replace('\\','/') for x in views]
     extend = {}
     include = {}
     for c in views:
-        data = open(apath('%s/views/%s' % (app, c), r=request), 'r').read()
+        data = safe_read(apath('%s/views/%s' % (app, c), r=request))
         items = regex_extend.findall(data)
-
         if items:
             extend[c] = items[0][1]
 
         items = regex_include.findall(data)
         include[c] = [i[1] for i in items]
-    
+
     # Get all modules
     modules = listdir(apath('%s/modules/' % app, r=request), '.*\.py$')
     modules = modules=[x.replace('\\','/') for x in modules]
     modules.sort()
-    
+
     # Get all static files
     statics = listdir(apath('%s/static/' % app, r=request), '[^\.#].*')
     statics = [x.replace('\\','/') for x in statics]
     statics.sort()
-    
+
     # Get all languages
     languages = listdir(apath('%s/languages/' % app, r=request), '[\w-]*\.py')
 
     #Get crontab
     crontab = apath('%s/cron/crontab' % app, r=request)
-    if not os.path.exists(crontab): open(crontab,'w').write('#crontab')
-    
+    if not os.path.exists(crontab):
+        safe_write(crontab, '#crontab')
 
     def filter_plugins(items):
         regex=re.compile('^plugin_'+plugin+'(/.*|\..*)?$')
         return [item for item in items if regex.match(item)]
-    
+
     return dict(app=app,
                 models=filter_plugins(models),
                 defines=defines,
@@ -781,8 +877,8 @@ def plugin():
 
 def create_file():
     """ Create files handler """
-
     try:
+        app = get_app(name=request.vars.location.split('/')[0])
         path = apath(request.vars.location, r=request)
         filename = re.sub('[^\w./-]+', '_', request.vars.filename)
 
@@ -795,7 +891,7 @@ def create_file():
             app = path.split('/')[-3]
             path=os.path.join(apath(app, r=request),'languages',filename)
             if not os.path.exists(path):
-                open(path,'w').write('')
+                safe_write(path, '')
             findT(apath(app, r=request), filename[:-3])
             session.flash = T('language file "%(filename)s" created/updated',
                               dict(filename=filename))
@@ -809,7 +905,6 @@ def create_file():
             if len(filename) == 3:
                 raise SyntaxError
 
-            fn = re.sub('\W', '', filename[:-3].lower())
             text = '# coding: utf8\n'
 
         elif path[-13:] == '/controllers/':
@@ -829,17 +924,25 @@ def create_file():
             # Handle template (html) views
             if filename.find('.')<0:
                 filename += '.html'
-            
+            extension = filename.split('.')[-1].lower()
+
             if len(filename) == 5:
                 raise SyntaxError
 
             msg = T('This is the %(filename)s template',
-                    dict(filename=filename))
-            text = dedent("""
+                    dict(filename=filename))            
+            if extension == 'html':
+                text = dedent("""
                    {{extend 'layout.html'}}
                    <h1>%s</h1>
                    {{=BEAUTIFY(response._vars)}}""" % msg)
-
+            else:
+                generic = os.path.join(path,'generic.'+extension)
+                if os.path.exists(generic):
+                    text = read_file(generic)
+                else:
+                    text = ''
+                
         elif path[-9:] == '/modules/':
             if request.vars.plugin and not filename.startswith('plugin_%s/' % request.vars.plugin):
                 filename = 'plugin_%s/%s' % (request.vars.plugin, filename)
@@ -851,14 +954,9 @@ def create_file():
                 raise SyntaxError
 
             text = dedent("""
-                   #!/usr/bin/env python 
-                   # coding: utf8 
-                   from gluon.html import *
-                   from gluon.http import *
-                   from gluon.validators import *
-                   from gluon.sqlhtml import *
-                   # request, response, session, cache, T, db(s) 
-                   # must be passed and cannot be imported!""")
+                   #!/usr/bin/env python
+                   # coding: utf8
+                   from gluon import *\n""")
 
         elif path[-8:] == '/static/':
             if request.vars.plugin and not filename.startswith('plugin_%s/' % request.vars.plugin):
@@ -876,7 +974,7 @@ def create_file():
         if os.path.exists(full_filename):
             raise SyntaxError
 
-        open(full_filename, 'w').write(text)
+        safe_write(full_filename, text)
         session.flash = T('file "%(filename)s" created',
                           dict(filename=full_filename[len(path):]))
         redirect(URL('edit',
@@ -892,6 +990,8 @@ def upload_file():
     """ File uploading handler """
 
     try:
+        filename = None
+        app = get_app(name=request.vars.location.split('/')[0])
         path = apath(request.vars.location, r=request)
 
         if request.vars.filename:
@@ -920,31 +1020,84 @@ def upload_file():
         if not os.path.exists(dirpath):
             os.makedirs(dirpath)
 
-        open(filename, 'wb').write(request.vars.file.file.read())
+        safe_write(filename, request.vars.file.file.read(), 'wb')
         session.flash = T('file "%(filename)s" uploaded',
                           dict(filename=filename[len(path):]))
     except Exception:
-        session.flash = T('cannot upload file "%(filename)s"',
-                          dict(filename[len(path):]))
+        if filename:
+            d = dict(filename = filename[len(path):])
+        else:
+            d = dict(filename = 'unkown')
+        session.flash = T('cannot upload file "%(filename)s"', d)
 
     redirect(request.vars.sender)
 
 
 def errors():
     """ Error handler """
+    import operator
+    import os
+    import pickle
+    import hashlib
 
-    app = request.args[0]
+    app = get_app()
 
-    for item in request.vars:
-        if item[:7] == 'delete_':
-            os.unlink(apath('%s/errors/%s' % (app, item[7:]), r=request))
+    method = request.args(1) or 'new'
 
-    func = lambda p: os.stat(apath('%s/errors/%s' % (app, p), r=request)).st_mtime
-    tickets = sorted(listdir(apath('%s/errors/' % app, r=request), '^\w.*'),
-                     key=func,
-                     reverse=True)
 
-    return dict(app=app, tickets=tickets)
+    if method == 'new':
+        errors_path = apath('%s/errors' % app, r=request)
+
+        delete_hashes = []
+        for item in request.vars:
+            if item[:7] == 'delete_':
+                delete_hashes.append(item[7:])
+
+        hash2error = dict()
+
+        for fn in listdir(errors_path, '^\w.*'):
+            fullpath = os.path.join(errors_path, fn)
+            if not os.path.isfile(fullpath): continue
+            try:
+                fullpath_file = open(fullpath, 'r')
+                try:
+                    error = pickle.load(fullpath_file)
+                finally:
+                    fullpath_file.close()
+            except IOError:
+                continue
+
+            hash = hashlib.md5(error['traceback']).hexdigest()
+
+            if hash in delete_hashes:
+                os.unlink(fullpath)
+            else:
+                try:
+                    hash2error[hash]['count'] += 1
+                except KeyError:
+                    error_lines = error['traceback'].split("\n")
+                    last_line = error_lines[-2]
+                    error_causer = os.path.split(error['layer'])[1]
+                    hash2error[hash] = dict(count=1, pickel=error,
+                                            causer=error_causer,
+                                            last_line=last_line,
+                                            hash=hash,ticket=fn)
+
+        decorated = [(x['count'], x) for x in hash2error.values()]
+        decorated.sort(key=operator.itemgetter(0), reverse=True)
+
+        return dict(errors = [x[1] for x in decorated], app=app, method=method)
+    else:
+        for item in request.vars:
+            if item[:7] == 'delete_':
+                os.unlink(apath('%s/errors/%s' % (app, item[7:]), r=request))
+        func = lambda p: os.stat(apath('%s/errors/%s' % \
+                                           (app, p), r=request)).st_mtime
+        tickets = sorted(listdir(apath('%s/errors/' % app, r=request), '^\w.*'),
+                         key=func,
+                         reverse=True)
+
+        return dict(app=app, tickets=tickets, method=method)
 
 
 def make_link(path):
@@ -954,8 +1107,8 @@ def make_link(path):
     if os.path.isabs(tryFile) and os.path.isfile(tryFile):
         (folder, filename) = os.path.split(tryFile)
         (base, ext) = os.path.splitext(filename)
-        app = request.args[0]
-        
+        app = get_app()
+
         editable = {'controllers': '.py', 'models': '.py', 'views': '.html'}
         for key in editable.keys():
             check_extension = folder.endswith("%s/%s" % (app,key))
@@ -1014,7 +1167,8 @@ def ticket():
         session.flash = T('invalid ticket')
         redirect(URL('site'))
 
-    app = request.args[0]
+    app = get_app()
+    myversion = request.env.web2py_version
     ticket = request.args[1]
     e = RestrictedError()
     e.load(request, app, ticket)
@@ -1025,16 +1179,20 @@ def ticket():
                 traceback=(e.traceback and TRACEBACK(e.traceback)),
                 snapshot=e.snapshot,
                 code=e.code,
-                layer=e.layer)
+                layer=e.layer,
+                myversion=myversion)
 
+def error():
+    """ Generate a ticket (for testing) """
+    raise RuntimeError('admin ticket generator at your service')
 
 def update_languages():
     """ Update available languages """
 
-    app = request.args[0]
+    app = get_app()
     update_all_languages(apath(app, r=request))
     session.flash = T('Language files (static strings) updated')
-    redirect(URL('design',args=app))
+    redirect(URL('design',args=app,anchor='languages'))
 
 def twitter():
     session.forget()
@@ -1042,8 +1200,24 @@ def twitter():
     import gluon.tools
     import gluon.contrib.simplejson as sj
     try:
-        page = gluon.tools.fetch('http://twitter.com/web2py?format=json')
-        return sj.loads(page)['#timeline']
+        if TWITTER_HASH:
+            page = gluon.tools.fetch('http://twitter.com/%s?format=json'%TWITTER_HASH)
+            return sj.loads(page)['#timeline']
+        else:
+            return 'disabled'
     except Exception, e:
-        return DIV(T('Unable to download because'),PRE(str(e)))
+        return DIV(T('Unable to download because:'),BR(),str(e))
 
+def user():
+    if MULTI_USER_MODE:
+        if not db(db.auth_user).count():
+            auth.settings.registration_requires_approval = False            
+        return dict(form=auth())
+    else:
+        return dict(form=T("Disabled"))
+
+def reload_routes():
+    """ Reload routes.py """
+    import gluon.rewrite
+    gluon.rewrite.load()
+    redirect(URL('site'))

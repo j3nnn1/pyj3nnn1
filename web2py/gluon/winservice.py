@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This file is part of web2py Web Framework (Copyrighted, 2007-2010).
+This file is part of the web2py Web Framework
 Developed by Massimo Di Pierro <mdipierro@cs.depaul.edu> and
 Limodou <limodou@gmail.com>.
-License: GPL v2
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
 
 This makes uses of the pywin32 package
 (http://sourceforge.net/projects/pywin32/).
@@ -17,15 +17,18 @@ import time
 import os
 import sys
 import traceback
-import win32serviceutil
-import win32service
-import win32event
+try:
+    import win32serviceutil
+    import win32service
+    import win32event
+except:
+    if os.name == 'nt':
+        print "Warning, winservice is unable to install the Mark Hammond Win32 extensions"
 import servicemanager
 import _winreg
 from fileutils import up
 
 __all__ = ['web2py_windows_service_handler']
-
 
 class Service(win32serviceutil.ServiceFramework):
 
@@ -83,12 +86,15 @@ class Web2pyService(Service):
             h = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE,
                                 r'SYSTEM\CurrentControlSet\Services\%s'
                                  % self._svc_name_)
-            cls = _winreg.QueryValue(h, 'PythonClass')
+            try:
+                cls = _winreg.QueryValue(h, 'PythonClass')
+            finally:
+                _winreg.CloseKey(h)
             dir = os.path.dirname(cls)
             os.chdir(dir)
             return True
         except:
-            self.log("Can't change to web2py working path, server is stopped")
+            self.log("Can't change to web2py working path; server is stopped")
             return False
 
     def start(self):
@@ -100,6 +106,11 @@ class Web2pyService(Service):
         else:
             opt_mod = self._exe_args_
         options = __import__(opt_mod, [], [], '')
+        if True: # legacy support for old options files, which have only (deprecated) numthreads
+            if hasattr(options, 'numthreads') and not hasattr(options, 'minthreads'):
+                options.minthreads = options.numthreads
+            if not hasattr(options, 'minthreads'): options.minthreads = None
+            if not hasattr(options, 'maxthreads'): options.maxthreads = None
         import main
         self.server = main.HttpServer(
             ip=options.ip,
@@ -110,7 +121,8 @@ class Web2pyService(Service):
             profiler_filename=options.profiler_filename,
             ssl_certificate=options.ssl_certificate,
             ssl_private_key=options.ssl_private_key,
-            numthreads=options.numthreads,
+            min_threads=options.minthreads,
+            max_threads=options.maxthreads,
             server_name=options.server_name,
             request_queue_size=options.request_queue_size,
             timeout=options.timeout,
@@ -149,3 +161,6 @@ def web2py_windows_service_handler(argv=None, opt_file='options'):
 
 if __name__ == '__main__':
     web2py_windows_service_handler()
+
+
+

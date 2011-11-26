@@ -142,3 +142,12 @@ success!
 DELETE FROM etiquetas;
 DELETE FROM sqlite_sequence WHERE name='etiquetas';
 success!
+timestamp: 2011-11-24T01:11:28.962307
+CREATE TABLE auth_cas(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES auth_user(id) ON DELETE CASCADE,
+    created_on TIMESTAMP,
+    url CHAR(512),
+    uuid CHAR(512)
+);
+success!

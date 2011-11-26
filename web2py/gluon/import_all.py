@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-This file is part of web2py Web Framework (Copyrighted, 2007-2010).
-Developed by Massimo Di Pierro <mdipierro@cs.depaul.edu>.
-License: GPL v2
+This file is part of the web2py Web Framework
+Copyrighted by Massimo Di Pierro <mdipierro@cs.depaul.edu>
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
 
 This file is not strictly required by web2py. It is used for three purposes:
 
@@ -37,7 +37,7 @@ base_modules = ['aifc', 'anydbm', 'array', 'asynchat', 'asyncore', 'atexit',
                 'ftplib', 'functools', 'gc', 'getopt', 'getpass', 'gettext',
                 'glob', 'gzip', 'hashlib', 'heapq', 'hmac', 'hotshot',
                 'hotshot.stats', 'htmlentitydefs', 'htmllib', 'HTMLParser',
-                'httplib', 'imageop', 'imaplib', 'imghdr', 'imp', 'inspect',
+                'httplib', 'imaplib', 'imghdr', 'imp', 'inspect',
                 'itertools', 'keyword', 'linecache', 'locale', 'logging',
                 'macpath', 'mailbox', 'mailcap', 'marshal', 'math',
                 'mimetools', 'mimetypes', 'mmap', 'modulefinder', 'mutex',
@@ -84,18 +84,17 @@ alert_dependency = ['hashlib', 'uuid']
 # Now we remove the blacklisted modules if we are using the stated
 # python version.
 #
-# List of modules deprecated in python2.6 that are in the above set
+# List of modules deprecated in Python 2.6 or 2.7 that are in the above set
 py26_deprecated = ['mhlib', 'multifile', 'mimify', 'sets', 'MimeWriter']
+py27_deprecated = [] # ['optparse'] but we need it for now
 
-if python_version == '2.6':
+if python_version >= '2.6':
     base_modules += ['json', 'multiprocessing']
     base_modules = list(set(base_modules).difference(set(py26_deprecated)))
 
-# Example for python 2.7 (Uncomment if need)
-#py27_deprecated = ['put_the_deprecated_module_here']
-
-#if python_version == '2.7':
-#    base_modules = list(set(base_modules).difference(set(py27_deprecated)))
+if python_version >= '2.7':
+    base_modules += ['argparse']
+    base_modules = list(set(base_modules).difference(set(py27_deprecated)))
 
 # Now iterate in the base_modules, trying to do the import
 for module in base_modules + contributed_modules:
@@ -108,3 +107,6 @@ for module in base_modules + contributed_modules:
             msg += "Try the following command: "
             msg += "easy_install-%(python_version)s -U %(module)s" % locals()
             raise ImportError, msg
+
+
+

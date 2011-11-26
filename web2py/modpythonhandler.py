@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
+This file is part of the web2py Web Framework
+Copyrighted by Massimo Di Pierro <mdipierro@cs.depaul.edu>
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
+
 WSGI wrapper for mod_python. Requires Python 2.2 or greater.
 Part of CherryPy mut modified by Massimo Di Pierro (2008) for web2py
 
@@ -29,10 +33,8 @@ import os
 from mod_python import apache
 
 path = os.path.dirname(os.path.abspath(__file__))
-if not path in sys.path:
-    sys.path.append(path)
-    sys.path.append(os.path.join(path,'site-packages'))
 os.chdir(path)
+sys.path = [path]+[p for p in sys.path if not p==path]
 
 import gluon.main
 
@@ -220,3 +222,4 @@ def handler(req):
 
     Handler(req).run(gluon.main.wsgibase)
     return apache.OK
+

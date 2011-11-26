@@ -12,7 +12,7 @@ SLEEP_MINUTES = 5
 
 while 1: # Infinite loop
     now = time() # get current Unix timestamp
-    
+
     for row in db().select(db.web2py_session_welcome.ALL):
         t = row.modified_datetime
         # Convert to a Unix timestamp
@@ -21,5 +21,6 @@ while 1: # Infinite loop
             del db.web2py_session_welcome[row.id]
 
     db.commit() # Write changes to database
-    
+
     sleep(SLEEP_MINUTES * 60)
+

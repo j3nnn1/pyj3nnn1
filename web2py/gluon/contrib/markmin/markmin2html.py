@@ -1,7 +1,8 @@
-#!/usr/bin/env python                                                                                                        # created my Massimo Di Pierro
+#!/usr/bin/env python 
+# created my Massimo Di Pierro
 # license MIT/BSD/GPL
 import re
-import cgi    
+import cgi
 
 __all__ = ['render', 'markmin2html']
 
@@ -10,7 +11,7 @@ __doc__ = """
 
 ## About
 
-This is a new markup language that we call markmin designed to produce high quality scientific papers and books and also put them online. We provide serializers for html, latex and pdf. It is implemented in the ``markmin2html`` function in the ``markmin2html.py``. 
+This is a new markup language that we call markmin designed to produce high quality scientific papers and books and also put them online. We provide serializers for html, latex and pdf. It is implemented in the ``markmin2html`` function in the ``markmin2html.py``.
 
 Example of usage:
 
@@ -37,7 +38,7 @@ We wanted a markup language with the following requirements:
 - can add anchors
 - does not use _ for markup (since it creates odd behavior)
 - automatically links urls
-- fast 
+- fast
 - easy to extend
 - supports latex and pdf including references
 - allows to describe the markup in the markup (this document is generated from markmin syntax)
@@ -63,8 +64,8 @@ markmin2html.py and markmin2latex.py are single files and have no web2py depende
 ``# title``                | **title**
 ``## section``             | **section**
 ``### subsection``         | **subsection**
-``**bold**``               | **bold** 
-``''italic''``             | ''italic'' 
+``**bold**``               | **bold**
+``''italic''``             | ''italic''
 ``!`!`verbatim`!`!``       | ``verbatim``
 ``http://google.com``      | http://google.com
 ``[[click me #myanchor]]`` | [[click me #myanchor]]
@@ -94,10 +95,10 @@ This paragraph has an image aligned to the right with a width of 200px. Its is p
 - Mouse
 ``
 
-is rendered as 
+is rendered as
 - Dog
 - Cat
-- Mouse 
+- Mouse
 
 Two new lines between items break the list in two lists.
 
@@ -175,7 +176,7 @@ Markmin also supports the <video> and <audio> html5 tags using the notation:
 [[title link audio]]
 ``
 
-### Latex
+### Latex and other extensions
 
 Formulas can be embedded into HTML with ``$````$``formula``$````$``.
 You can use Google charts to render the formula:
@@ -184,6 +185,26 @@ You can use Google charts to render the formula:
 >>> LATEX = '<img src="http://chart.apis.google.com/chart?cht=tx&chl=%s" align="ce\
 nter"/>'
 >>> markmin2html(text,{'latex':lambda code: LATEX % code.replace('"','\"')})
+``
+
+### Code with syntax highlighting
+
+This requires a syntax highlighting tool, such as the web2py CODE helper.
+
+``
+>>> extra={'code_cpp':lambda text: CODE(text,language='cpp').xml(),
+           'code_java':lambda text: CODE(text,language='java').xml(),
+           'code_python':lambda text: CODE(text,language='python').xml(),
+           'code_html':lambda text: CODE(text,language='html').xml()}
+>>> markmin2html(text,extra=extra)
+``
+
+Code can now be marked up as in this example:
+
+``
+!`!`
+<html><body>example</body></html>
+!`!`:code_html
 ``
 
 ### Citations and References
@@ -215,6 +236,7 @@ As shown in Ref.!`!`mdipierro`!`!:cite
 """
 
 META = 'META'
+LATEX = '<img src="http://chart.apis.google.com/chart?cht=tx&chl=%s" align="center"/>'
 regex_newlines = re.compile('(\n\r)|(\r\n)')
 regex_dd=re.compile('\$\$(?P<latex>.*?)\$\$')
 regex_code = re.compile('('+META+')|(``(?P<t>.*?)``(:(?P<c>\w+))?)',re.S)
@@ -243,6 +265,7 @@ regex_video = re.compile('\[\[(?P<t>.*?) +(?P<k>\S+) +video\]\]')
 regex_audio = re.compile('\[\[(?P<t>.*?) +(?P<k>\S+) +audio\]\]')
 regex_link = re.compile('\[\[(?P<t>.*?) +(?P<k>\S+)\]\]')
 regex_link_popup = re.compile('\[\[(?P<t>.*?) +(?P<k>\S+) popup\]\]')
+regex_link_no_anchor = re.compile('\[\[ +(?P<k>\S+)\]\]')
 regex_auto = re.compile('(?<!["\w\>])(?P<k>\w+://[\w\.\-\+\?&%\/]+)',re.M)
 
 def render(text,extra={},allowed={},sep='p'):
@@ -254,7 +277,7 @@ def render(text,extra={},allowed={},sep='p'):
     - allowed is a dictionary of list of allowed classes like
       allowed = dict(code=('python','cpp','java'))
     - sep can be 'p' to separate text in <p>...</p>
-      or can be 'br' to separate text using <br /> 
+      or can be 'br' to separate text using <br />
 
 
     >>> render('this is\\n# a section\\nparagraph')
@@ -291,14 +314,14 @@ def render(text,extra={},allowed={},sep='p'):
     >>> render('[[this is a link http://example.com]]')
     '<p><a href="http://example.com">this is a link</a></p>'
 
-    >>> render('[[this is an image http://example.com left]]')    
+    >>> render('[[this is an image http://example.com left]]')
     '<p><img src="http://example.com" alt="this is an image" align="left" /></p>'
     >>> render('[[this is an image http://example.com left 200px]]')
     '<p><img src="http://example.com" alt="this is an image" align="left" width="200px" /></p>'
 
-    >>> render('[[this is an image http://example.com video]]')    
+    >>> render('[[this is an image http://example.com video]]')
     '<p><video src="http://example.com" controls></video></p>'
-    >>> render('[[this is an image http://example.com audio]]')    
+    >>> render('[[this is an image http://example.com audio]]')
     '<p><audio src="http://example.com" controls></audio></p>'
 
     >>> render('[[this is a **link** http://example.com]]')
@@ -309,6 +332,7 @@ def render(text,extra={},allowed={},sep='p'):
     >>> render(r"$$\int_a^b sin(x)dx$$")
     '<code class="latex">\\\\int_a^b sin(x)dx</code>'
     """
+    text = str(text or '')
     #############################################################
     # replace all blocks marked with ``...``:class with META
     # store them into segments they will be treated as code
@@ -337,7 +361,7 @@ def render(text,extra={},allowed={},sep='p'):
     text = cgi.escape(text)
     for regex, sub in regex_maps:
         text = regex.sub(sub,text)
- 
+
     #############################################################
     # process tables and blockquotes
     #############################################################
@@ -363,9 +387,10 @@ def render(text,extra={},allowed={},sep='p'):
     text = regex_video.sub('<video src="\g<k>" controls></video>', text)
     text = regex_audio.sub('<audio src="\g<k>" controls></audio>', text)
     text = regex_link_popup.sub('<a href="\g<k>" target="_blank">\g<t></a>', text)
+    text = regex_link_no_anchor.sub('<a href="\g<k>">\g<k></a>', text)
     text = regex_link.sub('<a href="\g<k>">\g<t></a>', text)
     text = regex_auto.sub('<a href="\g<k>">\g<k></a>', text)
-    
+
     #############################################################
     # deal with paragraphs (trick <<ul, <<ol, <<table, <<h1, etc)
     # the << indicates that there should NOT be a new paragraph
@@ -373,7 +398,9 @@ def render(text,extra={},allowed={},sep='p'):
     #############################################################
     items = [item.strip() for item in text.split('\n\n')]
     if sep=='p':
-        text = ''.join(p[:2]!='<<' and p!=META and '<p>%s</p>'%p or '%s'%p for p in items if p)
+        text = ''.join(
+            (p[:2]!='<<' and p!=META and '<p>%s</p>'%p or '%s'%p) \
+                for p in items if p.strip())
     elif sep=='br':
         text = '<br />'.join(items)
 
@@ -381,7 +408,7 @@ def render(text,extra={},allowed={},sep='p'):
     # finally get rid of <<
     #############################################################
     text=text.replace('<<','<')
-    
+
     #############################################################
     # process all code text
     #############################################################
@@ -396,8 +423,11 @@ def render(text,extra={},allowed={},sep='p'):
                 if code[-1:]=='\n': code=code[:-1]
                 html = extra[b](code)
             elif b=='cite':
-                html = '['+','.join('<a href="#%s" class="%s">%s</a>' % (d,b,d) \
-                                        for d in cgi.escape(code).split(','))+']'
+                html = '['+','.join('<a href="#%s" class="%s">%s</a>' \
+                      % (d,b,d) \
+                      for d in cgi.escape(code).split(','))+']'
+            elif b=='latex':
+                html = LATEX % code.replace('"','\"').replace('\n',' ')
             elif code[:1]=='\n' or code[-1:]=='\n':
                 if code[:1]=='\n': code=code[1:]
                 if code[-1:]=='\n': code=code[:-1]
@@ -419,6 +449,11 @@ if __name__ == '__main__':
     if sys.argv[1:2]==['-h']:
         print '<html><body>'+markmin2html(__doc__)+'</body></html>'
     elif len(sys.argv)>1:
-        print '<html><body>'+markmin2html(open(sys.argv[1],'r').read())+'</body></html>'
+        fargv = open(sys.argv[1],'r')
+        try:
+            print '<html><body>'+markmin2html(fargv.read())+'</body></html>'
+        finally:
+            fargv.close()
     else:
         doctest.testmod()
+

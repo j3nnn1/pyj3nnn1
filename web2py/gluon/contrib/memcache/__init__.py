@@ -1,5 +1,5 @@
 from gluon.contrib.memcache.memcache import Client
-from gluon.cache import CacheAbstract 
+from gluon.cache import CacheAbstract
 import time
 
 """
@@ -15,9 +15,11 @@ locker = thread.allocate_lock()
 
 def MemcacheClient(*a, **b):
     locker.acquire()
-    if not hasattr(MemcacheClient, '__mc_instance'):
-        MemcacheClient.__mc_instance = _MemcacheClient(*a, **b)
-    locker.release()
+    try:
+        if not hasattr(MemcacheClient, '__mc_instance'):
+            MemcacheClient.__mc_instance = _MemcacheClient(*a, **b)
+    finally:
+        locker.release()
     return MemcacheClient.__mc_instance
 
 class _MemcacheClient(Client):
@@ -62,11 +64,11 @@ class _MemcacheClient(Client):
 
     def increment(self, key, value=1, time_expire=300):
         newKey = self.__keyFormat__(key)
-        obj = self.get(newKey)
+        obj = Client.get(self, newKey)
         if obj:
             return Client.incr(self, newKey, value)
         else:
-            self.set(newKey, value, time_expire)
+            Client.set(self, newKey, value, time_expire)
             return value
 
     def set(self, key, value, time_expire=300):
@@ -83,4 +85,5 @@ class _MemcacheClient(Client):
 
     def __keyFormat__(self, key):
         return '%s/%s' % (self.request.application, key.replace(' ', '_'))
+
 

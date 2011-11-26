@@ -1,9 +1,8 @@
 {{extend 'layout.html'}}
 
-<center>
+{{block sectionclass}}delete{{end}}
+
+<div class="center">
 <h2>{{=T('Are you sure you want to delete file "%s"?', filename)}}</h2>
-<table><tr>
-<td>{{=FORM(INPUT(_type='submit',_name='nodelete',_value=T('NO')),INPUT(_type='hidden',_name='sender',_value=sender))}}</td>
-<td>{{=FORM(INPUT(_type='submit',_name='delete',_value=T('YES')),INPUT(_type='hidden',_name='sender',_value=sender))}}</td>
-</tr></table>
-</center>
+<p>{{=FORM(INPUT(_type='submit',_name='nodelete',_value=T('Abort')),INPUT(_type='hidden',_name='sender',_value=sender), _class="inline")}}{{=FORM(INPUT(_type='submit',_name='delete',_value=T('Delete')),INPUT(_type='hidden',_name='sender',_value=sender), _class="inline")}}</p>
+</div>

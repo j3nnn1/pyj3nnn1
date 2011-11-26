@@ -1,7 +1,7 @@
 #!/bin/bash
 # the script should be run
 # from WEB2PY root directory
- 
+
 prog=`basename $0`
 
 cd `pwd`
@@ -13,7 +13,7 @@ function web2py_start {
   if [ $pid -ne $$ ]
   then
     echo "WEB2PY has been started."
-  fi 
+  fi
 }
 function web2py_stop {
   kill -15 `pgrep $prog | grep -v $$` 2>/dev/null
@@ -41,3 +41,4 @@ case "$1" in
 esac
 
 exit 0
+

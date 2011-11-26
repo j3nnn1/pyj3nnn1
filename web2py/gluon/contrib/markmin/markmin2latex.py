@@ -2,8 +2,10 @@
 # created my Massimo Di Pierro
 # license MIT/BSD/GPL
 import re
-import cgi    
+import cgi
 import sys
+import doctest
+from optparse import OptionParser
 
 __all__ = ['render','markmin2latex']
 
@@ -19,7 +21,7 @@ regex_maps = [
     (re.compile("''(?P<t>[^\s']+( +[^\s']+)*)''"),'{\\it \g<t>}'),
     (re.compile('^#{6} (?P<t>[^\n]+)',re.M),'\n\n{\\\\bf \g<t>}\n'),
     (re.compile('^#{5} (?P<t>[^\n]+)',re.M),'\n\n{\\\\bf \g<t>}\n'),
-    (re.compile('^#{4} (?P<t>[^\n]+)',re.M),'\n\n\\\\goodbreak\\subsubsection*{\g<t>}\n'),
+    (re.compile('^#{4} (?P<t>[^\n]+)',re.M),'\n\n\\\\goodbreak\\subsubsection{\g<t>}\n'),
     (re.compile('^#{3} (?P<t>[^\n]+)',re.M),'\n\n\\\\goodbreak\\subsection{\g<t>}\n'),
     (re.compile('^#{2} (?P<t>[^\n]+)',re.M),'\n\n\\\\goodbreak\\section{\g<t>}\n'),
     (re.compile('^#{1} (?P<t>[^\n]+)',re.M),''),
@@ -54,6 +56,7 @@ def render(text,extra={},allowed={},sep='p',image_mapper=lambda x:x):
     # replace all blocks marked with ``...``:class with META
     # store them into segments they will be treated as code
     #############################################################
+    text = str(text or '')
     segments, i = [], 0
     text = regex_dd.sub('``\g<latex>``:latex ',text)
     text = regex_newlines.sub('\n',text)
@@ -67,14 +70,14 @@ def render(text,extra={},allowed={},sep='p',image_mapper=lambda x:x):
             c = item.group('c') or ''
             if 'code' in allowed and not c in allowed['code']: c = ''
             code = item.group('t').replace('!`!','`')
-            segments.append((code,c))            
+            segments.append((code,c))
             text = text[:item.start()]+META+text[item.end():]
         i=item.start()+3
 
 
     #############################################################
     # do h1,h2,h3,h4,h5,h6,b,i,ol,ul and normalize spaces
-    #############################################################    
+    #############################################################
 
     title = regex_title.search(text)
     if not title: title='Title'
@@ -94,7 +97,7 @@ def render(text,extra={},allowed={},sep='p',image_mapper=lambda x:x):
         text = regex.sub(sub,text)
     text=text.replace('#','\\#')
     text=text.replace('`',"'")
- 
+
     #############################################################
     # process tables and blockquotes
     #############################################################
@@ -107,7 +110,7 @@ def render(text,extra={},allowed={},sep='p',image_mapper=lambda x:x):
         if ' | ' in content:
             rows = content.replace('\n','\\\\\n').replace(' | ',' & ')
             row0,row2 = rows.split('\\\\\n',1)
-            cols=row0.count(' & ')+1            
+            cols=row0.count(' & ')+1
             cal='{'+''.join('l' for j in range(cols))+'}'
             tabular = '\\begin{center}\n{\\begin{tabular}'+cal+'\\hline\n' + row0+'\\\\ \\hline\n'+row2 + ' \\\\ \\hline\n\\end{tabular}}\n\\end{center}'
             if row2.count('\n')>20: tabular='\\newpage\n'+tabular
@@ -126,7 +129,7 @@ def render(text,extra={},allowed={},sep='p',image_mapper=lambda x:x):
     text = regex_image_width.sub(sub,text)
     text = regex_image.sub(sub,text)
 
-    text = regex_link.sub('{\\\\footnotesize\\href{\g<k>}{\g<t>}}', text)    
+    text = regex_link.sub('{\\\\footnotesize\\href{\g<k>}{\g<t>}}', text)
     text = regex_commas.sub('\g<t>',text)
     text = regex_noindent.sub('\n\\\\noindent \g<t>',text)
 
@@ -135,10 +138,10 @@ def render(text,extra={},allowed={},sep='p',image_mapper=lambda x:x):
     while True:
         match=regex.search(text)
         if not match: break
-        text=text[:match.start()]+text[match.start()+1:]        
+        text=text[:match.start()]+text[match.start()+1:]
     text = regex_quote_left.sub('``',text)
     text = regex_quote_right.sub("''",text)
-    
+
     #############################################################
     # process all code text
     #############################################################
@@ -196,10 +199,11 @@ def render(text,extra={},allowed={},sep='p',image_mapper=lambda x:x):
     text =  text.replace(' ~\\cite','~\\cite')
     return text, title, authors
 
-HEADER = """
+WRAPPER = """
 \\documentclass[12pt]{article}
 \\usepackage{hyperref}
 \\usepackage{listings}
+\\usepackage{upquote}
 \\usepackage{color}
 \\usepackage{graphicx}
 \\usepackage{grffile}
@@ -208,7 +212,7 @@ HEADER = """
 \\definecolor{dg}{rgb}{0.3,0.3,0.3}
 \\def\\ft{\\small\\tt}
 \\lstset{
-   basicstyle=\\footnotesize, 
+   basicstyle=\\footnotesize,
    breaklines=true, basicstyle=\\ttfamily\\color{black}\\footnotesize,
    keywordstyle=\\bf\\ttfamily,
    commentstyle=\\it\\ttfamily,
@@ -217,31 +221,65 @@ HEADER = """
    backgroundcolor=\\color{lg}, tabsize=4, showspaces=false,
    showstringspaces=false
 }
-\\title{%s}
-\\author{%s}
+\\title{%(title)s}
+\\author{%(author)s}
 \\begin{document}
 \\maketitle
 \\tableofcontents
 \\newpage
-"""
-FOOTER = """
+%(body)s
 \\end{document}
 """
 
-def markmin2latex(data, image_mapper=lambda x:x):
-    latex, title, authors = render(data,image_mapper=image_mapper)
+def markmin2latex(data, image_mapper=lambda x:x, extra={},
+                  wrapper=WRAPPER):
+    body, title, authors = render(data, extra=extra, image_mapper=image_mapper)
     author = '\n\\and\n'.join(a.replace('\n','\\\\\n\\footnotesize ') for a in authors)
-    return HEADER % (title, author) + latex + FOOTER    
-
+    return wrapper % dict(title=title, author=author, body=body)
 
 if __name__ == '__main__':
-    import sys
-    import doctest
-    import markmin2html
-    if sys.argv[1:2]==['-h']:
-        print markmin2latex(markmin2html.__doc__)
-    elif len(sys.argv)>1:
-        print markmin2latex(open(sys.argv[1],'r').read())
-    else:
+    parser = OptionParser()
+    parser.add_option("-i", "--info", dest="info",
+                      help="markmin help")
+    parser.add_option("-t", "--test", dest="test", action="store_true",
+                      default=False)
+    parser.add_option("-n", "--no_wrapper", dest="no_wrapper",
+                      action="store_true",default=False)
+    parser.add_option("-1", "--one", dest="one",action="store_true",
+                      default=False,help="switch section for chapter")
+    parser.add_option("-w", "--wrapper", dest="wrapper", default=False,
+                      help="latex file containing header and footer")
+
+    (options, args) = parser.parse_args()
+    if options.info:
+        import markmin2html
+        markmin2latex(markmin2html.__doc__)
+    elif options.test:
         doctest.testmod()
+    else:
+        if options.wrapper:
+            fwrapper = open(options.wrapper,'rb')
+            try:
+                wrapper = fwrapper.read()
+            finally:
+                fwrapper.close()
+        elif options.no_wrapper:
+            wrapper  = '%(body)s'
+        else:
+            wrapper = WRAPPER
+        for f in args:
+            fargs = open(f,'r')
+            content_data = []
+            try:
+                content_data.append(fargs.read())
+            finally:
+                fargs.close()
+        content = '\n'.join(content_data)
+        output= markmin2latex(content,wrapper=wrapper)
+        if options.one:
+            output=output.replace(r'\section*{',r'\chapter*{')
+            output=output.replace(r'\section{',r'\chapter{')
+            output=output.replace(r'subsection{',r'section{')
+        print output
+
 

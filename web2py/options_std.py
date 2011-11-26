@@ -21,7 +21,9 @@ log_filename = 'httpserver.log'
 profiler_filename = None
 #ssl_certificate = 'ssl_certificate.pem'  # ## path to certificate file
 #ssl_private_key = 'ssl_private_key.pem'  # ## path to private key file
-numthreads = 50
+#numthreads = 50 # ## deprecated; remove
+minthreads = None
+maxthreads = None
 server_name = socket.gethostname()
 request_queue_size = 5
 timeout = 30
@@ -29,3 +31,4 @@ shutdown_timeout = 5
 folder = os.getcwd()
 extcron = None
 nocron = None
+

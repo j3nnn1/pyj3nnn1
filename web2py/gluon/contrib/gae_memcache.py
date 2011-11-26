@@ -3,6 +3,7 @@
 
 """
 Developed by Robin Bhattacharyya (memecache for GAE)
+Released under the web2py license (LGPL)
 
 from gluon.contrib.gae_memcache import MemcacheClient
 cache.ram=cache.disk=MemcacheClient(request)
@@ -45,3 +46,8 @@ class MemcacheClient(Client):
             value = obj[1] + value
         self.set((time.time(), value))
         return value
+
+    def clear(self, key):
+        key = '%s/%s' % (self.request.application, key)
+        self.delete(key)
+

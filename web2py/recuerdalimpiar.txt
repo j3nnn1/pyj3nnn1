@@ -1,5 +1,0 @@
-hacer script para elimnar esto
-cache
-errors
-sessions
-eliminar .bak

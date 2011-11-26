@@ -73,14 +73,14 @@ class ParagraphStyle :
 
     def SetShadingPropertySet( self, value ) :
         """Set the background shading for the paragraph."""
-        
+
         assert value is None or isinstance( value, ShadingPropertySet )
         self.ShadingPropertySet = value or ShadingPropertySet()
         return self
 
     def SetBasedOn( self, value ) :
         """Set the Paragraph Style that this one is based on."""
-        
+
         assert not value or isinstance( value, ParagraphStyle )
         self.BasedOn = value
         return self
@@ -91,3 +91,4 @@ class ParagraphStyle :
         assert not value or isinstance( value, ParagraphStyle )
         self.Next    = value
         return self
+

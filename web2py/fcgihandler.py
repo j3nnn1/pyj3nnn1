@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
+This file is part of the web2py Web Framework
+Copyrighted by Massimo Di Pierro <mdipierro@cs.depaul.edu>
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
+
 This is a handler for lighttpd+fastcgi
 This file has to be in the PYTHONPATH
 Put something like this in the lighttpd.conf file:
@@ -28,11 +32,10 @@ SOFTCRON = False
 import sys
 import os
 
-# Append the file path in python path
 path = os.path.dirname(os.path.abspath(__file__))
-if not path in sys.path:
-    sys.path.append(path)
-    sys.path.append(os.path.join(path,'site-packages'))
+os.chdir(path)
+sys.path = [path]+[p for p in sys.path if not p==path]
+
 import gluon.main
 import gluon.contrib.gateways.fcgi as fcgi
 
@@ -44,7 +47,8 @@ else:
     application = gluon.main.wsgibase
 
 if SOFTCRON:
-    from settings import settings
-    settings.web2py_crontype = 'soft'
+    from gluon.settings import global_settings
+    global_settings.web2py_crontype = 'soft'
 
 fcgi.WSGIServer(application, bindAddress='/tmp/fcgi.sock').run()
+

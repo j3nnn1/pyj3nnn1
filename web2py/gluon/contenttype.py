@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-This file is part of web2py Web Framework (Copyrighted, 2007-2010).
-Developed by Massimo Di Pierro <mdipierro@cs.depaul.edu>.
-License: GPL v2
+This file is part of the web2py Web Framework
+Copyrighted by Massimo Di Pierro <mdipierro@cs.depaul.edu>
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
 
 CONTENT_TYPE dictionary created against freedesktop.org' shared mime info
 database version 0.70.
@@ -243,6 +243,8 @@ CONTENT_TYPE = {
     '.jpr': 'application/x-jbuilder-project',
     '.jpx': 'image/jp2',
     '.js': 'application/javascript',
+    '.json': 'application/json',
+    '.jsonp': 'application/jsonp',
     '.k25': 'image/x-kodak-k25',
     '.kar': 'audio/midi',
     '.karbon': 'application/x-karbon',
@@ -421,6 +423,7 @@ CONTENT_TYPE = {
     '.pict': 'image/x-pict',
     '.pict1': 'image/x-pict',
     '.pict2': 'image/x-pict',
+    '.pickle': 'application/python-pickle',
     '.pk': 'application/x-tex-pk',
     '.pkipath': 'application/pkix-pkipath',
     '.pkr': 'application/pgp-keys',
@@ -713,3 +716,6 @@ def contenttype(filename, default='text/plain'):
     if default.startswith('text/'):
         default += '; charset=utf-8'
     return default
+
+
+

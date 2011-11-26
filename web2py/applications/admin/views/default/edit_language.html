@@ -7,7 +7,12 @@ function delkey(id) {
   return false; 
 }
 </script>
-<h1>{{=T('Editing Language file')}} "{{=filename}}"</h1><br/><br/>
 
-{{=form}}
+{{block sectionclass}}edit_language{{end}}
+
+<h2>{{=T('Editing Language file')}} "{{=filename}}"</h2>
+
+<div class="languageform">
+  {{=form}}
+</div>
 

@@ -151,11 +151,12 @@ class XssCleaner(HTMLParser):
 
     def url_is_acceptable(self, url):
         """
-        Requires all URLs to be \"absolute.\"
+        Accepts relative and absolute urls
         """
 
         parsed = urlparse(url)
-        return parsed[0] in self.allowed_schemes and '.' in parsed[1]
+        return (parsed[0] in self.allowed_schemes and '.' in parsed[1]) \
+            or (parsed[0] == '' and parsed[2].startswith('/'))
 
     def strip(self, rawstring, escape=True):
         """
@@ -167,6 +168,7 @@ class XssCleaner(HTMLParser):
           content, otherwise remove it
         """
 
+        if not isinstance(rawstring, str): return str(rawstring)
         for tag in self.requires_no_close:
             rawstring = rawstring.replace("<%s/>" % tag, "<%s />" % tag)
         if not escape:
@@ -194,21 +196,32 @@ class XssCleaner(HTMLParser):
 
 
 def sanitize(text, permitted_tags=[
-    'a',
-    'b',
-    'blockquote',
-    'br/',
-    'i',
-    'li',
-    'ol',
-    'ul',
-    'p',
-    'cite',
-    'code',
-    'pre',
-    'img/',
-    ], allowed_attributes={'a': ['href', 'title'], 'img': ['src', 'alt'
-                           ], 'blockquote': ['type']},
-    escape=True):
+        'a',
+        'b',
+        'blockquote',
+        'br/',
+        'i',
+        'li',
+        'ol',
+        'ul',
+        'p',
+        'cite',
+        'code',
+        'pre',
+        'img/',
+        'h1','h2','h3','h4','h5','h6',
+        'table','tr','td','div',
+        ],
+             allowed_attributes = {
+        'a': ['href', 'title'],
+        'img': ['src', 'alt'],
+        'blockquote': ['type'],
+        'td': ['colspan'],
+        },
+             escape=True):
+    if not isinstance(text, str): return str(text)
     return XssCleaner(permitted_tags=permitted_tags,
                       allowed_attributes=allowed_attributes).strip(text, escape)
+
+
+

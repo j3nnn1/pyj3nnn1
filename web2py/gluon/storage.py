@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-This file is part of web2py Web Framework (Copyrighted, 2007-2010).
-Developed by Massimo Di Pierro <mdipierro@cs.depaul.edu>.
-License: GPL v2
+This file is part of the web2py Web Framework
+Copyrighted by Massimo Di Pierro <mdipierro@cs.depaul.edu>
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
 
 Provides:
 
@@ -24,13 +24,12 @@ class List(list):
     Like a regular python list but a[i] if i is out of bounds return None
     instead of IndexOutOfBounds
     """
-    
+
     def __call__(self, i, default=None):
         if 0<=i<len(self):
             return self[i]
         else:
             return default
-
 
 class Storage(dict):
 
@@ -62,7 +61,11 @@ class Storage(dict):
             return None
 
     def __setattr__(self, key, value):
-        self[key] = value
+        if value is None:
+            if key in self:
+                del self[key]
+        else:
+            self[key] = value
 
     def __delattr__(self, key):
         if key in self:
@@ -79,14 +82,17 @@ class Storage(dict):
     def __setstate__(self, value):
         for (k, v) in value.items():
             self[k] = v
-            
-    def getlist(self, obj):
-        """Returns a list given a request.vars style object attribute.
-    
-        If object is list it will be returned as is.  If object is None, an empty
-        list will be returned.  Otherwise, [object] will be returned.
-    
-        Simulated output with a query string of ?x=abc&y=abc&y=def
+
+    def getlist(self, key):
+        """Return a Storage value as a list.
+
+        If the value is a list it will be returned as-is.
+        If object is None, an empty list will be returned.
+        Otherwise, [value] will be returned.
+
+        Example output for a query string of ?x=abc&y=abc&y=def
+        >>> request = Storage()
+        >>> request.vars = Storage()
         >>> request.vars.x = 'abc'
         >>> request.vars.y = ['abc', 'def']
         >>> request.vars.getlist('x')
@@ -95,22 +101,24 @@ class Storage(dict):
         ['abc', 'def']
         >>> request.vars.getlist('z')
         []
-    
+
         """
-        value = self.get(obj, None)
-        if isinstance(value, list):
+        value = self.get(key, None)
+        if isinstance(value, (list, tuple)):
             return value
         elif value is None:
             return []
         return [value]
-    
-    def getfirst(self, obj):
-        """Returns a single value when given a request.vars style object attribute.
-    
-        If object is list, the first item will be returned, otherwise, object
-        will be returned as is.
-    
-        Simulated output with a query string of ?x=abc&y=abc&y=def
+
+    def getfirst(self, key):
+        """Return the first or only value when given a request.vars-style key.
+
+        If the value is a list, its first item will be returned;
+        otherwise, the value will be returned as-is.
+
+        Example output for a query string of ?x=abc&y=abc&y=def
+        >>> request = Storage()
+        >>> request.vars = Storage()
         >>> request.vars.x = 'abc'
         >>> request.vars.y = ['abc', 'def']
         >>> request.vars.getfirst('x')
@@ -118,21 +126,22 @@ class Storage(dict):
         >>> request.vars.getfirst('y')
         'abc'
         >>> request.vars.getfirst('z')
-        None
-    
+
         """
-        value = self.getlist(obj)
+        value = self.getlist(key)
         if len(value):
             return value[0]
-        return None 
-    
-    def getlast(self, obj):
-        """Returns a single value when given a request.vars style object attribute.
-    
-        If object is list, the last item will be returned, otherwise, object
-        will be returned as is.
-    
+        return None
+
+    def getlast(self, key):
+        """Returns the last or only single value when given a request.vars-style key.
+
+        If the value is a list, the last item will be returned;
+        otherwise, the value will be returned as-is.
+
         Simulated output with a query string of ?x=abc&y=abc&y=def
+        >>> request = Storage()
+        >>> request.vars = Storage()
         >>> request.vars.x = 'abc'
         >>> request.vars.y = ['abc', 'def']
         >>> request.vars.getlast('x')
@@ -140,10 +149,9 @@ class Storage(dict):
         >>> request.vars.getlast('y')
         'def'
         >>> request.vars.getlast('z')
-        None
-    
+
         """
-        value = self.getlist(obj)
+        value = self.getlist(key)
         if len(value):
             return value[-1]
         return None
@@ -156,24 +164,28 @@ class StorageList(Storage):
         if key in self:
             return self[key]
         else:
-            self[key]=[]
+            self[key] = []
             return self[key]
 
 def load_storage(filename):
     fp = open(filename, 'rb')
-    portalocker.lock(fp, portalocker.LOCK_EX)
-    storage = cPickle.load(fp)
-    portalocker.unlock(fp)
-    fp.close()
+    try:
+        portalocker.lock(fp, portalocker.LOCK_EX)
+        storage = cPickle.load(fp)
+        portalocker.unlock(fp)
+    finally:
+        fp.close()
     return Storage(storage)
 
 
 def save_storage(storage, filename):
     fp = open(filename, 'wb')
-    portalocker.lock(fp, portalocker.LOCK_EX)
-    cPickle.dump(dict(storage), fp)
-    portalocker.unlock(fp)
-    fp.close()
+    try:
+        portalocker.lock(fp, portalocker.LOCK_EX)
+        cPickle.dump(dict(storage), fp)
+        portalocker.unlock(fp)
+    finally:
+        fp.close()
 
 
 class Settings(Storage):
@@ -205,3 +217,10 @@ class Messages(Storage):
         if isinstance(value, str):
             return str(self['T'](value))
         return value
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+
+

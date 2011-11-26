@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-This file is part of web2py Web Framework (Copyrighted, 2007-2010).
+This file is part of the web2py Web Framework
 Developed by Massimo Di Pierro <mdipierro@cs.depaul.edu>,
 limodou <limodou@gmail.com> and srackham <srackham@gmail.com>.
-License: GPL v2
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
 
 """
 
@@ -17,26 +17,29 @@ import types
 import re
 import optparse
 import glob
-
+import traceback
 import fileutils
+import settings
 from utils import web2py_uuid
-from compileapp import *
+from compileapp import build_environment, read_pyc, run_models_in
 from restricted import RestrictedError
 from globals import Request, Response, Session
 from storage import Storage
 from admin import w2p_unpack
+from dal import BaseAdapter
+
 
 logger = logging.getLogger("web2py")
 
 def exec_environment(
     pyfile='',
-    request=Request(),
-    response=Response(),
-    session=Session(),
+    request=None,
+    response=None,
+    session=None,
     ):
     """
     .. function:: gluon.shell.exec_environment([pyfile=''[, request=Request()
-        [, response=Response[, sessions=Session()]]]])
+        [, response=Response[, session=Session()]]]])
 
         Environment builder and module loader.
 
@@ -48,6 +51,10 @@ def exec_environment(
 
     """
 
+    if request is None: request = Request()
+    if response is None: response = Response()
+    if session is None: session = Session()
+
     if request.folder is None:
         mo = re.match(r'(|.*/)applications/(?P<appname>[^/]+)', pyfile)
         if mo:
@@ -55,7 +62,7 @@ def exec_environment(
             request.folder = os.path.join('applications', appname)
         else:
             request.folder = ''
-    env = build_environment(request, response, session)
+    env = build_environment(request, response, session, store_current=False)
     if pyfile:
         pycfile = pyfile + 'c'
         if os.path.isfile(pycfile):
@@ -105,6 +112,7 @@ def env(
     request.env.path_info = '/%s/%s/%s' % (a, c, f)
     request.env.http_host = '127.0.0.1:8000'
     request.env.remote_addr = '127.0.0.1'
+    request.env.web2py_runtime_gae = settings.global_settings.web2py_runtime_gae
 
     for k,v in extra_request.items():
         request[k] = v
@@ -124,6 +132,8 @@ def env(
         except RestrictedError, e:
             sys.stderr.write(e.traceback+'\n')
             sys.exit(1)
+
+    environment['__name__'] = '__main__'
     return environment
 
 
@@ -141,6 +151,8 @@ def run(
     plain=False,
     import_models=False,
     startfile=None,
+    bpython=False,
+    python_code=False
     ):
     """
     Start interactive shell or run Python script (startfile) in web2py
@@ -160,15 +172,17 @@ def run(
                       % a).lower() in ['y', 'yes']:
             os.mkdir(adir)
             w2p_unpack('welcome.w2p', adir)
+            for subfolder in ['models','views','controllers', 'databases',
+                              'modules','cron','errors','sessions',
+                              'languages','static','private','uploads']:
+                subpath =  os.path.join(adir,subfolder)
+                if not os.path.exists(subpath):
+                    os.mkdir(subpath)
             db = os.path.join(adir,'models/db.py')
             if os.path.exists(db):
-                fp = open(db,'r')
-                data = fp.read()
-                fp.close()
+                data = fileutils.read_file(db)
                 data = data.replace('<your secret key>','sha512:'+web2py_uuid())
-                fp = open(db,'w')
-                fp.write(data)
-                fp.close()
+                fileutils.write_file(db, data)
 
     if c:
         import_models = True
@@ -176,8 +190,13 @@ def run(
     if c:
         cfile = os.path.join('applications', a, 'controllers', c + '.py')
         if not os.path.isfile(cfile):
-            die(errmsg)
-        execfile(cfile, _env)
+            cfile = os.path.join('applications', a, 'compiled', "controllers_%s_%s.pyc" % (c,f))
+            if not os.path.isfile(cfile):
+                die(errmsg)
+            else:
+                exec read_pyc(cfile) in _env
+        else:
+            execfile(cfile, _env)
 
     if f:
         exec ('print %s()' % f, _env)
@@ -185,21 +204,47 @@ def run(
         exec_pythonrc()
         try:
             execfile(startfile, _env)
-        except RestrictedError, e:
-            print e.traceback
+            if import_models: BaseAdapter.close_all_instances('commit')
+        except Exception, e:
+            print traceback.format_exc()
+            if import_models: BaseAdapter.close_all_instances('rollback')
+    elif python_code:
+        exec_pythonrc()
+        try:
+            exec(python_code, _env)
+            if import_models: BaseAdapter.close_all_instances('commit')
+        except Exception, e:
+            print traceback.format_exc()
+            if import_models: BaseAdapter.close_all_instances('rollback')
     else:
         if not plain:
-            try:
-                import IPython
-                # following 2 lines fixe a problem with IPython, thanks Michael Toomim
-                if '__builtins__' in _env:
-                    del _env['__builtins__']
-                shell = IPython.Shell.IPShell(argv=[], user_ns=_env)
-                shell.mainloop()
-                return
-            except:
-                logger.warning(
-                    'import IPython error; use default python shell')
+            if bpython:
+                try:
+                    import bpython
+                    bpython.embed(locals_=_env)
+                    return
+                except:
+                    logger.warning(
+                        'import bpython error; trying ipython...')
+            else:
+                try:
+                    import IPython
+                    if IPython.__version__ >= '0.11':
+                        from IPython.frontend.terminal.embed import InteractiveShellEmbed
+                        shell = InteractiveShellEmbed(user_ns=_env)
+                        shell()
+                        return
+                    else:
+                        # following 2 lines fix a problem with
+                        # IPython; thanks Michael Toomim
+                        if '__builtins__' in _env:
+                            del _env['__builtins__']
+                        shell = IPython.Shell.IPShell(argv=[],user_ns=_env)
+                        shell.mainloop()
+                        return
+                except:
+                    logger.warning(
+                        'import IPython error; use default python shell')
         try:
             import readline
             import rlcompleter
@@ -318,6 +363,17 @@ def execute_from_command_line(argv=None):
     parser.add_option('-S', '--shell', dest='shell', metavar='APPNAME',
         help='run web2py in interactive shell or IPython(if installed) ' + \
             'with specified appname')
+    msg = 'run web2py in interactive shell or bpython (if installed) with'
+    msg += ' specified appname (if app does not exist it will be created).'
+    msg += '\n Use combined with --shell'
+    parser.add_option(
+        '-B',
+        '--bpython',
+        action='store_true',
+        default=False,
+        dest='bpython',
+        help=msg,
+        )
     parser.add_option(
         '-P',
         '--plain',
@@ -355,8 +411,11 @@ def execute_from_command_line(argv=None):
         startfile = args[0]
     else:
         startfile = ''
-    run(options.shell, options.plain, startfile=startfile)
+    run(options.shell, options.plain, startfile=startfile, bpython=options.bpython)
 
 
 if __name__ == '__main__':
     execute_from_command_line()
+
+
+

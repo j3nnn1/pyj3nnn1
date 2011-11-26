@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """
+This file is part of the web2py Web Framework
+Copyrighted by Massimo Di Pierro <mdipierro@cs.depaul.edu>
+License: LGPLv3 (http://www.gnu.org/licenses/lgpl.html)
+
+
 This is a WSGI handler for Apache
 Requires apache+mod_wsgi.
 
@@ -18,12 +23,13 @@ SOFTCRON = False
 
 import sys
 import os
-sys.path.insert(0, '')
+
 path = os.path.dirname(os.path.abspath(__file__))
-if not path in sys.path:
-    sys.path.append(path)
-    sys.path.append(os.path.join(path,'site-packages'))
 os.chdir(path)
+sys.path = [path]+[p for p in sys.path if not p==path]
+
+sys.stdout=sys.stderr
+
 import gluon.main
 
 if LOGGING:
@@ -34,5 +40,6 @@ else:
     application = gluon.main.wsgibase
 
 if SOFTCRON:
-    from settings import settings
-    settings.web2py_crontype = 'soft'
+    from gluon.settings import global_settings
+    global_settings.web2py_crontype = 'soft'
+

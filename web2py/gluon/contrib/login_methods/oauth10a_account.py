@@ -9,7 +9,7 @@ Adds support for  OAuth1.0a authentication to web2py.
 
 Dependencies:
  - python-oauth2 (http://github.com/simplegeo/python-oauth2)
- 
+
 """
 
 import oauth2 as oauth
@@ -44,7 +44,7 @@ class OAuthAccount(object):
         .
         .
         .
-    
+
         CLIENT_ID=\"<put your fb application id here>\"
         CLIENT_SECRET=\"<put your fb application secret here>\"
         AUTH_URL="..."
@@ -80,12 +80,12 @@ class OAuthAccount(object):
 
         If token is already in the session that one will be used.
         Otherwise the token is fetched from the auth server.
-        
+
         """
-        
+
         if self.session.access_token:
             # return the token (TODO: does it expire?)
-            
+
             return self.session.access_token
         if self.session.request_token:
             # Exchange the request token with an authorization token.
@@ -97,17 +97,17 @@ class OAuthAccount(object):
             token.set_verifier(self.request.vars.oauth_verifier)
             client = oauth.Client(self.consumer, token)
 
-            
+
             resp, content = client.request(self.access_token_url, "POST")
-            if resp['status'] != '200':
+            if str(resp['status']) != '200':
                 self.session.request_token = None
                 self.globals['redirect'](self.globals['URL'](f='user',args='logout'))
 
 
             self.session.access_token = oauth.Token.from_string(content)
-            
+
             return self.session.access_token
-            
+
         self.session.access_token = None
         return None
 
@@ -121,18 +121,18 @@ class OAuthAccount(object):
         self.auth_url = auth_url
         self.token_url = token_url
         self.access_token_url = access_token_url
-        
+
         # consumer init
         self.consumer = oauth.Consumer(self.client_id, self.client_secret)
-        
-        
+
+
     def login_url(self, next="/"):
         self.__oauth_login(next)
         return next
 
     def logout_url(self, next="/"):
         self.session.request_token = None
-        self.session.access_token = None 
+        self.session.access_token = None
         return next
 
     def get_user(self):
@@ -154,7 +154,7 @@ class OAuthAccount(object):
         called to set the access token into the session by calling
         accessToken()
         '''
-       
+
         if not self.accessToken():
             # setup the client
             client = oauth.Client(self.consumer, None)
@@ -167,7 +167,7 @@ class OAuthAccount(object):
             if resp['status'] != '200':
                 self.session.request_token = None
                 self.globals['redirect'](self.globals['URL'](f='user',args='logout'))
-                
+
             # Store the request token in session.
             request_token = self.session.request_token = oauth.Token.from_string(content)
 
@@ -176,14 +176,15 @@ class OAuthAccount(object):
                                   oauth_callback=callback_url))
             auth_request_url = self.auth_url + '?' +data
 
-            
+
             HTTP = self.globals['HTTP']
-            
+
 
             raise HTTP(307,
                        "You are not authenticated: you are being redirected to the <a href='" + auth_request_url + "'> authentication server</a>",
                        Location=auth_request_url)
 
         return None
-    
+
+
 
