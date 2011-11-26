@@ -171,6 +171,7 @@ def create_tweet(titulo):
             if authen:
                 api = tweepy.API(authen)
                 try:
+                
                     #api.update_status("En mi blog: %s" % titulo)
                     #api.update_status("Muy buenos días!")
                     msg='Tu articulo ha sido publicado en el blog y en twitter'
@@ -400,6 +401,23 @@ def showarchivesold():
 	print  db().select()
 	return dict(html=html)
 
+
+def rss_blog():
+    filtro = (db.articulos.id >0)
+    posts = db(filtro).select(db.articulos.titulo, db.articulos.id,  db.articulos.articulo)
+    rss =[];
+
+    for post in posts:
+        print "una vez mas"
+        postrss = { 'title':post.titulo,
+                    'link':"URL('viewpost', args=post.articulos.id)",
+                    'description':"post.articulos.articulo[0:100]"}
+        rss.append(postrss)
+
+    return dict(title="jennni's blog",
+                link="http://maldonado.pl/blog/default/rss_blog.rss",
+                description="Jenni's blog",
+                entries  = rss )
 
 
 

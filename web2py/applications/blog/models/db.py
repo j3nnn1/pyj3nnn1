@@ -130,3 +130,5 @@ db.define_table('tweets',
                 Field('status', 'string', readable=True, writable=True, default='nada'),
                 Field('updatedate', 'datetime', readable=True, writable=True, default=now),
                 Field('updatedateregister', 'datetime', readable=True, writable=True, default=now))
+
+response.generic_patterns = ['*.json','*.xml', '*.rss']
