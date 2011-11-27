@@ -403,15 +403,17 @@ def showarchivesold():
 
 
 def rss_blog():
+    
     filtro = (db.articulos.id >0)
-    posts = db(filtro).select(db.articulos.titulo, db.articulos.id,  db.articulos.articulo)
+    posts = db(filtro).select(db.articulos.titulo, db.articulos.id,  db.articulos.articulo, db.articulos.fecha)
     rss =[];
 
     for post in posts:
-        print "una vez mas"
-        postrss = { 'title':post.titulo,
-                    'link':"URL('viewpost', args=post.articulos.id)",
-                    'description':"post.articulos.articulo[0:100]"}
+        postrss = { 'title': post.titulo,
+                    'link': 'http://localhost:8000/blog/default/viewpost/' + str(post.id),#  URL('viewpost', args=post.id),
+                    'description': str(post.articulo[0:49]),
+                    'created_on' : post.fecha
+                    }
         rss.append(postrss)
 
     return dict(title="jennni's blog",
