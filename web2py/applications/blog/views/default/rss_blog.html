@@ -1,0 +1,9 @@
+
+{{extend 'layout.html'}}
+
+{{=CAT(H1('Are you looking for this? ',
+	A('RSS', 
+	_href=URL('blog','default','rss_blog.rss'),
+	_class="title")))}}
+<img src="/blog/static/images/404.jpg" width="350" heigth="350"/>
+

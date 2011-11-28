@@ -5,7 +5,8 @@
 # are used when the respective element is missing from the
 # (possibly rewritten) incoming URL
 #
-default_application = 'init'    # ordinarily set in base routes.py
+#default_application = 'init'    # ordinarily set in base routes.py
+default_application = 'blog'    # ordinarily set in base routes.py
 default_controller = 'default'  # ordinarily set in app-specific routes.py
 default_function = 'index'      # ordinarily set in app-specific routes.py
 
@@ -17,10 +18,13 @@ default_function = 'index'      # ordinarily set in app-specific routes.py
 # Example: support welcome, admin, app and myapp, with myapp the default:
 
 
+#routes_app = ((r'/(?P<app>welcome|admin|app)\b.*', r'\g<app>'),
+#              (r'(.*)', r'myapp'),
+#              (r'/?(.*)', r'myapp'))
+#
 routes_app = ((r'/(?P<app>welcome|admin|app)\b.*', r'\g<app>'),
-              (r'(.*)', r'myapp'),
-              (r'/?(.*)', r'myapp'))
-
+              (r'(.*)', r'blog'),
+              (r'/?(.*)', r'blog'))
 # routes_in is a tuple of tuples.  The first item in each is a regexp that will
 # be used to match the incoming request URL. The second item in the tuple is
 # what it will be replaced with.  This mechanism allows you to redirect incoming
@@ -33,6 +37,7 @@ routes_app = ((r'/(?P<app>welcome|admin|app)\b.*', r'\g<app>'),
 
 routes_in = ((r'.*:/favicon.ico', r'/examples/static/favicon.ico'),
              (r'.*:/robots.txt', r'/examples/static/robots.txt'),
+             ('^/blog/default/index$','/blog/'),
              ((r'.*http://otherdomain.com.* (?P<any>.*)', r'/app/ctr\g<any>')))
 
 # routes_out, like routes_in translates URL paths created with the web2py URL()
@@ -40,6 +45,7 @@ routes_in = ((r'.*:/favicon.ico', r'/examples/static/favicon.ico'),
 #
 
 routes_out = ((r'.*http://otherdomain.com.* /app/ctr(?P<any>.*)', r'\g<any>'),
+              (r'*/blog/default/\g<any>', r'/blog/\g<any>'),
               (r'/app(?P<any>.*)', r'\g<any>'))
 
 # Error-handling redirects all HTTP errors (status codes >= 400) to a specified
@@ -52,12 +58,18 @@ routes_out = ((r'.*http://otherdomain.com.* /app/ctr(?P<any>.*)', r'\g<any>'),
 # The error handling page is also passed the error code and ticket as
 # variables.  Traceback information will be stored in the ticket.
 #
+#routes_onerror = [
+#     (r'blog/400', r'/init/default/login')
+#    ,(r'blog/*', r'/blog/static/error.html')
+ #   ,(r'*/*', r'/blog/index')
+# ]
 # routes_onerror = [
 #     (r'init/400', r'/init/default/login')
 #    ,(r'init/*', r'/init/static/fail.html')
 #    ,(r'*/404', r'/init/static/cantfind.html')
 #    ,(r'*/*', r'/init/error/index')
 # ]
+#
 
 # specify action in charge of error handling
 #
