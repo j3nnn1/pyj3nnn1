@@ -1176,3 +1176,27 @@ recalled
 - scripts/make_min_web2py.py
 - crud.search has more options, thanks Denes
 - many bug fixes (thanks Jonathan, Michele, Fran and others)
+
+##Esto se puede instalar fácilmente en dotcloud.com
+
+1 - crear una cuenta.
+2 - instalar la línea de comando para dotcloud http://docs.dotcloud.com/firststeps/install/ 
+3 - crear una aplicación: dotcloud create  nombre_aplicacion 
+4 - crear archivo de configuración dotcloud.yml y guardarlo en la raíz de la app, contenido del archivo:
+
+	www:
+	    type: python
+	    approot: blog
+
+5 - crear una carpeta blog dentro de la raíz de la app.
+5.1 - crear un enlace simbolico en el directorio blog. ln -s wsgihandler.py wsgi.py
+6 - Estructura del directorio
+
+	directoriodotcloud
+        |    -dotcloud.yml
+	|    -blog
+	|	| todo el contenido dentro de la carpeta web2py
+	|	| enlace simbolico de wsghandler.py wsgi.py
+
+7 - Detro del directorio: "directoriodotcloud" ejecutar: dotcloud push blog .
+

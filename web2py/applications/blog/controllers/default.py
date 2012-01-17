@@ -218,6 +218,7 @@ def createpost():
             print 'database not available'
         else:
             print 'insert article successful'
+            redirect(URL('viewpost', args=id_articulo))
         #insertando registro en etiquetas_articulos
         [db.etiquetas_articulos.insert(id_etiqueta=i, id_articulo=id_articulo) for i in ids] # List comprehensions rocks 
         response.flash = msg = create_tweet(form.vars['titulo']) # Comentado pq necesita algun trabajo adicional
