@@ -1,109 +1,250 @@
-!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!--
 
 Design by Free CSS Templates
 http://www.freecsstemplates.org
 Released for free under a Creative Commons Attribution 2.5 License
 
-Title      : Night Vision
+Title      : FlashyWeb
 Version    : 1.0
-Released   : 20080119
-Description: Three-column blog design with the third column allocated for ads. Features Web 2.0 design ideal for 1024x768 resolutions.
+Released   : 20081102
+Description: A two-column, fixed-width and lightweight template ideal for 1024x768 resolutions. Suitable for blogs and small websites.
 
 -->
 <html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<title>{{=response.title or request.application}}</title>
-<meta name="keywords" content="" />
-<meta name="description" content="" />
-{{response.files.append(URL(request.application,'static','plugin_layouts/layouts/earthlingtwo/style.css'))}}
-{{response.files.append(URL('static','plugin_layouts/superfish.js'))}}
-{{include 'web2py_ajax.html'}}
-</style>
-</head>
-<body>
+ <head>
+  <title>
+   {{=response.title or request.application}}
+  </title>
+  {{response.files.append(URL('static','flickrshow.min.css'))}}
+  {{response.files.append(URL(request.application,'static','plugin_layouts/layouts/FlashyWeb/default.css'))}}
+  {{response.files.append(URL('static','plugin_layouts/superfish.js'))}}
+  {{response.files.append(URL('static','plugin_layouts/flickrshow-7.2.min.js'))}}
+  {{response.files.append(URL('static','plugin_layouts/query-1.7.1.js'))}}
+  {{response.files.append(URL('static','plugin_layouts/tinymce/jscripts/tiny_mce/tiny_mce_jquery.js'))}}
+  {{include 'web2py_ajax.html'}}
+  <style>
+ul.web2py-menu-vertical { width: 150px; position: relative; top:1em; left:1em;  z-index:30; border:0; margin:0; padding: 0; list-style: none; text-decoration: none;}
+ul.web2py-menu-vertical li { margin:0; padding:0; border:0; width: 150px; background: black; text-align:left;}
+ul.web2py-menu-vertical li a { margin:0; padding: 1px 3px 1px 3px; border:0; width: 144px; color: white; font-size:12px;}
+div.flash { position: fixed; float: right; padding: 10px; top: 10px; right: 30px; opacity: 0.75; margin: 10px 10px 10px 10px; text-align: center; clear: both; color: #fff; font-size: 11pt; text-align: center; vertical-align: middle; cursor: pointer; background: black; border: 2px solid #fff; -moz-border-radius: 5px; -webkit-border-radius: 5px; z-index: 2; }
+div.error { background-color: red; color: white; padding: 3px; }
+.auth_navbar { text-align:right; z-index:20; position: absolute; top: 2px; right:30px; border:0; padding:0 }
+  </style>
+ </head>
+ <body>
+  <!-- start header -->
+  {{try:}}{{=auth.navbar(action=URL('default','user'))}}{{except:pass}}
 
-<!-- start header -->
-<div id="wrapper">
-	<div id="header">
-		<div id="logo">
-			{{=H1(A(T(response.title or request.application), _class='link', _href=URL(a='blog', c='default', f='index')))}}
-		</div>
-		<div id="rss"><a href="#">Subscribe to RSS Feed</a></div>
-	</div>
-<!-- end header -->
-<!-- star menu -->
-<div id="menu">
-	{{=MENU(response.menu,_class='web2py-menu')}}
-    		<script>
-       			jQuery(document).ready(function(){jQuery('ul.web2py-menu').superfish({delay:400});});
-    		</script>
-</div>
-<!-- end menu -->
-<!-- start page -->
-<div id="page">
-	
-	<!-- start content -->
-	<div id="content">
-		<div class="flash">{{=response.flash or ''}}</div>
-    		{{include}}
-   		<div style="clear: both;"> &nbsp; </div>
-	</div>
-	<!-- end content -->
-	<!-- start sidebar -->
-	<div id="sidebar">
-		<ul>
-			<li id='blog_archive'>
-				<h2>Archivos Viejos</h2>
-				<div id='cont_blog_archive'> </div>
-			</li>			
-			<li id='st_etiquetas'>
-				<h2> Tags </h2>
-				<script type='text/javascript'> ajax('http://localhost:8000/blog/default/showcloudtag', '', 'etiquetas')</script>
-				<div id='etiquetas'> </div>	
-			</li>
-			<li id="categories">
-				&nbsp;
-				<h2>Publicidad</h2>
-				<div class="portlet" id="p-perl">
- 					<div class="pBody">
-   						<div style="padding: 8px">
-     						<script type="text/javascript"  src="http://pcas.szabgab.com/ads/direct_link_selflink.js"></script>
-						</div>
-   					</div>
- 				</div>
-				<div id=python >
-					<a target="_blank" title="Python" href="http://www.python.org/" >
-					<img src="/blog/static/images/python-logo-glassy.png" border="0" width="160" height="150"/>
-					</a>
-				</div>		
-			</li>
-			
-		</ul>
-	</div>
-	<!-- end sidebar -->
-	<div style="clear: both;">&nbsp;</div>
-</div>
-<!-- end page -->
-</div>
-<!-- start footer -->
-<div id="footer-content">
-	<div class="column1">
-		<h2>Desde Mis raíces..</h2>
-		<p><strong>Érase una vez.. </strong> ahora dos y tres más veces, un individuo.. <a href="/blog/default/about" class='more'>Learn more&#8230;</a></p>
-	</div>
-	
-	<div class="column2">
-		<ul class="list">
-			<p><strong>Algunas pistas... </strong>
-	</ul>
-	</div>
-</div>
-<div id="footer">
-	<p> (c) 2011 jenn.org.ve. Design by <a href="http://www.nodethirtythree.com">nodethirtythree</a> and <a href="http://www.freecsstemplates.org">Free CSS Templates</a>.</p>
-</div>
-</div>
-<!-- end footer -->
-</body>
+  <!-- start header -->
+  <div id="header">
+   <div id="logo">
+    <h1>
+     {{=response.title or request.application}}
+    </h1>
+    <h2>
+     {{=response.subtitle or '=response.subtitle'}}
+    </h2>
+   </div>
+   <div id="menu">
+    {{=MENU(response.menu,_class='web2py-menu')}}
+    <script>
+      jQuery(document).ready(function(){jQuery('ul.web2py-menu').superfish({delay:400});});
+    </script>
+   </div>
+  </div>
+  <!-- end header -->
+  <!-- start page -->
+  <div id="page">
+   <!-- start content -->
+   <div id="content">
+    <div class="flash">{{=response.flash or ''}}</div>
+    {{include}}
+   </div>
+   <!-- end content -->
+   <!-- start sidebar -->
+   <div id="sidebar">
+    <ul>
+     <li id="search">
+      <h2>
+       <b class="text1">
+        Search
+       </b>
+      </h2>
+      <form method="get" action="">
+       <fieldset>
+        <input type="text" id="s" name="s" value="" />
+        <input type="submit" id="x" value="Search" />
+       </fieldset>
+      </form>
+     </li>
+     <li>
+      <h2>
+       <strong>
+        Lorem
+       </strong>
+       Ipsum
+      </h2>
+      <ul>
+       <li>
+        <a href="#">
+         Fusce dui neque fringilla
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Eget tempor eget nonummy
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Magna lacus bibendum mauris
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Nec metus sed donec
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Magna lacus bibendum mauris
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Velit semper nisi molestie
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Eget tempor eget nonummy
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li>
+      <h2>
+       <b>
+        Volutpat
+       </b>
+       Dolore
+      </h2>
+      <ul>
+       <li>
+        <a href="#">
+         Nec metus sed donec
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Magna lacus bibendum mauris
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Velit semper nisi molestie
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Eget tempor eget nonummy
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Nec metus sed donec
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Magna lacus bibendum mauris
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Velit semper nisi molestie
+        </a>
+       </li>
+      </ul>
+     </li>
+     <li>
+      <h2>
+       <b>
+        Volutpat
+       </b>
+       Dolore
+      </h2>
+      <ul>
+       <li>
+        <a href="#">
+         Nec metus sed donec
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Magna lacus bibendum mauris
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Velit semper nisi molestie
+        </a>
+       </li>
+       <li>
+        <a href="#">
+         Eget tempor eget nonummy
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </div>
+   <!-- end sidebar -->
+   <div style="clear: both;">
+    &nbsp;
+   </div>
+  </div>
+  <!-- end page -->
+  <!-- start footer -->
+  <div id="footer">
+   <div id="footer-menu">
+    <ul>
+     <li class="active">
+      <a href="#">
+       homepage
+      </a>
+     </li>
+     <li>
+      <a href="#">
+       photo gallery
+      </a>
+     </li>
+     <li>
+      <a href="#">
+       about us
+      </a>
+     </li>
+     <li>
+      <a href="#">
+       links
+      </a>
+     </li>
+     <li>
+      <a href="#">
+       contact us
+      </a>
+     </li>
+    </ul>
+   </div>
+   <p id="legal">
+    (c) 2008 YourSite. Design by
+    <a href="http://www.freecsstemplates.org/">
+     Free CSS Templates
+    </a>
+    .
+   </p>
+  </div>
+  <!-- end footer -->
+ </body>
 </html>

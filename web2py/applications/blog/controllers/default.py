@@ -422,4 +422,8 @@ def rss_blog():
                 description="Jenni's blog",
                 entries  = rss )
 
+def get():
+    flick='Hola flickr!' 
+    return dict(flick=flick)
+
 

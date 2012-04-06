@@ -50,8 +50,8 @@ if not config.strip():
 
 def auto_in(apps):
     routes = [
-        ('/robots.txt','/welcome/static/robots.txt'),
-        ('/favicon.ico','/welcome/static/favicon.ico'),
+        ('/robots.txt','/blog/static/robots.txt'),
+        ('/favicon.ico','/blog/static/favicon.ico'),
         ('/admin$anything','/admin$anything'),
         ]
     for domain,path in [x.strip().split() for x in apps.split('\n') if x.strip() and not x.strip().startswith('#')]:

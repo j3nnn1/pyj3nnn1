@@ -18,7 +18,8 @@ response.meta.keywords = 'j3nnn1 web2py python'
 response.menu = [
     (T('Index'), False, URL(request.application,'default','index'), []),
     (T('About'), False, URL(request.application,'default','about'), []),
-    (T('Admin'), False, URL(request.application,'default','admin'), [])
+    (T('Admin'), False, URL(request.application,'default','admin'), []),
+    (T('Flickr'), False, URL(request.application,'default','get'), []),
     ]
 
 ##########################################
