@@ -1,15 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+# j3nnn1 - 0.0.0 -
 #.I identificador del documento
 #
 #DOC
 # DOCNO
-# S
-# M
-# T
-# P
-# W
-# A
+#
 from xml.dom import minidom
 #import xml.etree.ElementTree as ET
 #import xml.etree.ElementTree as xml
@@ -35,10 +31,9 @@ pattern = re.compile(r'(\d+)')
 root = xml.Element('terrier')
 #this is bad, I know. :(  Python FILE on memory RAM. I don't know other way
 lines = file.readlines()
-count = 0
 size = len(lines)
 
-for line in lines:
+for count, line  in enumerate(lines):
     nextline = count + 1 
     if (re.match('\.I', line)):
         id = pattern.search(line).group(0)
@@ -85,7 +80,6 @@ for line in lines:
             child2.text = source
             child.append(child2)
 
-
     if (re.match('\.A',line)):
         if (nextline < size):
             source = lines[nextline].strip()
@@ -93,25 +87,6 @@ for line in lines:
             child2.text = source
             child.append(child2)
 
-    count = count + 1    
-#
-
-#for line in file:
-#    if (re.match('\.I', line)):
-#        id = pattern.search(line).group(0)
-        #print(id)
-        ##create child
-#        child = xml.Element('DOC')
-#        ##add 
-#        root.append(child)
-#        ##setting attr DOCNO
-#        child2 = xml.Element('DOCNO')
-#        child2.text = id
-#        child.append(child2)
-#    #if(re.match('\.U', line)):
-#    #    medID = file.readline()
-#    #    print medID
-#	
 xml.ElementTree(root).write('testing.xml', pretty_print=True)
 file.close()
 
