@@ -1,0 +1,22 @@
+.example{
+	background:#EEE;
+	height:30em;
+	width:50em;
+	margin-bottom:1.5em;
+	float: left;
+	}
+
+.example p{
+		color:#333;
+		font-weight:700;
+		padding:14.25em 3em 0;
+		text-align:center;
+		text-shadow:#FFF 1px 1px 0;
+		-moz-text-shadow:#FFF 1px 1px 0;
+		-webkit-text-shadow:#FFF 1px 1px 0}
+
+.example .flickrshow-buttons-title{
+					font-family:'Proxima Nova',sans-serif !important;
+	
+					font-weight:400 !important}
+
