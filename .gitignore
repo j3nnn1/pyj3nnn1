@@ -2,3 +2,10 @@
 *.*~
 *.log
 *.pid
+*.swp
+*.swo
+*/*.pyc
+*.w2p
+*.app
+*.nosubir
+*.blog*

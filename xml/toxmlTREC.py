@@ -60,7 +60,7 @@ for count, line  in enumerate(lines):
     if (line.strip()=='.T'):
         if (nextline < size):
             source = lines[nextline].strip()
-            child2 = xml.Element('T')   ##setting attr DOCNO
+            child2 = xml.Element('title')   ##setting attr DOCNO
             child2.text = source
             child.append(child2)
  
@@ -74,7 +74,7 @@ for count, line  in enumerate(lines):
     if (line.strip()=='.W'):
         if (nextline < size):
             source = lines[nextline].strip()
-            child2 = xml.Element('W')   ##setting attr DOCNO
+            child2 = xml.Element('desc')   ##setting attr DOCNO
             child2.text = source
             child.append(child2)
 
