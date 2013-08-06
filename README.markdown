@@ -15,6 +15,7 @@ http://blog-j3nnn1.dotcloud.com/
 
 ### pythonconbaterias
 * this a latex poster, with information about python.
+* http://www.slideshare.net/j3nnn1/pythonconbaterias
   
 
 
